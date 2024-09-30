@@ -23,7 +23,7 @@ Create results table that has CRISPR scores, Wilcoxon rank-sum test and t tests.
 
   gimap_dataset <- gimap_dataset \%>\%
     gimap_filter() \%>\%
-    gimap_annotate() \%>\%
+    gimap_annotate(cell_line = "HELA") \%>\%
     gimap_normalize(
       timepoints = "day",
       replicates = "rep"

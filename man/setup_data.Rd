@@ -4,19 +4,12 @@
 \alias{setup_data}
 \title{Making a new gimap dataset}
 \usage{
-setup_data(
-  counts = NULL,
-  pg_ids = NULL,
-  pg_metadata = NULL,
-  sample_metadata = NULL
-)
+setup_data(counts = NULL, pg_ids = NULL, sample_metadata = NULL)
 }
 \arguments{
 \item{counts}{a matrix of data that contains the counts where rows are each paired_guide target and columns are each sample}
 
 \item{pg_ids}{the pgRNA IDs: metadata associated with the pgRNA constructs that correspond to the rows of the counts data}
-
-\item{pg_metadata}{construct metadata}
 
 \item{sample_metadata}{metadata associated with the samples of the dataset that correspond to the columns of the counts data.
 Should include a column that has replicate information as well as a column that contains timepoint information respectively (this will be used for log fold calculations). These columns should be factors.}

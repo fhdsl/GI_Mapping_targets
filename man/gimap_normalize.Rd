@@ -8,7 +8,9 @@ gimap_normalize(
   .data = NULL,
   gimap_dataset,
   timepoints = NULL,
-  replicates = NULL
+  replicates = NULL,
+  num_ids_wo_annot = 20,
+  rm_ids_wo_annot = TRUE
 )
 }
 \arguments{
@@ -24,6 +26,11 @@ The late timepoints will be the focus for the calculations. The column used for 
 \item{replicates}{Specifies the column name of the metadata set up in `$metadata$sample_metadata`
 that has a factor that represents column that specifies replicates. These replicates will be kept separate
 for the late but the early and plasmid others will be averaged and used for normalization.}
+
+\item{num_ids_wo_annot}{default is 20; the number of pgRNA IDs to display to console if they don't have corresponding annotation data;
+ff there are more IDs without annotation data than this number, the output will be sent to a file rather than the console.}
+
+\item{rm_ids_wo_annot}{default is TRUE; whether or not to filter out pgRNA IDs from the input dataset that don't have corresponding annotation data available}
 }
 \description{
 This calculates the log fold change for a gimap dataset based on the annotation and metadata provided.
@@ -38,7 +45,7 @@ run_qc(gimap_dataset)
 
 gimap_dataset <- gimap_dataset \%>\%
   gimap_filter() \%>\%
-  gimap_annotate() \%>\%
+  gimap_annotate(cell_line = "HELA") \%>\%
   gimap_normalize(
     timepoints = "day",
     replicates = "rep"

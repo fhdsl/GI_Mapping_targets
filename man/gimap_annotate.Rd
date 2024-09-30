@@ -7,7 +7,7 @@
 gimap_annotate(
   .data = NULL,
   gimap_dataset,
-  cell_line = "HELA",
+  cell_line,
   control_genes = NULL,
   cn_annotate = TRUE,
   annotation_file = NULL
@@ -18,7 +18,7 @@ gimap_annotate(
 
 \item{gimap_dataset}{A special dataset structure that is setup using the `setup_data()` function.}
 
-\item{cell_line}{which cell line are you using? Default is "HELA"}
+\item{cell_line}{which cell line are you using? (e.g., HELA, PC9, etc.). Required argument}
 
 \item{control_genes}{A vector of gene symbols (e.g. AAMP) that should be labeled as control genes. These will be used for log fold change calculations. If no list is given then DepMap Public 23Q4 Achilles_common_essentials.csv is used https://depmap.org/portal/download/all/}
 
@@ -39,7 +39,7 @@ run_qc(gimap_dataset)
 
 gimap_dataset <- gimap_dataset \%>\%
   gimap_filter() \%>\%
-  gimap_annotate()
+  gimap_annotate(cell_line = "HELA")
 
 # To see anotations
 gimap_dataset$annotation

@@ -26,7 +26,7 @@ run_qc(gimap_dataset)
 
 gimap_dataset <- gimap_dataset \%>\%
   gimap_filter() \%>\%
-  gimap_annotate() \%>\%
+  gimap_annotate(cell_line = "HELA") \%>\%
   gimap_normalize(
     timepoints = "day",
     replicates = "rep"
