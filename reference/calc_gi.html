@@ -86,7 +86,7 @@
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="va">gimap_dataset</span> <span class="op">&lt;-</span> <span class="va">gimap_dataset</span> <span class="op">%&gt;%</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="gimap_filter.html">gimap_filter</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="gimap_annotate.html">gimap_annotate</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="gimap_annotate.html">gimap_annotate</a></span><span class="op">(</span>cell_line <span class="op">=</span> <span class="st">"HELA"</span><span class="op">)</span> <span class="op">%&gt;%</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="gimap_normalize.html">gimap_normalize</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>      timepoints <span class="op">=</span> <span class="st">"day"</span>,</span></span>
 <span class="r-in"><span>      replicates <span class="op">=</span> <span class="st">"rep"</span></span></span>
@@ -113,6 +113,7 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> 12/22 [unnamed-chunk-5] </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 13/22                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 14/22 [unnamed-chunk-6] </span>
+<span class="r-plt img"><img src="calc_gi-1.png" alt="" width="700" height="433"></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 15/22                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 16/22 [unnamed-chunk-7] </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 17/22                   </span>
@@ -122,7 +123,7 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> 21/22                   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 22/22 [unnamed-chunk-10]</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> output file: gimap_QC_Report.knit.md</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> /opt/hostedtoolcache/pandoc/3.1.11/x64/pandoc +RTS -K512m -RTS gimap_QC_Report.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output gimap_QC_Report.html --lua-filter /home/runner/work/_temp/Library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /home/runner/work/_temp/Library/rmarkdown/rmarkdown/lua/latex-div.lua --embed-resources --standalone --variable bs3=TRUE --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_smooth_scroll=1 --variable toc_print=1 --template /home/runner/work/_temp/Library/rmarkdown/rmd/h/default.html --no-highlight --variable highlightjs=1 --variable theme=spacelab --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /tmp/RtmpwWlOKU/rmarkdown-str16705a87a745.html --variable code_folding=show --variable code_menu=1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> /opt/hostedtoolcache/pandoc/3.1.11/x64/pandoc +RTS -K512m -RTS gimap_QC_Report.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output gimap_QC_Report.html --lua-filter /home/runner/work/_temp/Library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /home/runner/work/_temp/Library/rmarkdown/rmarkdown/lua/latex-div.lua --embed-resources --standalone --variable bs3=TRUE --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_smooth_scroll=1 --variable toc_print=1 --template /home/runner/work/_temp/Library/rmarkdown/rmd/h/default.html --no-highlight --variable highlightjs=1 --variable theme=spacelab --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /tmp/Rtmptyk9Je/rmarkdown-str17be4ab7db6.html --variable code_folding=show --variable code_menu=1 </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Output created: gimap_QC_Report.html</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Results in: ./gimap_QC_Report.html</span>
@@ -134,10 +135,10 @@
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in dplyr::filter(., stripped_cell_line_name == toupper(cell_line)):</span> <span style="color: #00BBBB;">ℹ</span> In argument: `stripped_cell_line_name == toupper(cell_line)`.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error:</span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> argument "cell_line" is missing, with no default</span>
-<span class="r-plt img"><img src="calc_gi-1.png" alt="" width="700" height="433"></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Normalizing Log Fold Change</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The input data for the IDs which were not found in the annotation data will be kept throughout the analysis, but any data from the annotation won't be available for them.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Calculating CRISPR score</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Calculating Genetic Interaction scores</span>
 </code></pre></div>
     </div>
   </div>
@@ -152,7 +153,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
       </footer></div>
