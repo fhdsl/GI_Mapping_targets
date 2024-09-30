@@ -101,16 +101,18 @@ gimap_normalize <- function(.data = NULL,
                        names_from = c(timepoints, replicates))
 
 
-  missing_ids <- setdiff(lfc_df$pg_ids, gimap_dataset$annotation$pgRNA_id)
+  missing_ids <- data.frame(
+    missing_ids = setdiff(lfc_df$pg_ids, gimap_dataset$annotation$pgRNA_id)
+  )
 
-  if ((length(missing_ids) > 0) & (length(missing_ids) < num_ids_wo_annot)){
-    message("The following ", length(missing_ids), " IDs were not found in the annotation data: \n", paste0(missing_ids, collapse = ", "))
+  if ((nrow(missing_ids) > 0) & (nrow(missing_ids) < num_ids_wo_annot)){
+    message("The following ", nrow(missing_ids), " IDs were not found in the annotation data: \n", paste0(missing_ids, collapse = ", "))
   } else {
     missing_ids_file <- file.path("missing_ids_file.csv")
     readr::write_csv(missing_ids, missing_ids_file)
   }
 
-  if ((length(missing_ids) > 0) & (rm_ids_wo_annot == TRUE)){
+  if ((nrow(missing_ids) > 0) & (rm_ids_wo_annot == TRUE)){
     lfc_df <- lfc_df %>%
       filter(!pg_ids %in% missing_ids)
     message("The input data for the IDs which were not found in the annotation data has been filtered out and will not be included in the analysis output.")
