@@ -1,0 +1,79 @@
+---
+title: "gimap testing from sita"
+output: html_document
+---
+  
+Note the steps below are adapted from an Rmd file written by Sita Moorthi who is testing the pipeline for us. I have made a few adjustments/changes based on requirements by the software (e.g., excluding the data merging or trying to find column types or not creating the pgRNA sequence metadata)  
+  
+```{r}
+library(remotes)
+remotes::install_github("FredHutch/gimap")
+```
+
+```{r}
+library(gimap)
+library(dplyr)
+```
+
+```{r}
+output_dir <- "output_data"
+dir.create(output_dir, showWarnings = FALSE)
+```
+
+## Data loading and setup
+
+```{r}
+example_data <- get_example_data("count_treatment") 
+
+example_counts <- example_data %>%
+  select(c("pretreatment", "dmsoA", "dmsoB", "drug1A", "drug1B")) %>% 
+  as.matrix()
+
+example_pg_id <- example_data %>%
+  dplyr::select("id")
+
+example_sample_metadata <- data.frame(
+  col_names = c("pretreatment", "dmsoA", "dmsoB", "drug1A", "drug1B"),
+  treatment = as.factor(c("control", "dsmo", "dsmo", "drug", "drug"))
+)
+
+
+gimap_dataset <- setup_data(counts = example_counts,
+                                pg_ids = example_pg_id,
+                                sample_metadata = example_sample_metadata
+)
+
+nrow(gimap_dataset$transformed_data$log2_cpm)
+```  
+
+The above steps for data setup ran without error
+
+## QC
+
+```{r}
+run_qc(gimap_dataset_aib,
+       output_file = "example_qc_report.Rmd",
+       overwrite = TRUE,
+       quiet = TRUE,
+       filter_replicates_target_col = c(4,5))
+```
+
+## Filtering
+
+```{r}
+gimap_dataset_aib <- gimap_dataset_aib %>%
+  gimap_filter()
+nrow(gimap_dataset_aib$filtered_data$transformed_log2_cpm)
+```
+
+## Normalization and calculating scores
+
+```{r}
+gimap_dataset <- gimap_dataset_aib %>%
+  gimap_annotate(cell_line = "PC9") %>%
+  gimap_normalize(
+    treatment = "drug_treatment") %>% 
+  calc_crispr() %>%
+  calc_gi()
+```
+
