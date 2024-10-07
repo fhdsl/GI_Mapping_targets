@@ -34,7 +34,7 @@ example_pg_id <- example_data %>%
 
 example_sample_metadata <- data.frame(
   col_names = c("pretreatment", "dmsoA", "dmsoB", "drug1A", "drug1B"),
-  treatment = as.factor(c("control", "dsmo", "dsmo", "drug", "drug"))
+  drug_treatment = as.factor(c("pretreatment", "dsmo", "dsmo", "drug", "drug"))
 )
 
 
@@ -46,12 +46,10 @@ gimap_dataset <- setup_data(counts = example_counts,
 nrow(gimap_dataset$transformed_data$log2_cpm)
 ```  
 
-The above steps for data setup ran without error
-
 ## QC
 
 ```{r}
-run_qc(gimap_dataset_aib,
+run_qc(gimap_dataset,
        output_file = "example_qc_report.Rmd",
        overwrite = TRUE,
        quiet = TRUE,
@@ -61,18 +59,20 @@ run_qc(gimap_dataset_aib,
 ## Filtering
 
 ```{r}
-gimap_dataset_aib <- gimap_dataset_aib %>%
+gimap_dataset <- gimap_dataset %>%
   gimap_filter()
-nrow(gimap_dataset_aib$filtered_data$transformed_log2_cpm)
+nrow(gimap_dataset$filtered_data$transformed_log2_cpm)
 ```
 
 ## Normalization and calculating scores
 
 ```{r}
-gimap_dataset <- gimap_dataset_aib %>%
+gimap_dataset <- gimap_dataset %>%
   gimap_annotate(cell_line = "PC9") %>%
+  # Whatever is specified for "control_name" is what will be used to normalize other data points
   gimap_normalize(
-    treatment = "drug_treatment") %>% 
+    treatments = "drug_treatment", 
+    control_name = "pretreatment") %>% 
   calc_crispr() %>%
   calc_gi()
 ```

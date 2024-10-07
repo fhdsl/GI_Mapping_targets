@@ -35,7 +35,7 @@ gimap_normalize <- function(.data = NULL,
                             gimap_dataset,
                             timepoints = NULL,
                             treatments = NULL,
-                            control = NULL,
+                            control_name = NULL,
                             num_ids_wo_annot = 20,
                             rm_ids_wo_annot = TRUE) {
 
@@ -57,39 +57,32 @@ gimap_normalize <- function(.data = NULL,
     pg_ids <- gimap_dataset$metadata$pg_ids
   }
 
-  # Doing some reshaping to get one handy data frame
-  lfc_df <- dataset %>%
-    as.data.frame() %>%
-    dplyr::mutate(pg_ids = pg_ids) %>%
-    tidyr::pivot_longer(-pg_ids, values_to = "log2_cpm") %>%
-    # Adding on metadata
-    dplyr::left_join(gimap_dataset$metadata$sample_metadata, by = c("name" = "col_names")) %>%
-    dplyr::select(-name)
-
-
   ### IF WE HAVE TREATMENTS
   if (!is.null(treatments)) {
     if (!(treatments %in% colnames(gimap_dataset$metadata$sample_metadata))) {
       stop("The column name specified for 'treatments' does not exist in gimap_dataset$metadata$sample_metadata")
     }
+
+    # Just extract what we are working with
+    treatment_vector <- gimap_dataset$metadata$sample_metadata[[treatments]]
+
+    # Check the control is here
+    if (!(control_name %in% treatment_vector)) {
+        stop("The specified control with the name: '", control_name,
+             "' does not exist in specified treatments column: '", treatments ,
+             "'")
+    }
+
+    # What are the comparisons we are doing here?
+    treatment_group_names <- setdiff(unique(treatment_vector), control_name)
+
     # Rename and recode the timepoints variable
     gimap_dataset$metadata$sample_metadata <- gimap_dataset$metadata$sample_metadata %>%
-      dplyr::rename(treatments = all_of(treatments))
+      dplyr::mutate(comparison = dplyr::case_when(treatment_vector == control_name ~ "control", TRUE ~ treatment_vector),
+                    comparison = factor(comparison,
+                                        levels = c("control", treatment_group_names)))
 
-    # Collapse reps
-    lfc_df <- lfc_df %>%
-      tidyr::pivot_wider(values_from = "log2_cpm",
-                         names_from = treatments,
-                         values_fn = mean)
-
-    if (!is.null(control_name)) {
-      if (!(control_name %in% colnames(lfc_df))) {
-        stop("There are no samples with the label of 'control' in the treatments column")
-      }
-      gimap_dataset$metadata$sample_metadata <- gimap_dataset$metadata$sample_metadata %>%
-        dplyr::rename(control = control_name)
     }
-  }
 
   ### IF WE HAVE TIMEPOINTS
   if (!is.null(timepoints)) {
@@ -105,13 +98,13 @@ gimap_normalize <- function(.data = NULL,
         timepoints == min(timepoints) ~ "control",
         timepoints == max(timepoints) ~ "late",
         TRUE ~ "early"
-      ))
+      )) %>%
+      dplyr::mutate(comparison = factor(timepoints,
+                                        levels = c("control", "early", "late")))
 
-    # Collapse reps
-    lfc_df <- lfc_df %>%
-      tidyr::pivot_wider(values_from = "log2_cpm",
-                         names_from = treatments,
-                         values_fn = mean)
+    # What are the comparisons we are doing here?
+    treatment_group_names <- c("early", "late")
+
   }
 
   ### Stop if no annotations
@@ -124,6 +117,17 @@ gimap_normalize <- function(.data = NULL,
 
   message("Normalizing Log Fold Change")
 
+  # Doing some reshaping to get one handy data frame
+  lfc_df <- dataset %>%
+    as.data.frame() %>%
+    dplyr::mutate(pg_ids = pg_ids) %>%
+    tidyr::pivot_longer(-pg_ids, values_to = "log2_cpm") %>%
+    # Adding on metadata
+    dplyr::left_join(gimap_dataset$metadata$sample_metadata %>%
+                       dplyr::select(col_names, comparison),
+                     by = c("name" = "col_names")) %>%
+    tidyr::pivot_wider(values_from = "log2_cpm",
+                       names_from = c(name, comparison))
 
   ##### Checking for missing ids
   missing_ids <- data.frame(
@@ -147,10 +151,14 @@ gimap_normalize <- function(.data = NULL,
 
   ###################### Subtract the control column (so either day 0 or pretreatment)
 
+  # This is collapsing multiple controls into on should that occur
+  ctrl_mean <- lfc_df %>%
+    dplyr::select(dplyr::ends_with("_control")) %>%
+    apply(., 1., mean)
 
   comparison_df <-  lfc_df %>%
-      dplyr::mutate_at(dplyr::vars(!c(pg_ids, control)), ~.x - control) %>%
-      dplyr::select(-control)  %>%
+    dplyr::mutate_at(dplyr::vars(!c(pg_ids, dplyr::ends_with("_control"))), ~.x - ctrl_mean ) %>%
+      dplyr::select(!dplyr::matches(pg_ids) & !dplyr::ends_with("_control"))  %>%
       dplyr::left_join(gimap_dataset$annotation, by = c("pg_ids" = "pgRNA_id"))
 
   ########################### Perform adjustments #############################
@@ -158,7 +166,7 @@ gimap_normalize <- function(.data = NULL,
   ### Calculate medians
   neg_control_median_df <- comparison_df %>%
     dplyr::filter(norm_ctrl_flag == "negative_control") %>%
-    dplyr::select(pg_ids, dplyr::starts_with("late"))
+    dplyr::select(dplyr::ends_with(treatment_group_names))
 
   # Find a median for each rep, so apply across columns
   neg_control_median <- apply(neg_control_median_df[, -1], 2, median)
@@ -167,7 +175,7 @@ gimap_normalize <- function(.data = NULL,
   lfc_df_adj <- comparison_df %>%
     #subtract the correct replicate negative control median from the late vs plasmid difference
     mutate(across(names(neg_control_median), ~ . - neg_control_median[cur_column()])) %>%
-    tidyr::pivot_longer(dplyr::starts_with("late"),
+    tidyr::pivot_longer(dplyr::starts_with(treatment_group_names),
                         names_to = "rep",
                         values_to = "lfc_adj1")  %>%
     group_by(rep) %>%
@@ -175,7 +183,7 @@ gimap_normalize <- function(.data = NULL,
       # Then, divide by the median of negative controls (double non-targeting) minus
       # median of positive controls (targeting 1 essential gene).
       # This will effectively set the median of the positive controls (essential genes) to -1.
-      lfc_adj = lfc_adj1 / (median(lfc_adj1[norm_ctrl_flag == "negative_control"], na.rm = TRUE) - median(lfc_adj1[norm_ctrl_flag == "positive_control"]))
+      lfc_adj = lfc_adj1 / (median(lfc_adj1[norm_ctrl_flag == "negative_control"], na.rm = TRUE) - median(lfc_adj1[norm_ctrl_flag == "positive_control"], na.rm = TRUE))
     ) %>%
     ungroup()
 
