@@ -31,6 +31,14 @@ get_example_data <- function(which_data) {
       full.names = TRUE
     )
     return(readr::read_tsv(file))
+  } else if (which_data == "count_treatment") {
+    file <- list.files(
+      pattern = "counts_pgPEN_PC9_example.tsv",
+      recursive = TRUE,
+      system.file("extdata", package = "gimap"),
+      full.names = TRUE
+    )
+    return(readr::read_tsv(file))
   } else if (which_data == "meta") {
     file <- list.files(
       pattern = "pgRNA_ID_pgPEN_library_comp.csv",
