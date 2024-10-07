@@ -15,8 +15,7 @@
 #'   gimap_filter() %>%
 #'   gimap_annotate(cell_line = "HELA") %>%
 #'   gimap_normalize(
-#'     timepoints = "day",
-#'     replicates = "rep"
+#'     timepoints = "day"
 #'   ) %>%
 #'   calc_crispr()
 #'
@@ -76,14 +75,7 @@ calc_crispr <- function(.data = NULL,
       # fact that single-targeting pgRNAs generate only two double-strand breaks
       # (1 per allele), whereas the double-targeting pgRNAs generate four DSBs.
       # To do this, we set the median (adjusted) LFC for unexpressed genes of each group to zero.
-      crispr_score = lfc_adj - median,
-      # TODO: I think this n_genes_expressed variable is never used so can we eliminate?
-      n_genes_expressed = dplyr::case_when(
-        gene1_expressed_flag == FALSE & gene2_expressed_flag == FALSE ~ "0",
-        gene1_expressed_flag == TRUE & gene2_expressed_flag == FALSE ~ "1",
-        gene1_expressed_flag == FALSE & gene2_expressed_flag == TRUE ~ "1",
-        gene1_expressed_flag == TRUE & gene2_expressed_flag == TRUE ~ "2"
-      )
+      crispr_score = lfc_adj - median
     )
 
   # Get mean control target CRISPR scores -- they will be used for expected calculations

@@ -2,17 +2,18 @@
 #' @description This calculates the log fold change for a gimap dataset based on the annotation and metadata provided.
 #' @param .data Data can be piped in with a tidyverse pipe from function to function. But the data must still be a gimap_dataset
 #' @param gimap_dataset A special dataset structure that is setup using the `setup_data()` function.
+#' @param control_name A name that specifies the data either in the treatments column that should be used as the control. This could be the Day 0 of treatment or an untreated sample.
+#'  For timepoints testing it will be assumed that the mininmum timepoint is the control.
 #' @param timepoints Specifies the column name of the metadata set up in `$metadata$sample_metadata`
 #' that has a factor that represents the timepoints. Timepoints will be made into three categories:
 #' plasmid for the earliest time point, early for all middle timepoints and late for the latest timepoints.
 #' The late timepoints will be the focus for the calculations. The column used for timepoints must be numeric or at least ordinal.
-#' @param replicates Specifies the column name of the metadata set up in `$metadata$sample_metadata`
-#' that has a factor that represents column that specifies replicates. These replicates will be kept separate
-#' for the late but the early and plasmid others will be averaged and used for normalization.
+#' @param treatments Specifies the column name of the metadata set up in `$metadata$sample_metadata`
+#' that has a factor that represents column that specifies the treatment applied to each. The replicates will be kept collapsed to an average.
 #' @param num_ids_wo_annot default is 20; the number of pgRNA IDs to display to console if they don't have corresponding annotation data;
 #' ff there are more IDs without annotation data than this number, the output will be sent to a file rather than the console.
 #' @param rm_ids_wo_annot default is TRUE; whether or not to filter out pgRNA IDs from the input dataset that don't have corresponding annotation data available
-#' @export
+#' @exports
 #' @examples \dontrun{
 #'
 #' gimap_dataset <- get_example_data("gimap")
@@ -25,7 +26,6 @@
 #'   gimap_annotate(cell_line = "HELA") %>%
 #'   gimap_normalize(
 #'     timepoints = "day",
-#'     replicates = "rep"
 #'   )
 #'
 #' # To see results
@@ -34,49 +34,17 @@
 gimap_normalize <- function(.data = NULL,
                             gimap_dataset,
                             timepoints = NULL,
-                            replicates = NULL,
+                            treatments = NULL,
+                            control = NULL,
                             num_ids_wo_annot = 20,
                             rm_ids_wo_annot = TRUE) {
+
   # Code adapted from
   # https://github.com/FredHutch/GI_mapping/blob/main/workflow/scripts/03-filter_and_calculate_LFC.Rmd
 
   if (!is.null(.data)) gimap_dataset <- .data
 
   if (!("gimap_dataset" %in% class(gimap_dataset))) stop("This function only works with gimap_dataset objects which can be made with the setup_data() function.")
-
-  if (!is.null(replicates)) {
-    if (!(replicates %in% colnames(gimap_dataset$metadata$sample_metadata))) {
-      stop("The column name specified for 'replicates' does not exist in gimap_dataset$metadata$sample_metadata")
-    }
-    # Rename and recode the timepoints variable
-    gimap_dataset$metadata$sample_metadata <- gimap_dataset$metadata$sample_metadata %>%
-      dplyr::rename(replicates = all_of(replicates))
-  }
-
-  if (!is.null(timepoints)) {
-    if (!(timepoints %in% colnames(gimap_dataset$metadata$sample_metadata))) {
-      stop("The column name specified for 'timepoints' does not exist in gimap_dataset$metadata$sample_metadata")
-    }
-
-    # Rename and recode the timepoints variable
-    gimap_dataset$metadata$sample_metadata <- gimap_dataset$metadata$sample_metadata %>%
-      dplyr::rename(timepoints = all_of(timepoints)) %>%
-      # Note that timepoints are extablished as three categories: plasmid, early, or late.
-      dplyr::mutate(timepoints = dplyr::case_when(
-        timepoints == min(timepoints) ~ "plasmid",
-        timepoints == max(timepoints) ~ "late",
-        TRUE ~ "early"
-      ))
-  }
-
-  if (is.null(gimap_dataset$annotation)) {
-    stop(
-      "No annotations are stored in this gimap_dataset, annotations are needed so we know what genes should be used as controls.",
-      "Please run gimap_annotate() function on your gimap_dataset and then retry this function."
-    )
-  }
-
-  message("Normalizing Log Fold Change")
 
   # Based on log fold change calculations and other handling will go based on the code in:
   # https://github.com/FredHutch/GI_mapping/blob/main/workflow/scripts/03-filter_and_calculate_LFC.Rmd
@@ -96,11 +64,68 @@ gimap_normalize <- function(.data = NULL,
     tidyr::pivot_longer(-pg_ids, values_to = "log2_cpm") %>%
     # Adding on metadata
     dplyr::left_join(gimap_dataset$metadata$sample_metadata, by = c("name" = "col_names")) %>%
-    dplyr::select(-name) %>%
-    tidyr::pivot_wider(values_from = "log2_cpm",
-                       names_from = c(timepoints, replicates))
+    dplyr::select(-name)
 
 
+  ### IF WE HAVE TREATMENTS
+  if (!is.null(treatments)) {
+    if (!(treatments %in% colnames(gimap_dataset$metadata$sample_metadata))) {
+      stop("The column name specified for 'treatments' does not exist in gimap_dataset$metadata$sample_metadata")
+    }
+    # Rename and recode the timepoints variable
+    gimap_dataset$metadata$sample_metadata <- gimap_dataset$metadata$sample_metadata %>%
+      dplyr::rename(treatments = all_of(treatments))
+
+    # Collapse reps
+    lfc_df <- lfc_df %>%
+      tidyr::pivot_wider(values_from = "log2_cpm",
+                         names_from = treatments,
+                         values_fn = mean)
+
+    if (!is.null(control_name)) {
+      if (!(control_name %in% colnames(lfc_df))) {
+        stop("There are no samples with the label of 'control' in the treatments column")
+      }
+      gimap_dataset$metadata$sample_metadata <- gimap_dataset$metadata$sample_metadata %>%
+        dplyr::rename(control = control_name)
+    }
+  }
+
+  ### IF WE HAVE TIMEPOINTS
+  if (!is.null(timepoints)) {
+    if (!(timepoints %in% colnames(gimap_dataset$metadata$sample_metadata))) {
+      stop("The column name specified for 'timepoints' does not exist in gimap_dataset$metadata$sample_metadata")
+    }
+
+    # Rename and recode the timepoints variable
+    gimap_dataset$metadata$sample_metadata <- gimap_dataset$metadata$sample_metadata %>%
+      dplyr::rename(timepoints = all_of(timepoints)) %>%
+      # Note that timepoints are extablished as three categories: control, early, or late.
+      dplyr::mutate(timepoints = dplyr::case_when(
+        timepoints == min(timepoints) ~ "control",
+        timepoints == max(timepoints) ~ "late",
+        TRUE ~ "early"
+      ))
+
+    # Collapse reps
+    lfc_df <- lfc_df %>%
+      tidyr::pivot_wider(values_from = "log2_cpm",
+                         names_from = treatments,
+                         values_fn = mean)
+  }
+
+  ### Stop if no annotations
+  if (is.null(gimap_dataset$annotation)) {
+    stop(
+      "No annotations are stored in this gimap_dataset, annotations are needed so we know what genes should be used as controls.",
+      "Please run gimap_annotate() function on your gimap_dataset and then retry this function."
+    )
+  }
+
+  message("Normalizing Log Fold Change")
+
+
+  ##### Checking for missing ids
   missing_ids <- data.frame(
     missing_ids = setdiff(lfc_df$pg_ids, gimap_dataset$annotation$pgRNA_id)
   )
@@ -120,18 +145,18 @@ gimap_normalize <- function(.data = NULL,
     message("The input data for the IDs which were not found in the annotation data will be kept throughout the analysis, but any data from the annotation won't be available for them.")
   }
 
-  # Calculate the means for each construct across the groups
-  plasmid_df <- apply(dplyr::select(lfc_df, starts_with("plasmid")), 1, mean)
+  ###################### Subtract the control column (so either day 0 or pretreatment)
 
-  late_vs_plasmid_df <-  lfc_df %>%
-    dplyr::mutate_at(dplyr::vars(dplyr::starts_with("late")), ~.x - plasmid_df) %>%
-    dplyr::select(pg_ids, dplyr::starts_with("late"))  %>%
-    dplyr::left_join(gimap_dataset$annotation, by = c("pg_ids" = "pgRNA_id"))
+
+  comparison_df <-  lfc_df %>%
+      dplyr::mutate_at(dplyr::vars(!c(pg_ids, control)), ~.x - control) %>%
+      dplyr::select(-control)  %>%
+      dplyr::left_join(gimap_dataset$annotation, by = c("pg_ids" = "pgRNA_id"))
 
   ########################### Perform adjustments #############################
 
   ### Calculate medians
-  neg_control_median_df <- late_vs_plasmid_df %>%
+  neg_control_median_df <- comparison_df %>%
     dplyr::filter(norm_ctrl_flag == "negative_control") %>%
     dplyr::select(pg_ids, dplyr::starts_with("late"))
 
@@ -139,7 +164,7 @@ gimap_normalize <- function(.data = NULL,
   neg_control_median <- apply(neg_control_median_df[, -1], 2, median)
 
   # First and second adjustments to LFC
-  lfc_df_adj <- late_vs_plasmid_df %>%
+  lfc_df_adj <- comparison_df %>%
     #subtract the correct replicate negative control median from the late vs plasmid difference
     mutate(across(names(neg_control_median), ~ . - neg_control_median[cur_column()])) %>%
     tidyr::pivot_longer(dplyr::starts_with("late"),
