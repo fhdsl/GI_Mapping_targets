@@ -2,7 +2,6 @@
 #' @description This calculates the log fold change for a gimap dataset based on the annotation and metadata provided.
 #' @param .data Data can be piped in with tidyverse pipes from function to function. But the data must still be a gimap_dataset
 #' @param gimap_dataset A special dataset structure that is setup using the `setup_data()` function.
-#' @param normalized Default is TRUE meaning that we should expect to look for normalized data in the gimap_dataset.
 #' @export
 #' @examples \dontrun{
 #'
@@ -23,8 +22,7 @@
 #' gimap_dataset$crispr_score
 #' }
 calc_crispr <- function(.data = NULL,
-                        gimap_dataset,
-                        normalized = TRUE) {
+                        gimap_dataset) {
   # Code adapted from
   # https://github.com/FredHutch/GI_mapping/blob/main/workflow/scripts/03-filter_and_calculate_LFC.Rmd
 
@@ -32,12 +30,11 @@ calc_crispr <- function(.data = NULL,
 
   if (!("gimap_dataset" %in% class(gimap_dataset))) stop("This function only works with gimap_dataset objects which can be made with the setup_data() function.")
 
-  if (is.null(gimap_dataset$normalized_log_fc) && normalized) {
-    stop("No normalized data found in this gimap_dataset. Make sure you have run the gimap_normalize() function or set normalized = FALSE")
+  if (is.null(gimap_dataset$normalized_log_fc)) {
+    stop("No normalized data found in this gimap_dataset. Make sure you have run the gimap_normalize() function")
   }
 
-  # If data is normalized and normalized is TRUE, we set this to the source data
-  if (!is.null(gimap_dataset$normalized_log_fc) && normalized) {
+  if (!is.null(gimap_dataset$normalized_log_fc)) {
     source_data <- gimap_dataset$normalized_log_fc
   }
   if (gimap_dataset$filtered_data$filter_step_run) {
@@ -46,25 +43,11 @@ calc_crispr <- function(.data = NULL,
     pg_ids <- gimap_dataset$metadata$pg_ids
   }
 
-  # If normalized is set to FALSE, we use rawish data but attach annotation
-  if (!normalized) {
-    source_data <- gimap_dataset$transformed_data$log2_cpm %>%
-      as.data.frame() %>%
-      dplyr::mutate(pg_ids = pg_ids) %>%
-      tidyr::pivot_longer(-pg_ids) %>%
-      dplyr::left_join(gimap_dataset$metadata$sample_metadata, by = c("name" = "col_names")) %>%
-      dplyr::group_by(timepoints, pg_ids) %>%
-      dplyr::summarize(timepoint_avg = mean(value)) %>%
-      tidyr::pivot_wider(
-        values_from = timepoint_avg,
-        names_from = timepoints
-      )
-  }
 
   # Calculate medians based on single, double targeting as well as if they are unexpressed control genes
   medians_df <- source_data %>%
     dplyr::group_by(target_type, unexpressed_ctrl_flag) %>%
-    dplyr::summarize(median = median(lfc_adj))
+    dplyr::summarize(median = median(lfc_adj, na.rm = TRUE))
 
   message("Calculating CRISPR score")
 
@@ -110,7 +93,7 @@ calc_crispr <- function(.data = NULL,
     ) %>%
     group_by(rep, pgRNA_target, targeting_gRNA_seq) %>%
     # Taking the mean of the single target crisprs
-    mutate(mean_single_target_crispr = mean(crispr_score)) %>%
+    mutate(mean_single_target_crispr = mean(crispr_score, na.rm = TRUE)) %>%
     dplyr::select(rep,
       pgRNA_target,
       targeting_gRNA_seq,

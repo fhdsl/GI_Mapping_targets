@@ -1,10 +1,9 @@
 ---
-title: "gimap testing from sita"
+title: "gimap for treatment groups"
 output: html_document
 ---
   
-Note the steps below are adapted from an Rmd file written by Sita Moorthi who is testing the pipeline for us. I have made a few adjustments/changes based on requirements by the software (e.g., excluding the data merging or trying to find column types or not creating the pgRNA sequence metadata)  
-  
+
 ```{r}
 library(remotes)
 remotes::install_github("FredHutch/gimap")
@@ -23,10 +22,10 @@ dir.create(output_dir, showWarnings = FALSE)
 ## Data loading and setup
 
 ```{r}
-example_data <- get_example_data("count_treatment") 
+example_data <- get_example_data("count_treatment")
 
 example_counts <- example_data %>%
-  select(c("pretreatment", "dmsoA", "dmsoB", "drug1A", "drug1B")) %>% 
+  select(c("pretreatment", "dmsoA", "dmsoB", "drug1A", "drug1B")) %>%
   as.matrix()
 
 example_pg_id <- example_data %>%
@@ -53,7 +52,10 @@ run_qc(gimap_dataset,
        output_file = "example_qc_report.Rmd",
        overwrite = TRUE,
        quiet = TRUE,
-       filter_replicates_target_col = c(4,5))
+       # TODO: Think about how to specify this for multiple replicates
+       # Probably could supply a factor like this that would allow for the same 
+       # label to be treated as replicates
+       filter_replicates_target_col = factor("A", "B", "B", "C", "C"))
 ```
 
 ## Filtering
@@ -71,9 +73,8 @@ gimap_dataset <- gimap_dataset %>%
   gimap_annotate(cell_line = "PC9") %>%
   # Whatever is specified for "control_name" is what will be used to normalize other data points
   gimap_normalize(
-    treatments = "drug_treatment", 
-    control_name = "pretreatment") %>% 
+    treatments = "drug_treatment",
+    control_name = "pretreatment") %>%
   calc_crispr() %>%
   calc_gi()
 ```
-
