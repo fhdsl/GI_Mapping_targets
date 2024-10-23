@@ -91,9 +91,10 @@ calc_crispr <- function(.data = NULL,
       ),
     ) %>%
     dplyr::left_join(control_target_df,
-                           by = c("rep" = "rep", "control_gRNA_seq" = "control_gRNA_seq"),
-                           relationship = "many-to-many",
-                           suffix = c("", "_control")) %>%
+      by = c("rep" = "rep", "control_gRNA_seq" = "control_gRNA_seq"),
+      relationship = "many-to-many",
+      suffix = c("", "_control")
+    ) %>%
     group_by(rep, pgRNA_target, targeting_gRNA_seq) %>%
     # Taking the mean of the single target crisprs
     mutate(mean_single_target_crispr = mean(crispr_score, na.rm = TRUE)) %>%
@@ -110,14 +111,13 @@ calc_crispr <- function(.data = NULL,
   crispr_df <- lfc_df %>%
     dplyr::filter(target_type == "gene_gene") %>%
     dplyr::select(pg_ids,
-                  rep,
-                  double_crispr_score = crispr_score,
-                  pgRNA_target,
-                  gRNA1_seq,
-                  gRNA2_seq,
-                  pgRNA_target_double = pgRNA_target
-                 ) %>%
-
+      rep,
+      double_crispr_score = crispr_score,
+      pgRNA_target,
+      gRNA1_seq,
+      gRNA2_seq,
+      pgRNA_target_double = pgRNA_target
+    ) %>%
     # Join on single target crispr scores
     dplyr::left_join(single_target_df,
       by = c("rep" = "rep", "gRNA1_seq" = "targeting_gRNA_seq"),

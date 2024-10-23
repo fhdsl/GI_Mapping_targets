@@ -96,7 +96,7 @@ qc_variance_hist <- function(gimap_dataset, filter_replicates_target_col = NULL,
   if (is.null(filter_replicates_target_col)) {
     filter_replicates_target_col <- c(
       (ncol(gimap_dataset$transformed_data$log2_cpm) - 2):ncol(gimap_dataset$transformed_data$log2_cpm)
-      )
+    )
   } # last 3 columns of the data
 
   return(
@@ -153,8 +153,9 @@ qc_variance_hist <- function(gimap_dataset, filter_replicates_target_col = NULL,
 #'
 #' # or some combination of those
 #' qc_constructs_countzero_bar(gimap_dataset,
-#'                             filter_zerocount_target_col = 3:5,
-#'                             filter_replicates_target_col = 3:5)
+#'   filter_zerocount_target_col = 3:5,
+#'   filter_replicates_target_col = 3:5
+#' )
 #' }
 #'
 qc_constructs_countzero_bar <- function(gimap_dataset,
@@ -258,7 +259,7 @@ qc_cor_heatmap <- function(gimap_dataset) {
 #' qc_plasmid_histogram(gimap_dataset, filter_plasmid_target_col = 1:2)
 #'
 #' # or to specify a "cutoff" value that will be displayed as a dashed vertical
-#' #line as well as to specify a different column (or set of columns) to select
+#' # line as well as to specify a different column (or set of columns) to select
 #' qc_plasmid_histogram(gimap_dataset, cutoff = 2, filter_plasmid_target_col = 1:2)
 #' }
 #'

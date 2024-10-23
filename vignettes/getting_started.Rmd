@@ -113,9 +113,11 @@ We'll need to provide `example_counts`, `pg_ids` and `sample_metadata` to `setup
 Now let's setup our data using `setup_data()`. Optionally we can provide the metadata in this function as well so that it is stored with the data.
 
 ```{r}
-gimap_dataset <- setup_data(counts = example_counts,
-                            pg_ids = example_pg_id,
-                            sample_metadata = example_sample_metadata)
+gimap_dataset <- setup_data(
+  counts = example_counts,
+  pg_ids = example_pg_id,
+  sample_metadata = example_sample_metadata
+)
 ```
 
 You'll notice that this set up gives us a list of formatted data. This contains the original counts we gave `setup_data()` function but also normalized counts, and the total counts per sample.
@@ -210,7 +212,8 @@ gimap_dataset <- gimap_dataset %>%
   gimap_annotate(cell_line = "HELA") %>%
   gimap_normalize(
     timepoints = "day",
-    replicates = "rep") %>%
+    replicates = "rep"
+  ) %>%
   calc_crispr() %>%
   calc_gi()
 ```
@@ -239,7 +242,7 @@ gimap_dataset$results$overall
 Lastly, let's take a look at the by target results. We can arrange by results using `dplyr::arrange()` 
 
 ```{r}
-gimap_dataset$results$by_target %>% 
+gimap_dataset$results$by_target %>%
   dplyr::arrange(fdr_vals_wil_late_RepA)
 ```
 

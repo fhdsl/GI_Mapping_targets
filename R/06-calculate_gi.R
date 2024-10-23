@@ -33,47 +33,59 @@ calc_gi <- function(.data = NULL,
   ## calculate expected double-targeting GI score by summing the two mean single-targeting
   ## CRISPR scores for that paralog pair
   gi_calc_df <- gimap_dataset$crispr_score %>%
-    dplyr::mutate(expected_crispr_double = mean_single_target_crispr_1 + mean_single_target_crispr_2,
-                  expected_crispr_single_1 = mean_single_target_crispr_1 +  mean_double_control_crispr,
-                  expected_crispr_single_2 = mean_single_target_crispr_2 +  mean_double_control_crispr
-                  )
+    dplyr::mutate(
+      expected_crispr_double = mean_single_target_crispr_1 + mean_single_target_crispr_2,
+      expected_crispr_single_1 = mean_single_target_crispr_1 + mean_double_control_crispr,
+      expected_crispr_single_2 = mean_single_target_crispr_2 + mean_double_control_crispr
+    )
 
   mean_double_expected_df <- gi_calc_df %>%
     dplyr::group_by(rep, pgRNA_target_double) %>%
     dplyr::summarize(
-    mean_expected_double_crispr = mean(expected_crispr_double, na.rm = TRUE)
-  )
+      mean_expected_double_crispr = mean(expected_crispr_double, na.rm = TRUE)
+    )
 
   # Calculating mean crisprs
   reshaped_single_df <- gi_calc_df %>%
     # reshaping the data a bit so we can do the math later
-    dplyr::select(rep,
-                  pgRNA_target_double,
-                  mean_single_target_crispr_1,
-                  mean_single_target_crispr_2,
-                  expected_crispr_single_1,
-                  expected_crispr_single_2,
-                  gene_symbol_1,
-                  gene_symbol_2) %>%
-    tidyr::pivot_longer(cols = c(
-      gene_symbol_1,
-      gene_symbol_2),
-      values_to = "gene_symbol",
-      names_to = "which_gene") %>%
-    tidyr::pivot_longer(cols = c(
-      expected_crispr_single_1,
-      expected_crispr_single_2),
-      values_to = "expected_crispr_single",
-      names_to = "which_expected") %>%
-    tidyr::pivot_longer(cols = c(
+    dplyr::select(
+      rep,
+      pgRNA_target_double,
       mean_single_target_crispr_1,
-      mean_single_target_crispr_2),
+      mean_single_target_crispr_2,
+      expected_crispr_single_1,
+      expected_crispr_single_2,
+      gene_symbol_1,
+      gene_symbol_2
+    ) %>%
+    tidyr::pivot_longer(
+      cols = c(
+        gene_symbol_1,
+        gene_symbol_2
+      ),
+      values_to = "gene_symbol",
+      names_to = "which_gene"
+    ) %>%
+    tidyr::pivot_longer(
+      cols = c(
+        expected_crispr_single_1,
+        expected_crispr_single_2
+      ),
+      values_to = "expected_crispr_single",
+      names_to = "which_expected"
+    ) %>%
+    tidyr::pivot_longer(
+      cols = c(
+        mean_single_target_crispr_1,
+        mean_single_target_crispr_2
+      ),
       values_to = "observed_crispr_single",
-      names_to = "which_obs")
+      names_to = "which_obs"
+    )
 
 
   mean_single_expected_df <- reshaped_single_df %>%
-    dplyr::group_by(rep, gene_symbol)%>%
+    dplyr::group_by(rep, gene_symbol) %>%
     dplyr::summarize(
       mean_expected_single_crispr = mean(expected_crispr_single, na.rm = TRUE)
     )
@@ -136,13 +148,16 @@ calc_gi <- function(.data = NULL,
       double_target_gi_score,
       single_target_gi_score_1,
       single_target_gi_score_2,
-      expected_crispr
-    )
+      expected_crispr_single_1,
+      expected_crispr_single_2,
+      expected_crispr_double
+    ) %>%
+    dplyr::distinct()
 
   # Store this
   gimap_dataset$results <-
     list(
-      overall = overall_results,
+      overall = single_lm,
       by_target = target_results_df
     )
 

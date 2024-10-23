@@ -1,4 +1,3 @@
-
 #' Making a new gimap dataset
 #' @description This function allows people to have their data ready to be processed by gimap
 #' @param counts a matrix of data that contains the counts where rows are each paired_guide target and columns are each sample

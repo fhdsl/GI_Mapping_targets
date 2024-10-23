@@ -37,9 +37,10 @@ example_sample_metadata <- data.frame(
 )
 
 
-gimap_dataset <- setup_data(counts = example_counts,
-                                pg_ids = example_pg_id,
-                                sample_metadata = example_sample_metadata
+gimap_dataset <- setup_data(
+  counts = example_counts,
+  pg_ids = example_pg_id,
+  sample_metadata = example_sample_metadata
 )
 
 nrow(gimap_dataset$transformed_data$log2_cpm)
@@ -49,13 +50,14 @@ nrow(gimap_dataset$transformed_data$log2_cpm)
 
 ```{r}
 run_qc(gimap_dataset,
-       output_file = "example_qc_report.Rmd",
-       overwrite = TRUE,
-       quiet = TRUE,
-       # TODO: Think about how to specify this for multiple replicates
-       # Probably could supply a factor like this that would allow for the same 
-       # label to be treated as replicates
-       filter_replicates_target_col = factor("A", "B", "B", "C", "C"))
+  output_file = "example_qc_report.Rmd",
+  overwrite = TRUE,
+  quiet = TRUE,
+  # TODO: Think about how to specify this for multiple replicates
+  # Probably could supply a factor like this that would allow for the same
+  # label to be treated as replicates
+  filter_replicates_target_col = factor("A", "B", "B", "C", "C")
+)
 ```
 
 ## Filtering
@@ -74,7 +76,76 @@ gimap_dataset <- gimap_filtered %>%
   # Whatever is specified for "control_name" is what will be used to normalize other data points
   gimap_normalize(
     treatments = "drug_treatment",
-    control_name = "pretreatment") %>%
+    control_name = "pretreatment"
+  ) %>%
   calc_crispr() %>%
   calc_gi()
+```
+Take a look at the results. 
+
+
+Here's what's included in the GI Scores table: 
+
+```{r}
+head(gimap_dataset$gi_scores)
+```
+
+Take a look at a preview of the crispr scores: 
+
+```{r}
+head(gimap_dataset$crispr_score)
+```
+
+Take a look at the overall stats: 
+
+```{r}
+gimap_dataset$results$overall
+```
+
+Lastly, let's take a look at the by target results. We can arrange by results using `dplyr::arrange()` 
+
+```{r}
+gimap_dataset$results$by_target %>%
+  dplyr::arrange(fdr_vals_wil_late_RepA)
+```
+
+## Saving results to files
+
+We can save the genetic interactions scores like this:
+
+```{r}
+readr::write_tsv(gimap_dataset$gi_scores, file.path(output_dir, "gi_scores.tsv"))
+```
+
+Similarly let's save the CRISPR scores.
+
+```{r}
+readr::write_tsv(gimap_dataset$crispr_score, file.path(output_dir, "crispr_scores.tsv"))
+```
+
+We can extract and save the stats results to the TSV
+
+```{r}
+readr::write_tsv(
+  gimap_dataset$results$overall,
+  file.path(output_dir, "overall_stats.tsv")
+)
+readr::write_tsv(
+  gimap_dataset$results$by_target,
+  file.path(output_dir, "by_target_stats.tsv")
+)
+```
+
+We can save all these data as an RDS.
+
+```{r}
+saveRDS(gimap_dataset, "gimap_dataset_final.RDS")
+```
+
+## Session Info
+
+This is just for provenance purposes.
+
+```{r}
+sessionInfo()
 ```

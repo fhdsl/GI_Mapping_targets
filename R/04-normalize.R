@@ -38,7 +38,6 @@ gimap_normalize <- function(.data = NULL,
                             control_name = NULL,
                             num_ids_wo_annot = 20,
                             rm_ids_wo_annot = TRUE) {
-
   # Code adapted from
   # https://github.com/FredHutch/GI_mapping/blob/main/workflow/scripts/03-filter_and_calculate_LFC.Rmd
 
@@ -68,9 +67,11 @@ gimap_normalize <- function(.data = NULL,
 
     # Check the control is here
     if (!(control_name %in% treatment_vector)) {
-        stop("The specified control with the name: '", control_name,
-             "' does not exist in specified treatments column: '", treatments ,
-             "'")
+      stop(
+        "The specified control with the name: '", control_name,
+        "' does not exist in specified treatments column: '", treatments,
+        "'"
+      )
     }
 
     # What are the comparisons we are doing here?
@@ -78,11 +79,13 @@ gimap_normalize <- function(.data = NULL,
 
     # Rename and recode the timepoints variable
     gimap_dataset$metadata$sample_metadata <- gimap_dataset$metadata$sample_metadata %>%
-      dplyr::mutate(comparison = dplyr::case_when(treatment_vector == control_name ~ "control", TRUE ~ treatment_vector),
-                    comparison = factor(comparison,
-                                        levels = c("control", treatment_group_names)))
-
-    }
+      dplyr::mutate(
+        comparison = dplyr::case_when(treatment_vector == control_name ~ "control", TRUE ~ treatment_vector),
+        comparison = factor(comparison,
+          levels = c("control", treatment_group_names)
+        )
+      )
+  }
 
   ### IF WE HAVE TIMEPOINTS
   if (!is.null(timepoints)) {
@@ -100,11 +103,11 @@ gimap_normalize <- function(.data = NULL,
         TRUE ~ "early"
       )) %>%
       dplyr::mutate(comparison = factor(timepoints,
-                                        levels = c("control", "early", "late")))
+        levels = c("control", "early", "late")
+      ))
 
     # What are the comparisons we are doing here?
     treatment_group_names <- c("early", "late")
-
   }
 
   ### Stop if no annotations
@@ -123,28 +126,32 @@ gimap_normalize <- function(.data = NULL,
     dplyr::mutate(pg_ids = pg_ids) %>%
     tidyr::pivot_longer(-pg_ids, values_to = "log2_cpm") %>%
     # Adding on metadata
-    dplyr::left_join(gimap_dataset$metadata$sample_metadata %>%
-                       dplyr::select(col_names, comparison),
-                     by = c("name" = "col_names")) %>%
-    tidyr::pivot_wider(values_from = "log2_cpm",
-                       names_from = c(name, comparison))
+    dplyr::left_join(
+      gimap_dataset$metadata$sample_metadata %>%
+        dplyr::select(col_names, comparison),
+      by = c("name" = "col_names")
+    ) %>%
+    tidyr::pivot_wider(
+      values_from = "log2_cpm",
+      names_from = c(name, comparison)
+    )
 
   ##### Checking for missing ids
   missing_ids <- data.frame(
     missing_ids = setdiff(lfc_df$pg_ids, gimap_dataset$annotation$pgRNA_id)
   )
 
-  if ((nrow(missing_ids) > 0) & (nrow(missing_ids) < num_ids_wo_annot)){
+  if ((nrow(missing_ids) > 0) & (nrow(missing_ids) < num_ids_wo_annot)) {
     message("The following ", nrow(missing_ids), " IDs were not found in the annotation data: \n", paste0(missing_ids, collapse = ", "))
 
-    if (rm_ids_wo_annot){
+    if (rm_ids_wo_annot) {
       lfc_df <- lfc_df %>%
         filter(!pg_ids %in% missing_ids$missing_ids)
       message("The input data for the IDs which were not found in the annotation data has been filtered out and will not be included in the analysis output.")
-    } else{
+    } else {
       message("The input data for the IDs which were not found in the annotation data will be kept throughout the analysis, but any data from the annotation won't be available for them.")
-   }
-     } else {
+    }
+  } else {
     missing_ids_file <- file.path("missing_ids_file.csv")
     readr::write_csv(missing_ids, missing_ids_file)
   }
@@ -156,10 +163,10 @@ gimap_normalize <- function(.data = NULL,
     dplyr::select(dplyr::ends_with("_control")) %>%
     apply(., 1., mean, na.rm = TRUE)
 
-  comparison_df <-  lfc_df %>%
-    dplyr::mutate_at(dplyr::vars(!c(pg_ids, dplyr::ends_with("_control"))), ~.x - ctrl_mean ) %>%
-      dplyr::select(!dplyr::matches(pg_ids) & !dplyr::ends_with("_control"))  %>%
-      dplyr::left_join(gimap_dataset$annotation, by = c("pg_ids" = "pgRNA_id"))
+  comparison_df <- lfc_df %>%
+    dplyr::mutate_at(dplyr::vars(!c(pg_ids, dplyr::ends_with("_control"))), ~ .x - ctrl_mean) %>%
+    dplyr::select(!dplyr::matches(pg_ids) & !dplyr::ends_with("_control")) %>%
+    dplyr::left_join(gimap_dataset$annotation, by = c("pg_ids" = "pgRNA_id"))
 
   ########################### Perform adjustments #############################
 
@@ -173,11 +180,12 @@ gimap_normalize <- function(.data = NULL,
 
   # First and second adjustments to LFC
   lfc_df_adj <- comparison_df %>%
-    #subtract the correct replicate negative control median from the late vs plasmid difference
+    # subtract the correct replicate negative control median from the late vs plasmid difference
     mutate(across(names(neg_control_median), ~ . - neg_control_median[cur_column()])) %>%
     tidyr::pivot_longer(dplyr::starts_with(treatment_group_names),
-                        names_to = "rep",
-                        values_to = "lfc_adj1")  %>%
+      names_to = "rep",
+      values_to = "lfc_adj1"
+    ) %>%
     group_by(rep) %>%
     dplyr::mutate(
       # Then, divide by the median of negative controls (double non-targeting) minus

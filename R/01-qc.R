@@ -32,7 +32,7 @@ run_qc <- function(gimap_dataset,
                    filter_replicates_target_col = NULL,
                    ...) {
   if (!("gimap_dataset" %in% class(gimap_dataset))) {
-  stop("This function only works with gimap_dataset objects
+    stop("This function only works with gimap_dataset objects
        which can be made with the setup_data() function.")
   }
 

@@ -76,7 +76,7 @@ qc_plasmid_histogram(gimap_dataset, filter_plasmid_target_col = filter_plasmid_t
 ### Replicates with a pgRNA count of 0 
 
 ```{r}
-qc_constructs_countzero_bar(gimap_dataset, filter_zerocount_target_col= filter_zerocount_target_col, filter_replicates_target_col = filter_replicates_target_col)
+qc_constructs_countzero_bar(gimap_dataset, filter_zerocount_target_col = filter_zerocount_target_col, filter_replicates_target_col = filter_replicates_target_col)
 ```
 
 If this filter is applied, this is the number of pgRNAs that would be filtered out
