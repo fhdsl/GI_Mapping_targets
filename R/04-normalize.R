@@ -56,6 +56,7 @@ gimap_normalize <- function(.data = NULL,
     pg_ids <- gimap_dataset$metadata$pg_ids
   }
 
+
   ### IF WE HAVE TREATMENTS
   if (!is.null(treatments)) {
     if (!(treatments %in% colnames(gimap_dataset$metadata$sample_metadata))) {
@@ -97,12 +98,12 @@ gimap_normalize <- function(.data = NULL,
     gimap_dataset$metadata$sample_metadata <- gimap_dataset$metadata$sample_metadata %>%
       dplyr::rename(timepoints = all_of(timepoints)) %>%
       # Note that timepoints are extablished as three categories: control, early, or late.
-      dplyr::mutate(timepoints = dplyr::case_when(
+      dplyr::mutate(comparison = dplyr::case_when(
         timepoints == min(timepoints) ~ "control",
         timepoints == max(timepoints) ~ "late",
         TRUE ~ "early"
       )) %>%
-      dplyr::mutate(comparison = factor(timepoints,
+      dplyr::mutate(comparison = factor(comparison,
         levels = c("control", "early", "late")
       ))
 
@@ -182,7 +183,7 @@ gimap_normalize <- function(.data = NULL,
   lfc_df_adj <- comparison_df %>%
     # subtract the correct replicate negative control median from the late vs plasmid difference
     mutate(across(names(neg_control_median), ~ . - neg_control_median[cur_column()])) %>%
-    tidyr::pivot_longer(dplyr::starts_with(treatment_group_names),
+    tidyr::pivot_longer(dplyr::ends_with(treatment_group_names),
       names_to = "rep",
       values_to = "lfc_adj1"
     ) %>%

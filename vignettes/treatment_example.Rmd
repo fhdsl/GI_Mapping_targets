@@ -15,7 +15,7 @@ library(dplyr)
 ```
 
 ```{r}
-output_dir <- "output_data"
+output_dir <- "output_treatment"
 dir.create(output_dir, showWarnings = FALSE)
 ```
 
@@ -52,11 +52,11 @@ nrow(gimap_dataset$transformed_data$log2_cpm)
 run_qc(gimap_dataset,
   output_file = "example_qc_report.Rmd",
   overwrite = TRUE,
-  quiet = TRUE,
+  quiet = TRUE
   # TODO: Think about how to specify this for multiple replicates
   # Probably could supply a factor like this that would allow for the same
   # label to be treated as replicates
-  filter_replicates_target_col = factor("A", "B", "B", "C", "C")
+  #filter_replicates_target_col = factor("A", "B", "B", "C", "C")
 )
 ```
 
