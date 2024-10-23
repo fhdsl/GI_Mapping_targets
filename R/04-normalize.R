@@ -136,17 +136,17 @@ gimap_normalize <- function(.data = NULL,
 
   if ((nrow(missing_ids) > 0) & (nrow(missing_ids) < num_ids_wo_annot)){
     message("The following ", nrow(missing_ids), " IDs were not found in the annotation data: \n", paste0(missing_ids, collapse = ", "))
-  } else {
+
+    if (rm_ids_wo_annot){
+      lfc_df <- lfc_df %>%
+        filter(!pg_ids %in% missing_ids$missing_ids)
+      message("The input data for the IDs which were not found in the annotation data has been filtered out and will not be included in the analysis output.")
+    } else{
+      message("The input data for the IDs which were not found in the annotation data will be kept throughout the analysis, but any data from the annotation won't be available for them.")
+   }
+     } else {
     missing_ids_file <- file.path("missing_ids_file.csv")
     readr::write_csv(missing_ids, missing_ids_file)
-  }
-
-  if ((nrow(missing_ids) > 0) & (rm_ids_wo_annot == TRUE)){
-    lfc_df <- lfc_df %>%
-      filter(!pg_ids %in% missing_ids)
-    message("The input data for the IDs which were not found in the annotation data has been filtered out and will not be included in the analysis output.")
-  } else{
-    message("The input data for the IDs which were not found in the annotation data will be kept throughout the analysis, but any data from the annotation won't be available for them.")
   }
 
   ###################### Subtract the control column (so either day 0 or pretreatment)
@@ -154,7 +154,7 @@ gimap_normalize <- function(.data = NULL,
   # This is collapsing multiple controls into on should that occur
   ctrl_mean <- lfc_df %>%
     dplyr::select(dplyr::ends_with("_control")) %>%
-    apply(., 1., mean)
+    apply(., 1., mean, na.rm = TRUE)
 
   comparison_df <-  lfc_df %>%
     dplyr::mutate_at(dplyr::vars(!c(pg_ids, dplyr::ends_with("_control"))), ~.x - ctrl_mean ) %>%
@@ -169,7 +169,7 @@ gimap_normalize <- function(.data = NULL,
     dplyr::select(dplyr::ends_with(treatment_group_names))
 
   # Find a median for each rep, so apply across columns
-  neg_control_median <- apply(neg_control_median_df[, -1], 2, median)
+  neg_control_median <- apply(neg_control_median_df[, -1], 2, median, na.rm = TRUE)
 
   # First and second adjustments to LFC
   lfc_df_adj <- comparison_df %>%

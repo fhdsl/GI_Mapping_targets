@@ -33,39 +33,75 @@ calc_gi <- function(.data = NULL,
   ## calculate expected double-targeting GI score by summing the two mean single-targeting
   ## CRISPR scores for that paralog pair
   gi_calc_df <- gimap_dataset$crispr_score %>%
-    dplyr::mutate(expected_crispr = dplyr::case_when(
-      target_type == "gene_gene" ~ mean_single_target_crispr_1 + mean_single_target_crispr_2,
-      target_type == "gene_ctrl" ~ mean_single_target_crispr_1 + mean_double_control_crispr_2,
-      target_type == "ctrl_gene" ~ mean_double_control_crispr_1 + mean_single_target_crispr_2
-    ))
+    dplyr::mutate(expected_crispr_double = mean_single_target_crispr_1 + mean_single_target_crispr_2,
+                  expected_crispr_single_1 = mean_single_target_crispr_1 +  mean_double_control_crispr,
+                  expected_crispr_single_2 = mean_single_target_crispr_2 +  mean_double_control_crispr
+                  )
 
-  # Calculating mean crisprs
-  overall_results <- gi_calc_df %>%
+  mean_double_expected_df <- gi_calc_df %>%
     dplyr::group_by(rep, pgRNA_target_double) %>%
     dplyr::summarize(
-      mean_expected_crispr = mean(expected_crispr, na.rm = TRUE),
-      mean_observed_crispr = mean(double_crispr_score, na.rm = TRUE)
-    ) %>%
-    group_modify(~ broom::tidy(lm(mean_observed_crispr ~ mean_expected_crispr, data = .x)))
+    mean_expected_double_crispr = mean(expected_crispr_double, na.rm = TRUE)
+  )
+
+  # Calculating mean crisprs
+  reshaped_single_df <- gi_calc_df %>%
+    # reshaping the data a bit so we can do the math later
+    dplyr::select(rep,
+                  pgRNA_target_double,
+                  mean_single_target_crispr_1,
+                  mean_single_target_crispr_2,
+                  expected_crispr_single_1,
+                  expected_crispr_single_2,
+                  gene_symbol_1,
+                  gene_symbol_2) %>%
+    tidyr::pivot_longer(cols = c(
+      gene_symbol_1,
+      gene_symbol_2),
+      values_to = "gene_symbol",
+      names_to = "which_gene") %>%
+    tidyr::pivot_longer(cols = c(
+      expected_crispr_single_1,
+      expected_crispr_single_2),
+      values_to = "expected_crispr_single",
+      names_to = "which_expected") %>%
+    tidyr::pivot_longer(cols = c(
+      mean_single_target_crispr_1,
+      mean_single_target_crispr_2),
+      values_to = "observed_crispr_single",
+      names_to = "which_obs")
+
+
+  mean_single_expected_df <- reshaped_single_df %>%
+    dplyr::group_by(rep, gene_symbol)%>%
+    dplyr::summarize(
+      mean_expected_single_crispr = mean(expected_crispr_single, na.rm = TRUE)
+    )
+  # Calculate the linear model from this
+  single_lm <- reshaped_single_df %>%
+    dplyr::left_join(mean_single_expected_df, by = c("rep" = "rep", "gene_symbol" = "gene_symbol")) %>%
+    dplyr::group_by(rep) %>%
+    group_modify(~ broom::tidy(lm(observed_crispr_single ~ mean_expected_single_crispr, data = .x)))
 
   # Run the overall linear model
-  stats <- overall_results %>%
+  single_stats <- single_lm %>%
     dplyr::ungroup() %>%
     dplyr::select(term, estimate, rep) %>%
     pivot_wider(
       names_from = term,
       values_from = estimate
     ) %>%
-    rename(intercept = "(Intercept)", slope = mean_expected_crispr)
+    rename(intercept = "(Intercept)", slope = mean_expected_single_crispr)
 
   message("Calculating Genetic Interaction scores")
+
   # Do the linear model adjustments
   gi_calc_adj <- gi_calc_df %>%
-    dplyr::left_join(stats, by = "rep") %>%
+    dplyr::left_join(single_stats, by = "rep") %>%
     dplyr::mutate(
-      double_target_gi_score = double_crispr_score - (intercept + slope * expected_crispr),
-      single_target_gi_score_1 = single_crispr_score_1 - (intercept + slope * expected_crispr),
-      single_target_gi_score_2 = single_crispr_score_2 - (intercept + slope * expected_crispr)
+      double_target_gi_score = double_crispr_score - (intercept + slope * expected_crispr_double),
+      single_target_gi_score_1 = single_crispr_score_1 - (intercept + slope * expected_crispr_single_1),
+      single_target_gi_score_2 = single_crispr_score_2 - (intercept + slope * expected_crispr_single_2)
     )
 
   # Which replicates we have?

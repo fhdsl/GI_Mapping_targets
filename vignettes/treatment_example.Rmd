@@ -61,15 +61,15 @@ run_qc(gimap_dataset,
 ## Filtering
 
 ```{r}
-gimap_dataset <- gimap_dataset %>%
+gimap_filtered <- gimap_dataset %>%
   gimap_filter()
-nrow(gimap_dataset$filtered_data$transformed_log2_cpm)
+nrow(gimap_filtered$filtered_data$transformed_log2_cpm)
 ```
 
 ## Normalization and calculating scores
 
 ```{r}
-gimap_dataset <- gimap_dataset %>%
+gimap_dataset <- gimap_filtered %>%
   gimap_annotate(cell_line = "PC9") %>%
   # Whatever is specified for "control_name" is what will be used to normalize other data points
   gimap_normalize(
