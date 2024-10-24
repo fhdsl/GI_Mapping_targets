@@ -4,18 +4,21 @@ gimap performs analysis of dual-targeting CRISPR screening data, with the goal o
 
 It is based off of the original code and research from the Berger Lab stored in this repository: https://github.com/FredHutch/GI_mapping
 
-## Prerequisites 
+## Prerequisites
 
-In order to run this pipeline you will need R and to install the `gimap` package and its dependencies. In R you can run this to install the package: 
+In order to run this pipeline you will need R and to install the `gimap` package and its dependencies. In R you can run this to install the package:
 ```
 install.packages("remotes")
 remotes::install_github("FredHutch/gimap")
 ```
 
-## Getting Started Tutorial 
+## Getting Started Tutorial
 
-Now you can [go to our tutorial to get started!](https://fredhutch.github.io/gimap/articles/getting_started.html)
+Now you can [go to our quick start tutorial to get started!](https://fredhutch.github.io/gimap/articles/quick-start.html)
 
-Follow the steps there that will walk you through the example data. Then you can tailor that tutorial to use your own data. 
+We also have tutorial examples that show how to run timepoint or treatment experimental set ups with gimap:
 
+- [Timepoint example](https://fredhutch.github.io/gimap/articles/timepoint-example.html)
+- [Treatment example](https://fredhutch.github.io/gimap/articles/treatment-example.html)
 
+Follow the steps there that will walk you through the example data. Then you can tailor that tutorial to use your own data.
