@@ -20,11 +20,6 @@ gimap performs analysis of dual-targeting CRISPR screening data, with the goal o
 
 
 ```{r}
-library(remotes)
-remotes::install_github("FredHutch/gimap")
-```
-
-```{r}
 library(gimap)
 library(dplyr)
 ```
