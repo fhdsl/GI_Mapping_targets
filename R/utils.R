@@ -80,7 +80,6 @@ get_example_data <- function(which_data) {
         full.names = TRUE
         )
         return(readr::read_rds(file))
-    }
   } else {
     stop("Specification for `which_data` not understood; Need to use 'gimap', 'count', 'meta', or 'annotation' ")
   }
