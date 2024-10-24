@@ -13,6 +13,7 @@
 #' @param num_ids_wo_annot default is 20; the number of pgRNA IDs to display to console if they don't have corresponding annotation data;
 #' ff there are more IDs without annotation data than this number, the output will be sent to a file rather than the console.
 #' @param rm_ids_wo_annot default is TRUE; whether or not to filter out pgRNA IDs from the input dataset that don't have corresponding annotation data available
+#' @param missing_ids_file If there are missing IDs and a file is saved, where do you want this file to be saved? Provide a file path.
 #' @exports
 #' @examples \dontrun{
 #'
@@ -37,7 +38,8 @@ gimap_normalize <- function(.data = NULL,
                             treatments = NULL,
                             control_name = NULL,
                             num_ids_wo_annot = 20,
-                            rm_ids_wo_annot = TRUE) {
+                            rm_ids_wo_annot = TRUE,
+                            missing_ids_file = "missing_ids_file.csv") {
   # Code adapted from
   # https://github.com/FredHutch/GI_mapping/blob/main/workflow/scripts/03-filter_and_calculate_LFC.Rmd
 
@@ -153,7 +155,8 @@ gimap_normalize <- function(.data = NULL,
       message("The input data for the IDs which were not found in the annotation data will be kept throughout the analysis, but any data from the annotation won't be available for them.")
     }
   } else {
-    missing_ids_file <- file.path("missing_ids_file.csv")
+
+    missing_ids_file <- file.path(missing_ids_file)
     readr::write_csv(missing_ids, missing_ids_file)
   }
 
