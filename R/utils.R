@@ -64,6 +64,23 @@ get_example_data <- function(which_data) {
       full.names = TRUE
     )
     return(readr::read_tsv(file, show_col_types = FALSE))
+  } else if (which_data == "final_treatment") {
+      file <- list.files(
+        pattern = "gimap_dataset_final_treatment.RDS",
+        recursive = TRUE,
+        system.file("extdata", package = "gimap"),
+        full.names = TRUE
+      )
+      return(readr::read_rds(file))
+   } else if (which_data == "final_treatment") {
+      file <- list.files(
+        pattern = "gimap_dataset_final_treatment.RDS",
+        recursive = TRUE,
+        system.file("extdata", package = "gimap"),
+        full.names = TRUE
+        )
+        return(readr::read_rds(file))
+    }
   } else {
     stop("Specification for `which_data` not understood; Need to use 'gimap', 'count', 'meta', or 'annotation' ")
   }

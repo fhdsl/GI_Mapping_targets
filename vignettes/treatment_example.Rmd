@@ -248,7 +248,7 @@ Lastly, let's take a look at the by target results. We can arrange by results us
 
 ```{r}
 gimap_dataset$results$by_target %>%
-  dplyr::arrange(fdr_vals_wil_late_dmsoA_dmso)
+  dplyr::arrange(fdr_vals_wil_dmsoA_dmso)
 ```
 
 ## Saving results to files
