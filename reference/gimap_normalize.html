@@ -32,7 +32,13 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/getting_started.html">getting_started</a>
+      <a href="../articles/quick-start.html">gimap for timepoint experiment</a>
+    </li>
+    <li>
+      <a href="../articles/timepoint-example.html">gimap for timepoint experiment</a>
+    </li>
+    <li>
+      <a href="../articles/treatment_example.html">gimap for treatment experiment</a>
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
@@ -64,9 +70,11 @@
 <span>  .data <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">gimap_dataset</span>,</span>
 <span>  timepoints <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  replicates <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  treatments <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  control_name <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  num_ids_wo_annot <span class="op">=</span> <span class="fl">20</span>,</span>
-<span>  rm_ids_wo_annot <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  rm_ids_wo_annot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  missing_ids_file <span class="op">=</span> <span class="st">"missing_ids_file.csv"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -89,10 +97,14 @@ plasmid for the earliest time point, early for all middle timepoints and late fo
 The late timepoints will be the focus for the calculations. The column used for timepoints must be numeric or at least ordinal.</p></dd>
 
 
-<dt id="arg-replicates">replicates<a class="anchor" aria-label="anchor" href="#arg-replicates"></a></dt>
+<dt id="arg-treatments">treatments<a class="anchor" aria-label="anchor" href="#arg-treatments"></a></dt>
 <dd><p>Specifies the column name of the metadata set up in `$metadata$sample_metadata`
-that has a factor that represents column that specifies replicates. These replicates will be kept separate
-for the late but the early and plasmid others will be averaged and used for normalization.</p></dd>
+that has a factor that represents column that specifies the treatment applied to each. The replicates will be kept collapsed to an average.</p></dd>
+
+
+<dt id="arg-control-name">control_name<a class="anchor" aria-label="anchor" href="#arg-control-name"></a></dt>
+<dd><p>A name that specifies the data either in the treatments column that should be used as the control. This could be the Day 0 of treatment or an untreated sample.
+For timepoints testing it will be assumed that the mininmum timepoint is the control.</p></dd>
 
 
 <dt id="arg-num-ids-wo-annot">num_ids_wo_annot<a class="anchor" aria-label="anchor" href="#arg-num-ids-wo-annot"></a></dt>
@@ -102,6 +114,10 @@ ff there are more IDs without annotation data than this number, the output will 
 
 <dt id="arg-rm-ids-wo-annot">rm_ids_wo_annot<a class="anchor" aria-label="anchor" href="#arg-rm-ids-wo-annot"></a></dt>
 <dd><p>default is TRUE; whether or not to filter out pgRNA IDs from the input dataset that don't have corresponding annotation data available</p></dd>
+
+
+<dt id="arg-missing-ids-file">missing_ids_file<a class="anchor" aria-label="anchor" href="#arg-missing-ids-file"></a></dt>
+<dd><p>If there are missing IDs and a file is saved, where do you want this file to be saved? Provide a file path.</p></dd>
 
 </dl></div>
 
@@ -119,7 +135,6 @@ ff there are more IDs without annotation data than this number, the output will 
 <span class="r-in"><span>  <span class="fu"><a href="gimap_annotate.html">gimap_annotate</a></span><span class="op">(</span>cell_line <span class="op">=</span> <span class="st">"HELA"</span><span class="op">)</span> <span class="op">%&gt;%</span></span></span>
 <span class="r-in"><span>  <span class="fu">gimap_normalize</span><span class="op">(</span></span></span>
 <span class="r-in"><span>    timepoints <span class="op">=</span> <span class="st">"day"</span>,</span></span>
-<span class="r-in"><span>    replicates <span class="op">=</span> <span class="st">"rep"</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># To see results</span></span></span>

@@ -32,7 +32,13 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/getting_started.html">getting_started</a>
+      <a href="../articles/quick-start.html">gimap for timepoint experiment</a>
+    </li>
+    <li>
+      <a href="../articles/timepoint-example.html">gimap for timepoint experiment</a>
+    </li>
+    <li>
+      <a href="../articles/treatment_example.html">gimap for treatment experiment</a>
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
@@ -60,7 +66,7 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">calc_crispr</span><span class="op">(</span>.data <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">gimap_dataset</span>, normalized <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">calc_crispr</span><span class="op">(</span>.data <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">gimap_dataset</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -73,10 +79,6 @@
 
 <dt id="arg-gimap-dataset">gimap_dataset<a class="anchor" aria-label="anchor" href="#arg-gimap-dataset"></a></dt>
 <dd><p>A special dataset structure that is setup using the `setup_data()` function.</p></dd>
-
-
-<dt id="arg-normalized">normalized<a class="anchor" aria-label="anchor" href="#arg-normalized"></a></dt>
-<dd><p>Default is TRUE meaning that we should expect to look for normalized data in the gimap_dataset.</p></dd>
 
 </dl></div>
 
@@ -93,8 +95,7 @@
 <span class="r-in"><span>  <span class="fu"><a href="gimap_filter.html">gimap_filter</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="gimap_annotate.html">gimap_annotate</a></span><span class="op">(</span>cell_line <span class="op">=</span> <span class="st">"HELA"</span><span class="op">)</span> <span class="op">%&gt;%</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="gimap_normalize.html">gimap_normalize</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    timepoints <span class="op">=</span> <span class="st">"day"</span>,</span></span>
-<span class="r-in"><span>    replicates <span class="op">=</span> <span class="st">"rep"</span></span></span>
+<span class="r-in"><span>    timepoints <span class="op">=</span> <span class="st">"day"</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span> <span class="op">%&gt;%</span></span></span>
 <span class="r-in"><span>  <span class="fu">calc_crispr</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>

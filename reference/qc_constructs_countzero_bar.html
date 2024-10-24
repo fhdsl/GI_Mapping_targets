@@ -39,7 +39,13 @@ Note, if you select samples/columns to check with the filter that don't have the
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/getting_started.html">getting_started</a>
+      <a href="../articles/quick-start.html">gimap for timepoint experiment</a>
+    </li>
+    <li>
+      <a href="../articles/timepoint-example.html">gimap for timepoint experiment</a>
+    </li>
+    <li>
+      <a href="../articles/treatment_example.html">gimap for treatment experiment</a>
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
@@ -125,8 +131,9 @@ replicates whose variation you'd like to analyze; If NULL, the last 3 sample col
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># or some combination of those</span></span></span>
 <span class="r-in"><span><span class="fu">qc_constructs_countzero_bar</span><span class="op">(</span><span class="va">gimap_dataset</span>,</span></span>
-<span class="r-in"><span>                            filter_zerocount_target_col <span class="op">=</span> <span class="fl">3</span><span class="op">:</span><span class="fl">5</span>,</span></span>
-<span class="r-in"><span>                            filter_replicates_target_col <span class="op">=</span> <span class="fl">3</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  filter_zerocount_target_col <span class="op">=</span> <span class="fl">3</span><span class="op">:</span><span class="fl">5</span>,</span></span>
+<span class="r-in"><span>  filter_replicates_target_col <span class="op">=</span> <span class="fl">3</span><span class="op">:</span><span class="fl">5</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
