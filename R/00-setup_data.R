@@ -1,4 +1,3 @@
-
 #' Making a new gimap dataset
 #' @description This function allows people to have their data ready to be processed by gimap
 #' @param counts a matrix of data that contains the counts where rows are each paired_guide target and columns are each sample
@@ -40,6 +39,7 @@ setup_data <- function(counts = NULL,
       removed_pg_ids = NULL,
       all_reps_zerocount_ids = NULL
     ),
+    comparisons = NULL,
     annotation = NULL,
     normalized_log_fc = NULL,
     crispr_score = NULL,
@@ -51,7 +51,7 @@ setup_data <- function(counts = NULL,
   if (is.null(counts)) stop("counts cannot be NULL")
   if (!is.matrix(counts)) stop("counts can only be in the form of a matrix")
 
-  
+
   # If they don't give sample metadata, then we will make up a row id
   if (is.null(sample_metadata)) stop("sample metadata will be required in later steps. Please provide it")
   if (!is.data.frame(sample_metadata)) stop("metadata can only be in the form of a data.frame")

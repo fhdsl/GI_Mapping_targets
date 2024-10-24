@@ -4,14 +4,12 @@
 \alias{calc_crispr}
 \title{Calculate CRISPR scores}
 \usage{
-calc_crispr(.data = NULL, gimap_dataset, normalized = TRUE)
+calc_crispr(.data = NULL, gimap_dataset)
 }
 \arguments{
 \item{.data}{Data can be piped in with tidyverse pipes from function to function. But the data must still be a gimap_dataset}
 
 \item{gimap_dataset}{A special dataset structure that is setup using the `setup_data()` function.}
-
-\item{normalized}{Default is TRUE meaning that we should expect to look for normalized data in the gimap_dataset.}
 }
 \description{
 This calculates the log fold change for a gimap dataset based on the annotation and metadata provided.
@@ -28,8 +26,7 @@ gimap_dataset <- gimap_dataset \%>\%
   gimap_filter() \%>\%
   gimap_annotate(cell_line = "HELA") \%>\%
   gimap_normalize(
-    timepoints = "day",
-    replicates = "rep"
+    timepoints = "day"
   ) \%>\%
   calc_crispr()
 

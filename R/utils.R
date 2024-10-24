@@ -1,16 +1,21 @@
-utils::globalVariables(c("timepoints", "value", "timepoint_avg", "target_type",
-"unexpressed_ctrl_flag", "median", "lfc_adj", "median", "gRNA1_seq", "gRNA2_seq",
-"control_gRNA_seq", "crispr_score", "pgRNA_target", "mean_double_control_crispr",
-"pgRNA_target", "targeting_gRNA_seq", "mean_single_target_crispr", "double_crispr_score",
-"single_crispr_score_1", "single_crispr_score_2", "pgRNA_target_double", "mean_single_target_crispr_1",
-"mean_single_target_crispr_2", "mean_double_control_crispr_2", "pgRNA_target_double",
-"expected_crispr", "term", "estimate", "mean_expected_crispr", "intercept", "slope",
-"p_val_ttest", "p_val_wil", "fde_vals_ttest", "fdr_vals_wil", "double_target_gi_score",
-"single_target_gi_score_1", "single_target_gi_score_2", "gene", "DepMap_ID",
-"gene1_symbol", "gene2_symbol", "expressed_flag", "norm_ctrl_flag", "bool_vals",
-"filter_name", "counts", "numzero", "name", "value", "lfc_plasmid_vs_late", "lfc_adj",
-"pg_RNA_target_double", "double_target_gi_score", "count_normalized", "construct",
-"filterFlag", "plasmid_log2_cpm", "log2_cpm"
+utils::globalVariables(c(
+  "timepoints", "value", "timepoint_avg", "target_type",
+  "unexpressed_ctrl_flag", "median", "lfc_adj", "median", "gRNA1_seq", "gRNA2_seq",
+  "control_gRNA_seq", "crispr_score", "pgRNA_target", "mean_double_control_crispr",
+  "pgRNA_target", "targeting_gRNA_seq", "mean_single_target_crispr", "double_crispr_score",
+  "single_crispr_score_1", "single_crispr_score_2", "pgRNA_target_double", "mean_single_target_crispr_1",
+  "mean_single_target_crispr_2", "mean_double_control_crispr_2", "pgRNA_target_double",
+  "expected_crispr", "term", "estimate", "mean_expected_crispr", "intercept", "slope",
+  "p_val_ttest", "p_val_wil", "fde_vals_ttest", "fdr_vals_wil", "double_target_gi_score",
+  "single_target_gi_score_1", "single_target_gi_score_2", "gene", "DepMap_ID",
+  "gene1_symbol", "gene2_symbol", "expressed_flag", "norm_ctrl_flag", "bool_vals",
+  "filter_name", "counts", "numzero", "name", "value", "lfc_plasmid_vs_late", "lfc_adj",
+  "pg_RNA_target_double", "double_target_gi_score", "count_normalized", "construct",
+  "filterFlag", "plasmid_log2_cpm", "log2_cpm", "gene_symbol", "gene_symbol_1", "gene_symbol_2",
+  "mean_double_control_crispr_1", "expected_crispr_double", "expected_crispr_single_1",
+  "expected_crispr_single_2", "fdr_vals_ttest", "read_table", "stripped_cell_line_name",
+  "comparison", ".", "col_names", "lfc_adj1", "t.test", "wilcox.test", "p.adjust",
+  "cor", "quantile", "var", "browseURL", "mean_expected_single_crispr", "expected_crispr_single"
 ))
 
 
@@ -26,6 +31,14 @@ get_example_data <- function(which_data) {
   if (which_data == "count") {
     file <- list.files(
       pattern = "PP_pgPEN_HeLa_counts.txt",
+      recursive = TRUE,
+      system.file("extdata", package = "gimap"),
+      full.names = TRUE
+    )
+    return(readr::read_tsv(file))
+  } else if (which_data == "count_treatment") {
+    file <- list.files(
+      pattern = "counts_pgPEN_PC9_example.tsv",
       recursive = TRUE,
       system.file("extdata", package = "gimap"),
       full.names = TRUE
@@ -55,6 +68,22 @@ get_example_data <- function(which_data) {
       full.names = TRUE
     )
     return(readr::read_tsv(file, show_col_types = FALSE))
+  } else if (which_data == "final_treatment") {
+      file <- list.files(
+        pattern = "gimap_dataset_final_treatment.RDS",
+        recursive = TRUE,
+        system.file("extdata", package = "gimap"),
+        full.names = TRUE
+      )
+      return(readr::read_rds(file))
+   } else if (which_data == "final_treatment") {
+      file <- list.files(
+        pattern = "gimap_dataset_final_treatment.RDS",
+        recursive = TRUE,
+        system.file("extdata", package = "gimap"),
+        full.names = TRUE
+        )
+        return(readr::read_rds(file))
   } else {
     stop("Specification for `which_data` not understood; Need to use 'gimap', 'count', 'meta', or 'annotation' ")
   }
@@ -87,6 +116,10 @@ print_kbl <- function(tbl) {
     )
 }
 
+#' Save tbl
+#' @description This function saves table
+#' @importFrom stringr str_split
+#' @importFrom readr write_tsv write_rds
 save_tbl <- function(tbl, out_dir = NULL, params = NULL) {
   tbl_str <- deparse(substitute(tbl))
   tbl_name <- str_split(tbl_str, pattern = "\\.")[[1]][2]
@@ -165,7 +198,6 @@ save_example_data <- function() {
   gimap_dataset <- setup_data(
     counts = example_counts,
     pg_ids = example_pg_id,
-    pg_metadata = example_pg_metadata,
     sample_metadata = example_sample_metadata
   )
 

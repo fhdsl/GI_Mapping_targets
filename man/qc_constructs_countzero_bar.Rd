@@ -50,8 +50,9 @@ qc_constructs_countzero_bar(gimap_dataset, filter_replicates_target_col = 3:5)
 
 # or some combination of those
 qc_constructs_countzero_bar(gimap_dataset,
-                            filter_zerocount_target_col = 3:5,
-                            filter_replicates_target_col = 3:5)
+  filter_zerocount_target_col = 3:5,
+  filter_replicates_target_col = 3:5
+)
 }
 
 }

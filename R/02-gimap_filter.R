@@ -263,6 +263,7 @@ qc_filter_zerocounts <- function(gimap_dataset, filter_zerocount_target_col = NU
 #' @importFrom dplyr mutate across if_any
 #' @importFrom tidyr pivot_wider pivot_longer
 #' @importFrom janitor clean_names
+#' @importFrom stats quantile
 #' @return a named list with the filter `filter` specifying which pgRNAs have
 #' low plasmid log2 CPM (column of interest is `plasmid_cpm_filter`) and a report
 #' df `reportdf` for the number and percent of pgRNA which have a low plasmid log2 CPM

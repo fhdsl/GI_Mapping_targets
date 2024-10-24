@@ -2,7 +2,6 @@
 #' @description This calculates the log fold change for a gimap dataset based on the annotation and metadata provided.
 #' @param .data Data can be piped in with tidyverse pipes from function to function. But the data must still be a gimap_dataset
 #' @param gimap_dataset A special dataset structure that is setup using the `setup_data()` function.
-#' @param normalized Default is TRUE meaning that we should expect to look for normalized data in the gimap_dataset.
 #' @export
 #' @examples \dontrun{
 #'
@@ -15,8 +14,7 @@
 #'   gimap_filter() %>%
 #'   gimap_annotate(cell_line = "HELA") %>%
 #'   gimap_normalize(
-#'     timepoints = "day",
-#'     replicates = "rep"
+#'     timepoints = "day"
 #'   ) %>%
 #'   calc_crispr()
 #'
@@ -24,8 +22,7 @@
 #' gimap_dataset$crispr_score
 #' }
 calc_crispr <- function(.data = NULL,
-                        gimap_dataset,
-                        normalized = TRUE) {
+                        gimap_dataset) {
   # Code adapted from
   # https://github.com/FredHutch/GI_mapping/blob/main/workflow/scripts/03-filter_and_calculate_LFC.Rmd
 
@@ -33,12 +30,11 @@ calc_crispr <- function(.data = NULL,
 
   if (!("gimap_dataset" %in% class(gimap_dataset))) stop("This function only works with gimap_dataset objects which can be made with the setup_data() function.")
 
-  if (is.null(gimap_dataset$normalized_log_fc) && normalized) {
-    stop("No normalized data found in this gimap_dataset. Make sure you have run the gimap_normalize() function or set normalized = FALSE")
+  if (is.null(gimap_dataset$normalized_log_fc)) {
+    stop("No normalized data found in this gimap_dataset. Make sure you have run the gimap_normalize() function")
   }
 
-  # If data is normalized and normalized is TRUE, we set this to the source data
-  if (!is.null(gimap_dataset$normalized_log_fc) && normalized) {
+  if (!is.null(gimap_dataset$normalized_log_fc)) {
     source_data <- gimap_dataset$normalized_log_fc
   }
   if (gimap_dataset$filtered_data$filter_step_run) {
@@ -47,25 +43,10 @@ calc_crispr <- function(.data = NULL,
     pg_ids <- gimap_dataset$metadata$pg_ids
   }
 
-  # If normalized is set to FALSE, we use rawish data but attach annotation
-  if (!normalized) {
-    source_data <- gimap_dataset$transformed_data$log2_cpm %>%
-      as.data.frame() %>%
-      dplyr::mutate(pg_ids = pg_ids) %>%
-      tidyr::pivot_longer(-pg_ids) %>%
-      dplyr::left_join(gimap_dataset$metadata$sample_metadata, by = c("name" = "col_names")) %>%
-      dplyr::group_by(timepoints, pg_ids) %>%
-      dplyr::summarize(timepoint_avg = mean(value)) %>%
-      tidyr::pivot_wider(
-        values_from = timepoint_avg,
-        names_from = timepoints
-      )
-  }
-
   # Calculate medians based on single, double targeting as well as if they are unexpressed control genes
   medians_df <- source_data %>%
     dplyr::group_by(target_type, unexpressed_ctrl_flag) %>%
-    dplyr::summarize(median = median(lfc_adj))
+    dplyr::summarize(median = median(lfc_adj, na.rm = TRUE))
 
   message("Calculating CRISPR score")
 
@@ -76,14 +57,7 @@ calc_crispr <- function(.data = NULL,
       # fact that single-targeting pgRNAs generate only two double-strand breaks
       # (1 per allele), whereas the double-targeting pgRNAs generate four DSBs.
       # To do this, we set the median (adjusted) LFC for unexpressed genes of each group to zero.
-      crispr_score = lfc_adj - median,
-      # TODO: I think this n_genes_expressed variable is never used so can we eliminate?
-      n_genes_expressed = dplyr::case_when(
-        gene1_expressed_flag == FALSE & gene2_expressed_flag == FALSE ~ "0",
-        gene1_expressed_flag == TRUE & gene2_expressed_flag == FALSE ~ "1",
-        gene1_expressed_flag == FALSE & gene2_expressed_flag == TRUE ~ "1",
-        gene1_expressed_flag == TRUE & gene2_expressed_flag == TRUE ~ "2"
-      )
+      crispr_score = lfc_adj - median
     )
 
   # Get mean control target CRISPR scores -- they will be used for expected calculations
@@ -107,38 +81,43 @@ calc_crispr <- function(.data = NULL,
         target_type == "gene_ctrl" ~ gRNA1_seq,
         target_type == "ctrl_gene" ~ gRNA2_seq
       ),
+      control_gRNA_seq = case_when(
+        target_type == "gene_ctrl" ~ gRNA2_seq,
+        target_type == "ctrl_gene" ~ gRNA1_seq
+      ),
       gene_symbol = dplyr::case_when(
         target_type == "gene_ctrl" ~ gene1_symbol,
         target_type == "ctrl_gene" ~ gene2_symbol
       ),
-      control_gRNA_seq = case_when(
-        target_type == "gene_ctrl" ~ gRNA2_seq,
-        target_type == "ctrl_gene" ~ gRNA1_seq
-      )
+    ) %>%
+    dplyr::left_join(control_target_df,
+      by = c("rep" = "rep", "control_gRNA_seq" = "control_gRNA_seq"),
+      relationship = "many-to-many",
+      suffix = c("", "_control")
     ) %>%
     group_by(rep, pgRNA_target, targeting_gRNA_seq) %>%
     # Taking the mean of the single target crisprs
-    mutate(mean_single_target_crispr = mean(crispr_score)) %>%
+    mutate(mean_single_target_crispr = mean(crispr_score, na.rm = TRUE)) %>%
     dplyr::select(rep,
       pgRNA_target,
+      gene_symbol,
       targeting_gRNA_seq,
       mean_single_target_crispr,
-      single_crispr_score = crispr_score
+      single_crispr_score = crispr_score,
+      mean_double_control_crispr
     )
 
   # Now put it all together into one df
   crispr_df <- lfc_df %>%
-    dplyr::filter(target_type %in% c("gene_gene", "ctrl_ctrl")) %>%
+    dplyr::filter(target_type == "gene_gene") %>%
     dplyr::select(pg_ids,
-                  rep,
-                  double_crispr_score = crispr_score,
-                  target_type,
-                  pgRNA_target,
-                  gRNA1_seq,
-                  gRNA2_seq,
-                  pgRNA_target_double = pgRNA_target
-                 ) %>%
-
+      rep,
+      double_crispr_score = crispr_score,
+      pgRNA_target,
+      gRNA1_seq,
+      gRNA2_seq,
+      pgRNA_target_double = pgRNA_target
+    ) %>%
     # Join on single target crispr scores
     dplyr::left_join(single_target_df,
       by = c("rep" = "rep", "gRNA1_seq" = "targeting_gRNA_seq"),
@@ -150,31 +129,20 @@ calc_crispr <- function(.data = NULL,
       relationship = "many-to-many",
       suffix = c("_1", "_2")
     ) %>%
-    # Join on the control CRISPR
-    dplyr::left_join(control_target_df,
-      by = c("rep" = "rep", "gRNA1_seq" = "control_gRNA_seq"),
-      relationship = "many-to-many",
-      suffix = c("", "_1")
-    ) %>%
-    dplyr::left_join(control_target_df,
-      by = c("rep" = "rep", "gRNA2_seq" = "control_gRNA_seq"),
-      relationship = "many-to-many",
-      suffix = c("", "_2")
-    ) %>%
     dplyr::select(
       pg_ids,
-      target_type,
       rep,
       double_crispr_score,
       single_crispr_score_1,
       single_crispr_score_2,
       pgRNA_target_double,
+      gene_symbol_1,
+      gene_symbol_2,
       mean_single_target_crispr_1,
       mean_single_target_crispr_2,
       pgRNA1_seq = gRNA1_seq,
       pgRNA2_seq = gRNA2_seq,
-      mean_double_control_crispr_1 = mean_double_control_crispr,
-      mean_double_control_crispr_2
+      mean_double_control_crispr = mean_double_control_crispr_1
     )
 
   # Save at the target level

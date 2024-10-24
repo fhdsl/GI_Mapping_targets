@@ -136,7 +136,7 @@ gimap_annotate <- function(.data = NULL,
       )
     )
 
-################################ STORE IT ####################################
+  ################################ STORE IT ####################################
 
   if (gimap_dataset$filtered_data$filter_step_run) {
     keep_for_annotdf <- annotation_df$pgRNA_id %in% unlist(gimap_dataset$filtered_data$metadata_pg_ids)
@@ -250,12 +250,9 @@ crtl_genes <- function() {
 #' @examples \dontrun{
 #'
 #' cell_lines <- supported_cell_lines()
-#'
 #' }
 supported_cell_lines <- function() {
+  depmap_metadata <- readr::read_csv("https://figshare.com/ndownloader/files/35020903", show_col_types = FALSE)
 
- depmap_metadata <- readr::read_csv("https://figshare.com/ndownloader/files/35020903", show_col_types = FALSE)
-
- return(sort(depmap_metadata$stripped_cell_line_name))
-
+  return(sort(depmap_metadata$stripped_cell_line_name))
 }

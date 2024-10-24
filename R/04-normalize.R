@@ -6,12 +6,14 @@
 #' that has a factor that represents the timepoints. Timepoints will be made into three categories:
 #' plasmid for the earliest time point, early for all middle timepoints and late for the latest timepoints.
 #' The late timepoints will be the focus for the calculations. The column used for timepoints must be numeric or at least ordinal.
-#' @param replicates Specifies the column name of the metadata set up in `$metadata$sample_metadata`
-#' that has a factor that represents column that specifies replicates. These replicates will be kept separate
-#' for the late but the early and plasmid others will be averaged and used for normalization.
+#' @param treatments Specifies the column name of the metadata set up in `$metadata$sample_metadata`
+#' that has a factor that represents column that specifies the treatment applied to each. The replicates will be kept collapsed to an average.
+#' @param control_name A name that specifies the data either in the treatments column that should be used as the control. This could be the Day 0 of treatment or an untreated sample.
+#'  For timepoints testing it will be assumed that the mininmum timepoint is the control.
 #' @param num_ids_wo_annot default is 20; the number of pgRNA IDs to display to console if they don't have corresponding annotation data;
 #' ff there are more IDs without annotation data than this number, the output will be sent to a file rather than the console.
 #' @param rm_ids_wo_annot default is TRUE; whether or not to filter out pgRNA IDs from the input dataset that don't have corresponding annotation data available
+#' @param missing_ids_file If there are missing IDs and a file is saved, where do you want this file to be saved? Provide a file path.
 #' @export
 #' @examples \dontrun{
 #'
@@ -25,7 +27,6 @@
 #'   gimap_annotate(cell_line = "HELA") %>%
 #'   gimap_normalize(
 #'     timepoints = "day",
-#'     replicates = "rep"
 #'   )
 #'
 #' # To see results
@@ -34,49 +35,17 @@
 gimap_normalize <- function(.data = NULL,
                             gimap_dataset,
                             timepoints = NULL,
-                            replicates = NULL,
+                            treatments = NULL,
+                            control_name = NULL,
                             num_ids_wo_annot = 20,
-                            rm_ids_wo_annot = TRUE) {
+                            rm_ids_wo_annot = TRUE,
+                            missing_ids_file = "missing_ids_file.csv") {
   # Code adapted from
   # https://github.com/FredHutch/GI_mapping/blob/main/workflow/scripts/03-filter_and_calculate_LFC.Rmd
 
   if (!is.null(.data)) gimap_dataset <- .data
 
   if (!("gimap_dataset" %in% class(gimap_dataset))) stop("This function only works with gimap_dataset objects which can be made with the setup_data() function.")
-
-  if (!is.null(replicates)) {
-    if (!(replicates %in% colnames(gimap_dataset$metadata$sample_metadata))) {
-      stop("The column name specified for 'replicates' does not exist in gimap_dataset$metadata$sample_metadata")
-    }
-    # Rename and recode the timepoints variable
-    gimap_dataset$metadata$sample_metadata <- gimap_dataset$metadata$sample_metadata %>%
-      dplyr::rename(replicates = all_of(replicates))
-  }
-
-  if (!is.null(timepoints)) {
-    if (!(timepoints %in% colnames(gimap_dataset$metadata$sample_metadata))) {
-      stop("The column name specified for 'timepoints' does not exist in gimap_dataset$metadata$sample_metadata")
-    }
-
-    # Rename and recode the timepoints variable
-    gimap_dataset$metadata$sample_metadata <- gimap_dataset$metadata$sample_metadata %>%
-      dplyr::rename(timepoints = all_of(timepoints)) %>%
-      # Note that timepoints are extablished as three categories: plasmid, early, or late.
-      dplyr::mutate(timepoints = dplyr::case_when(
-        timepoints == min(timepoints) ~ "plasmid",
-        timepoints == max(timepoints) ~ "late",
-        TRUE ~ "early"
-      ))
-  }
-
-  if (is.null(gimap_dataset$annotation)) {
-    stop(
-      "No annotations are stored in this gimap_dataset, annotations are needed so we know what genes should be used as controls.",
-      "Please run gimap_annotate() function on your gimap_dataset and then retry this function."
-    )
-  }
-
-  message("Normalizing Log Fold Change")
 
   # Based on log fold change calculations and other handling will go based on the code in:
   # https://github.com/FredHutch/GI_mapping/blob/main/workflow/scripts/03-filter_and_calculate_LFC.Rmd
@@ -89,68 +58,144 @@ gimap_normalize <- function(.data = NULL,
     pg_ids <- gimap_dataset$metadata$pg_ids
   }
 
+
+  ### IF WE HAVE TREATMENTS
+  if (!is.null(treatments)) {
+    if (!(treatments %in% colnames(gimap_dataset$metadata$sample_metadata))) {
+      stop("The column name specified for 'treatments' does not exist in gimap_dataset$metadata$sample_metadata")
+    }
+
+    # Just extract what we are working with
+    treatment_vector <- gimap_dataset$metadata$sample_metadata[[treatments]]
+
+    # Check the control is here
+    if (!(control_name %in% treatment_vector)) {
+      stop(
+        "The specified control with the name: '", control_name,
+        "' does not exist in specified treatments column: '", treatments,
+        "'"
+      )
+    }
+
+    # What are the comparisons we are doing here?
+    treatment_group_names <- setdiff(unique(treatment_vector), control_name)
+
+    # Rename and recode the timepoints variable
+    gimap_dataset$metadata$sample_metadata <- gimap_dataset$metadata$sample_metadata %>%
+      dplyr::mutate(
+        comparison = dplyr::case_when(treatment_vector == control_name ~ "control", TRUE ~ treatment_vector),
+        comparison = factor(comparison,
+          levels = c("control", treatment_group_names)
+        )
+      )
+  }
+
+  ### IF WE HAVE TIMEPOINTS
+  if (!is.null(timepoints)) {
+    if (!(timepoints %in% colnames(gimap_dataset$metadata$sample_metadata))) {
+      stop("The column name specified for 'timepoints' does not exist in gimap_dataset$metadata$sample_metadata")
+    }
+
+    # Rename and recode the timepoints variable
+    gimap_dataset$metadata$sample_metadata <- gimap_dataset$metadata$sample_metadata %>%
+      dplyr::rename(timepoints = all_of(timepoints)) %>%
+      # Note that timepoints are extablished as three categories: control, early, or late.
+      dplyr::mutate(comparison = dplyr::case_when(
+        timepoints == min(timepoints) ~ "control",
+        timepoints == max(timepoints) ~ "late",
+        TRUE ~ "early"
+      )) %>%
+      dplyr::mutate(comparison = factor(comparison,
+        levels = c("control", "early", "late")
+      ))
+
+    # What are the comparisons we are doing here?
+    treatment_group_names <- c("early", "late")
+  }
+
+  ### Stop if no annotations
+  if (is.null(gimap_dataset$annotation)) {
+    stop(
+      "No annotations are stored in this gimap_dataset, annotations are needed so we know what genes should be used as controls.",
+      "Please run gimap_annotate() function on your gimap_dataset and then retry this function."
+    )
+  }
+
+  message("Normalizing Log Fold Change")
+
   # Doing some reshaping to get one handy data frame
   lfc_df <- dataset %>%
     as.data.frame() %>%
     dplyr::mutate(pg_ids = pg_ids) %>%
     tidyr::pivot_longer(-pg_ids, values_to = "log2_cpm") %>%
     # Adding on metadata
-    dplyr::left_join(gimap_dataset$metadata$sample_metadata, by = c("name" = "col_names")) %>%
-    dplyr::select(-name) %>%
-    tidyr::pivot_wider(values_from = "log2_cpm",
-                       names_from = c(timepoints, replicates))
+    dplyr::left_join(
+      gimap_dataset$metadata$sample_metadata %>%
+        dplyr::select(col_names, comparison),
+      by = c("name" = "col_names")
+    ) %>%
+    tidyr::pivot_wider(
+      values_from = "log2_cpm",
+      names_from = c(name, comparison)
+    )
 
-
+  ##### Checking for missing ids
   missing_ids <- data.frame(
     missing_ids = setdiff(lfc_df$pg_ids, gimap_dataset$annotation$pgRNA_id)
   )
 
-  if ((nrow(missing_ids) > 0) & (nrow(missing_ids) < num_ids_wo_annot)){
+  if ((nrow(missing_ids) > 0) & (nrow(missing_ids) < num_ids_wo_annot)) {
     message("The following ", nrow(missing_ids), " IDs were not found in the annotation data: \n", paste0(missing_ids, collapse = ", "))
+
+    if (rm_ids_wo_annot) {
+      lfc_df <- lfc_df %>%
+        filter(!pg_ids %in% missing_ids$missing_ids)
+      message("The input data for the IDs which were not found in the annotation data has been filtered out and will not be included in the analysis output.")
+    } else {
+      message("The input data for the IDs which were not found in the annotation data will be kept throughout the analysis, but any data from the annotation won't be available for them.")
+    }
   } else {
-    missing_ids_file <- file.path("missing_ids_file.csv")
+
+    missing_ids_file <- file.path(missing_ids_file)
     readr::write_csv(missing_ids, missing_ids_file)
   }
 
-  if ((nrow(missing_ids) > 0) & (rm_ids_wo_annot == TRUE)){
-    lfc_df <- lfc_df %>%
-      filter(!pg_ids %in% missing_ids)
-    message("The input data for the IDs which were not found in the annotation data has been filtered out and will not be included in the analysis output.")
-  } else{
-    message("The input data for the IDs which were not found in the annotation data will be kept throughout the analysis, but any data from the annotation won't be available for them.")
-  }
+  ###################### Subtract the control column (so either day 0 or pretreatment)
 
-  # Calculate the means for each construct across the groups
-  plasmid_df <- apply(dplyr::select(lfc_df, starts_with("plasmid")), 1, mean)
+  # This is collapsing multiple controls into on should that occur
+  ctrl_mean <- lfc_df %>%
+    dplyr::select(dplyr::ends_with("_control")) %>%
+    apply(., 1., mean, na.rm = TRUE)
 
-  late_vs_plasmid_df <-  lfc_df %>%
-    dplyr::mutate_at(dplyr::vars(dplyr::starts_with("late")), ~.x - plasmid_df) %>%
-    dplyr::select(pg_ids, dplyr::starts_with("late"))  %>%
+  comparison_df <- lfc_df %>%
+    dplyr::mutate_at(dplyr::vars(!c(pg_ids, dplyr::ends_with("_control"))), ~ .x - ctrl_mean) %>%
+    dplyr::select(!dplyr::matches(pg_ids) & !dplyr::ends_with("_control")) %>%
     dplyr::left_join(gimap_dataset$annotation, by = c("pg_ids" = "pgRNA_id"))
 
   ########################### Perform adjustments #############################
 
   ### Calculate medians
-  neg_control_median_df <- late_vs_plasmid_df %>%
+  neg_control_median_df <- comparison_df %>%
     dplyr::filter(norm_ctrl_flag == "negative_control") %>%
-    dplyr::select(pg_ids, dplyr::starts_with("late"))
+    dplyr::select(dplyr::ends_with(treatment_group_names))
 
   # Find a median for each rep, so apply across columns
-  neg_control_median <- apply(neg_control_median_df[, -1], 2, median)
+  neg_control_median <- apply(neg_control_median_df[, -1], 2, median, na.rm = TRUE)
 
   # First and second adjustments to LFC
-  lfc_df_adj <- late_vs_plasmid_df %>%
-    #subtract the correct replicate negative control median from the late vs plasmid difference
+  lfc_df_adj <- comparison_df %>%
+    # subtract the correct replicate negative control median from the late vs plasmid difference
     mutate(across(names(neg_control_median), ~ . - neg_control_median[cur_column()])) %>%
-    tidyr::pivot_longer(dplyr::starts_with("late"),
-                        names_to = "rep",
-                        values_to = "lfc_adj1")  %>%
+    tidyr::pivot_longer(dplyr::ends_with(treatment_group_names),
+      names_to = "rep",
+      values_to = "lfc_adj1"
+    ) %>%
     group_by(rep) %>%
     dplyr::mutate(
       # Then, divide by the median of negative controls (double non-targeting) minus
       # median of positive controls (targeting 1 essential gene).
       # This will effectively set the median of the positive controls (essential genes) to -1.
-      lfc_adj = lfc_adj1 / (median(lfc_adj1[norm_ctrl_flag == "negative_control"], na.rm = TRUE) - median(lfc_adj1[norm_ctrl_flag == "positive_control"]))
+      lfc_adj = lfc_adj1 / (median(lfc_adj1[norm_ctrl_flag == "negative_control"], na.rm = TRUE) - median(lfc_adj1[norm_ctrl_flag == "positive_control"], na.rm = TRUE))
     ) %>%
     ungroup()
 
