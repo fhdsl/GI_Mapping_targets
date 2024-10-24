@@ -42,7 +42,7 @@ qc_plasmid_histogram(gimap_dataset, cutoff = 1.75)
 qc_plasmid_histogram(gimap_dataset, filter_plasmid_target_col = 1:2)
 
 # or to specify a "cutoff" value that will be displayed as a dashed vertical
-#line as well as to specify a different column (or set of columns) to select
+# line as well as to specify a different column (or set of columns) to select
 qc_plasmid_histogram(gimap_dataset, cutoff = 2, filter_plasmid_target_col = 1:2)
 }
 

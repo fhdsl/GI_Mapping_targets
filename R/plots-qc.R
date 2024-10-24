@@ -83,6 +83,7 @@ qc_sample_hist <- function(gimap_dataset, wide_ar = 0.75) {
 #' @param wide_ar aspect ratio, default is 0.75
 #' @importFrom tidyr pivot_longer
 #' @importFrom magrittr %>%
+#' @importFrom stats var
 #' @import ggplot2
 #' @import dplyr
 #' @return a ggplot histogram
@@ -208,6 +209,7 @@ qc_constructs_countzero_bar <- function(gimap_dataset,
 #' @param gimap_dataset The special gimap_dataset from the `setup_data` function which contains the transformed data
 #' @importFrom magrittr %>%
 #' @importFrom pheatmap pheatmap
+#' @importFrom stats cor
 #' @return `sample_cor_heatmap` a pheatmap
 #' @export
 #' @examples \dontrun{

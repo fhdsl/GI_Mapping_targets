@@ -9,3 +9,7 @@ vignettes/gimap_dataset_final.RDS
 vignettes/qc_plots/*
 CONTRIBUTING.md
 docs/*
+gimap_QC_Report.html
+gimap_QC_Report.Rmd
+qc_plots
+missing_ids_file.csv

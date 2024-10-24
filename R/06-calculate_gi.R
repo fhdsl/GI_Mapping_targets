@@ -169,6 +169,7 @@ calc_gi <- function(.data = NULL,
 #' @description Create results table that has t test p values
 #' @param replicate a name of a replicate to filter out from gi_calc_adj
 #' @param gi_calc_adj a data.frame with adjusted gi scores
+#' @importFrom stats p.adjust t.test wilcox.test
 gimap_rep_stats <- function(replicate, gi_calc_adj) {
   ## get a vector of GI scores for all single-targeting ("control") pgRNAs for each rep
   ## get double-targeting pgRNAs for this rep, do a t-test to compare the double-

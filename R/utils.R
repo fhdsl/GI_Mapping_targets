@@ -11,7 +11,11 @@ utils::globalVariables(c(
   "gene1_symbol", "gene2_symbol", "expressed_flag", "norm_ctrl_flag", "bool_vals",
   "filter_name", "counts", "numzero", "name", "value", "lfc_plasmid_vs_late", "lfc_adj",
   "pg_RNA_target_double", "double_target_gi_score", "count_normalized", "construct",
-  "filterFlag", "plasmid_log2_cpm", "log2_cpm"
+  "filterFlag", "plasmid_log2_cpm", "log2_cpm", "gene_symbol", "gene_symbol_1", "gene_symbol_2",
+  "mean_double_control_crispr_1", "expected_crispr_double", "expected_crispr_single_1",
+  "expected_crispr_single_2", "fdr_vals_ttest", "read_table", "stripped_cell_line_name",
+  "comparison", ".", "col_names", "lfc_adj1", "t.test", "wilcox.test", "p.adjust",
+  "cor", "quantile", "var", "browseURL"
 ))
 
 
