@@ -24,7 +24,6 @@ Imports:
     readr,
     dplyr,
     tidyr,
-    knitr,
     rmarkdown,
     ggplot2,
     magrittr,
@@ -36,7 +35,6 @@ Imports:
     utils,
     stats,
     stringr,
-    fastmap (>= 1.2.0)
 Suggests:
     testthat (>= 3.0.0),
     roxygen2,

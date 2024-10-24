@@ -15,7 +15,7 @@ utils::globalVariables(c(
   "mean_double_control_crispr_1", "expected_crispr_double", "expected_crispr_single_1",
   "expected_crispr_single_2", "fdr_vals_ttest", "read_table", "stripped_cell_line_name",
   "comparison", ".", "col_names", "lfc_adj1", "t.test", "wilcox.test", "p.adjust",
-  "cor", "quantile", "var", "browseURL"
+  "cor", "quantile", "var", "browseURL", "mean_expected_single_crispr", "expected_crispr_single"
 ))
 
 
@@ -116,6 +116,10 @@ print_kbl <- function(tbl) {
     )
 }
 
+#' Save tbl
+#' @description This function saves table
+#' @importFrom stringr str_split
+#' @importFrom readr write_tsv write_rds
 save_tbl <- function(tbl, out_dir = NULL, params = NULL) {
   tbl_str <- deparse(substitute(tbl))
   tbl_name <- str_split(tbl_str, pattern = "\\.")[[1]][2]
@@ -194,7 +198,6 @@ save_example_data <- function() {
   gimap_dataset <- setup_data(
     counts = example_counts,
     pg_ids = example_pg_id,
-    pg_metadata = example_pg_metadata,
     sample_metadata = example_sample_metadata
   )
 
