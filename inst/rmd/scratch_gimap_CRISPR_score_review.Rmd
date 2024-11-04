@@ -18,10 +18,9 @@ devtools::load_all()
 ```{r}
  gimap_dataset <- get_example_data("gimap") %>%
    gimap_filter() %>%
-   gimap_annotate() %>%
+   gimap_annotate(cell_line = "HELA") %>%
    gimap_normalize(
-     timepoints = "day",
-     replicates = "rep") %>%
+     timepoints = "day") %>%
   calc_crispr()
 ```
 
@@ -35,7 +34,7 @@ old_crispr_results <- read_tsv("~/Downloads/results/calculate_LFC/tables/tsv/HeL
 
 ```{r}
 old_crispr_results %<>% mutate(
-  rep = recode(rep, "A" = "late_RepA", "B" = "late_RepB", "C" = "late_RepC")
+  rep = recode(rep, "A" = "Day22_RepA_late", "B" = "Day22_RepB_late", "C" = "Day22_RepC_late")
 )
 ```
 
