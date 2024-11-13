@@ -155,7 +155,6 @@ gimap_normalize <- function(.data = NULL,
       message("The input data for the IDs which were not found in the annotation data will be kept throughout the analysis, but any data from the annotation won't be available for them.")
     }
   } else {
-
     missing_ids_file <- file.path(missing_ids_file)
     readr::write_csv(missing_ids, missing_ids_file)
   }
