@@ -7,6 +7,7 @@ date: "`r Sys.Date()`"
 ```{r warning=FALSE, message=FALSE}
 library(tidyverse)
 library(devtools)
+library(magrittr)
 
 devtools::load_all()
 ```
@@ -16,10 +17,9 @@ devtools::load_all()
 ```{r}
  gimap_dataset <- get_example_data("gimap") %>%
    gimap_filter() %>%
-   gimap_annotate() %>%
+   gimap_annotate(cell_line = "HELA") %>%
    gimap_normalize(
-     timepoints = "day",
-     replicates = "rep") %>%
+     timepoints = "day") %>%
   calc_crispr() %>%
   calc_gi()
 ```
@@ -32,6 +32,14 @@ saveRDS(gimap_dataset, "gimap_dataset_calculated.RDS")
 
 ```{r}
 old_gi_results <- readRDS("d.HeLa_GI_scores_target")
+```
+
+#### sync the reps values
+
+```{r}
+old_gi_results %<>% mutate(
+  rep = recode(rep, "A" = "Day22_RepA_late", "B" = "Day22_RepB_late", "C" = "Day22_RepC_late")
+)
 ```
 
 ## Compare results
@@ -48,7 +56,7 @@ colnames(old_gi_results)
 
 Looks like we want to compare the pgRNA targets which should be the `pgRNA_target_double` column for the gimap results and the `pgRNA_target` column for the GI Mapping results
 
-Columns in the GI Mapping results not in the gimap results seem to include model results (`intercept`, `slope`) as well as some significance values (`p_val`, `fdr`), observed and expected CRISPR score (`mean_observed_CS` and `mean_expected_CS` (which I think I need for plotting)). And how does `mean_GI_score` relate to the three GI score columns in the gimap results? 
+Columns in the GI Mapping results not in the gimap results seem to include model results (`intercept`, `slope`) as well as some significance values (`p_val`, `fdr`), observed and expected CRISPR score (`mean_observed_CS` and `mean_expected_CS` (which I think I need for plotting)). And how does `mean_GI_score` relate to the three GI score columns in the gimap results? The three GI score columns relate to the different target types.  
 
 ### Target overlap
 
@@ -61,7 +69,7 @@ length(unique(gimap_dataset$gi_scores$pgRNA_target_double))
 length(intersect(unique(old_gi_results$pgRNA_target), unique(gimap_dataset$gi_scores$pgRNA_target_double)))
 ```
 
-Only 1/3 of the GI Mapping targets are represented in the gimap results
+Only 1/3 of the GI Mapping targets are represented in the gimap results...
 
 ### Number of observations/rows total and rep column overlap
 
@@ -70,7 +78,7 @@ nrow(old_gi_results)
 nrow(gimap_dataset$gi_scores)
 ```
 
-The gimap results has far more rows 
+The gimap results has far more rows...
 
 ```{r}
 table(old_gi_results$rep)
@@ -78,10 +86,49 @@ table(old_gi_results$rep)
 table(gimap_dataset$gi_scores$rep)
 ```
 
-While the replicate values themselves can be synced like we've done in other reviews, this further shows the far greater number of observations (even if there are fewer represented pgRNA targets) in the gimap results
+While the replicate values themselves can't be completely synced like we've done in other reviews due to the gimap results including the Day05_RepA_early datapoints, this further shows the far greater number of observations (even if there are fewer represented pgRNA targets) in the gimap results....
 
 ```{r}
 head(old_gi_results)
 
 ```
 
+```{r}
+joindf <- dplyr::full_join(old_gi_results, gimap_dataset$gi_scores,
+                           by = c("pgRNA_target" = "pgRNA_target_double", "rep"),
+                           suffix = c("_old", "_new"))
+```
+
+## Split out the comparisons we want to make
+
+Have to drop NA's because the gimap results include Day05_RepA_early datapoints while the GI Mapping doesn't. Also have to drop NAs because there are GI Mapping targets that aren't represented in the gimap targets?
+
+```{r}
+joined_df <- rbind(
+  #join the gene_ctrl
+  full_join(
+    old_gi_results %>% filter(target_type == "gene_ctrl") %>% select(c("pgRNA_target", "paralog_pair", "mean_GI_score", "rep")),
+    gimap_dataset$gi_scores %>% separate(pgRNA_target_double, c("gene1", "gene2"), sep="_", remove = FALSE) %>% mutate(ctrl = "ctrl") %>% unite("pgRNA_target_summary", c("gene1", "ctrl"), sep="_") %>% select(c("pgRNA_target_summary", "pgRNA_target_double", "single_target_gi_score_1", "rep")),
+    by = c("pgRNA_target" = "pgRNA_target_summary", "paralog_pair"="pgRNA_target_double", "rep"),
+    suffix = c("_old", "_new")
+    ) %>% mutate(target_type = "gene_ctrl") %>% distinct() %>% select(c("pgRNA_target", "mean_GI_score", "rep", "single_target_gi_score_1", "target_type")) %>% `colnames<-`(c("pgRNA_target", "GI_Mapping_GI_score", "rep", "gimap_GI_score", "target_type")) %>% drop_na(),
+  # join the ctrl_gene
+  full_join(
+    old_gi_results %>% filter(target_type == "ctrl_gene") %>% select(c("pgRNA_target", "paralog_pair", "mean_GI_score", "rep")),
+    gimap_dataset$gi_scores %>% separate(pgRNA_target_double, c("gene1", "gene2"), sep="_", remove=FALSE) %>% mutate(ctrl = "ctrl") %>% unite("pgRNA_target_summary", c("ctrl", "gene2"), sep="_") %>% select(c("pgRNA_target_summary", "pgRNA_target_double", "single_target_gi_score_2", "rep")),
+    by = c("pgRNA_target" = "pgRNA_target_summary", "rep"),
+    suffix = c("_old", "_new")
+    ) %>% mutate(target_type = "ctrl_gene") %>% distinct() %>% select(c("pgRNA_target", "mean_GI_score", "rep", "single_target_gi_score_2", "target_type")) %>% `colnames<-`(c("pgRNA_target", "GI_Mapping_GI_score", "rep", "gimap_GI_score", "target_type")) %>% drop_na(),
+  #join the gene_gene
+  full_join(
+    old_gi_results %>% filter(target_type == "gene_gene") %>% select(c("pgRNA_target", "mean_GI_score", "rep")),
+    gimap_dataset$gi_scores %>% select(c("pgRNA_target_double", "double_target_gi_score", "rep")),
+    by = c("pgRNA_target" = "pgRNA_target_double", "rep"),
+    suffix = c("_old", "_new")
+  ) %>% mutate(target_type = "gene_gene") %>% `colnames<-`(c("pgRNA_target", "GI_Mapping_GI_score", "rep", "gimap_GI_score", "target_type")) %>% drop_na()
+)
+```
+
+```{r}
+joined_df %>% ggplot(aes(x=gimap_GI_score, y=GI_Mapping_GI_score, color=target_type)) + geom_point() + facet_wrap(rep~target_type) + theme(legend.position = "none")
+```
