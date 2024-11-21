@@ -102,6 +102,7 @@ calc_crispr <- function(.data = NULL,
       pgRNA_target,
       gene_symbol,
       targeting_gRNA_seq,
+      control_gRNA_seq,
       mean_single_target_crispr,
       single_crispr_score = crispr_score,
       mean_double_control_crispr
