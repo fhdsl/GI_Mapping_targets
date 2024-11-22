@@ -52,7 +52,8 @@ calc_gi <- function(.data = NULL,
     dplyr::select(
       rep,
       pgRNA_target_double,
-      pgRNA_target_single,
+      pgRNA_target_single_1,
+      pgRNA_target_single_2,
       mean_single_target_crispr_1,
       mean_single_target_crispr_2,
       expected_crispr_single_1,
@@ -83,6 +84,14 @@ calc_gi <- function(.data = NULL,
       ),
       values_to = "observed_crispr_single",
       names_to = "which_obs"
+    ) %>%
+    tidyr::pivot_longer(
+      cols = c(
+        pgRNA_target_single_1,
+        pgRNA_target_single_2
+      ),
+      values_to = "pgRNA_target_single",
+      names_to = "which_target"
     ) %>%
     # Because of the pivoting we have some duplicates
     # So we want to get down to non-redundant data
@@ -158,23 +167,46 @@ calc_gi <- function(.data = NULL,
   names(target_results) <- replicates
 
   # Turn into a data.frame
-  target_results_df <- dplyr::bind_rows(target_results, .id = "replicate") %>%
-    tidyr::pivot_wider(
-      names_from = replicate,
-      values_from = c(
-        p_val,
-        fdr
-      )
-    )
+  target_results_df <- dplyr::bind_rows(target_results, .id = "replicate")
+
+  ### Now just cleaning up for storage
+
+  gi_calc_double <- gi_calc_double %>%
+    # Collapse to just stats and don't care about pg_ids anymore
+    dplyr::select(-pg_ids) %>%
+    dplyr::mutate(target_type = "gene_gene") %>%
+    dplyr::select("rep", "target_type",
+                  "pgRNA_target" = pgRNA_target_double,
+                  "intercept", "slope",
+                  "mean_observed_cs" = double_crispr_score,
+                  "mean_expected_cs" = mean_expected_double_crispr,
+                  "mean_gi_score" = double_target_gi_score) %>%
+    dplyr::distinct()
+
+  gi_calc_single <- gi_calc_single %>%
+    dplyr::mutate(target_type = dplyr::case_when(
+      grepl("^ctrl_*", pgRNA_target_single) ~"ctrl_gene",
+      grepl("*_ctrl$", pgRNA_target_single) ~"gene_ctrl"
+      )) %>%
+    dplyr::select("rep", "target_type",
+                  "pgRNA_target" = pgRNA_target_single,
+                  "intercept", "slope",
+                  "mean_observed_cs" = mean_observed_single_crispr,
+                  "mean_expected_cs" = mean_expected_single_crispr,
+                  "mean_gi_score" = single_target_gi_score)
+
+  all_gi_scores <- dplyr::bind_rows(gi_calc_double, gi_calc_single) %>%
+    dplyr::left_join(target_results_df,
+    by = c("pgRNA_target" = "pgRNA_target_double", "rep" = "replicate"))
 
   # Store the useful bits
-  gimap_dataset$gi_scores <- gi_calc_double
+  gimap_dataset$gi_scores <- all_gi_scores
 
   # Store this
   gimap_dataset$results <-
     list(
       overall = single_lm_df,
-      by_target = target_results_df
+      by_target = all_gi_scores
     )
 
   return(gimap_dataset)
