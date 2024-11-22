@@ -63,13 +63,10 @@ Columns in the GI Mapping results not in the gimap results seem to include model
 
 ```{r}
 length(unique(gimap_dataset$normalized_log_fc$pgRNA_target))
-
 length(unique(old_gi_results$pgRNA_target))
-length(unique(gimap_dataset$gi_scores$pgRNA_target_double))
-length(intersect(unique(old_gi_results$pgRNA_target), unique(gimap_dataset$gi_scores$pgRNA_target_double)))
+length(unique(gimap_dataset$gi_scores$pgRNA_target))
+length(intersect(unique(old_gi_results$pgRNA_target), unique(gimap_dataset$gi_scores$pgRNA_target)))
 ```
-
-Only 1/3 of the GI Mapping targets are represented in the gimap results...
 
 ### Number of observations/rows total and rep column overlap
 
@@ -92,51 +89,27 @@ While the replicate values themselves can't be completely synced like we've done
 head(old_gi_results)
 ```
 
-```{r}
-joindf <- dplyr::full_join(old_gi_results, gimap_dataset$gi_scores,
-  by = c("pgRNA_target" = "pgRNA_target_double", "rep"),
-  suffix = c("_old", "_new")
-)
-```
-
 ## Split out the comparisons we want to make
 
 Have to drop NA's because the gimap results include `Day05_RepA_early` datapoints while the GI Mapping doesn't. Also have to drop NAs because there are GI Mapping targets that aren't represented in the gimap targets?
 
 ```{r}
-old_gi_results_wide <- old_gi_results %>% 
-  dplyr::select(paralog_pair, target_type, mean_GI_score, rep) %>% 
-  tidyr::pivot_wider(names_from = target_type, 
-                     values_from = mean_GI_score)
+View(gimap_dataset$gi_scores)
 
 # Reshape the data so we can plot
 joined_df <- gimap_dataset$gi_scores %>% 
-  dplyr::full_join(old_gi_results_wide, 
-                   by = c("pgRNA_target_double"= "paralog_pair", 
-                          "rep" = "rep")) %>% 
+  dplyr::inner_join(old_gi_results, 
+                   by = c("pgRNA_target", "rep", "target_type"), 
+                   suffix = c("_new", "_old")) %>% 
   dplyr::filter(!grepl("Day05", rep))
 ```
 
-```{r}
-joined_df %>% 
-  ggplot(aes(x = single_target_gi_score_1, y = gene_ctrl)) +
-  geom_point() +
-  facet_wrap(~rep) +
-  theme(legend.position = "none")
-```
+
 
 ```{r}
 joined_df %>% 
-  ggplot(aes(x = single_target_gi_score_2, y = ctrl_gene)) +
+  ggplot(aes(x = mean_gi_score, y = mean_GI_score)) +
   geom_point() +
-  facet_wrap(~rep) +
-  theme(legend.position = "none")
-```
-
-```{r}
-joined_df %>% 
-  ggplot(aes(x = double_target_gi_score, y = gene_gene)) +
-  geom_point() +
-  facet_wrap(~rep) +
+  facet_wrap(~target_type) +
   theme(legend.position = "none")
 ```

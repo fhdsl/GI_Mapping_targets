@@ -144,7 +144,7 @@ calc_gi <- function(.data = NULL,
   # Do the linear model adjustments but don't collapse double
   gi_calc_double <- gi_calc_df %>%
     # Tack on the mean expected double crispr
-    dplyr::left_join(dplyr::select(double_mean_df, mean_expected_double_crispr, rep, pgRNA_target_double),
+    dplyr::left_join(dplyr::select(double_mean_df, mean_observed_double_crispr, mean_expected_double_crispr, rep, pgRNA_target_double),
                      by = c("rep", "pgRNA_target_double")) %>%
     # Using the single target's linear model here
     dplyr::left_join(single_stats, by = "rep") %>%
@@ -170,17 +170,14 @@ calc_gi <- function(.data = NULL,
   target_results_df <- dplyr::bind_rows(target_results, .id = "replicate")
 
   ### Now just cleaning up for storage
-
   gi_calc_double <- gi_calc_double %>%
     # Collapse to just stats and don't care about pg_ids anymore
-    dplyr::select(-pg_ids) %>%
+    dplyr::select(rep,
+                  pgRNA_target = pgRNA_target_double,
+                  intercept, slope,
+                  mean_expected_cs = mean_expected_double_crispr,
+                  mean_gi_score = mean_observed_double_crispr) %>%
     dplyr::mutate(target_type = "gene_gene") %>%
-    dplyr::select("rep", "target_type",
-                  "pgRNA_target" = pgRNA_target_double,
-                  "intercept", "slope",
-                  "mean_observed_cs" = double_crispr_score,
-                  "mean_expected_cs" = mean_expected_double_crispr,
-                  "mean_gi_score" = double_target_gi_score) %>%
     dplyr::distinct()
 
   gi_calc_single <- gi_calc_single %>%
@@ -188,16 +185,17 @@ calc_gi <- function(.data = NULL,
       grepl("^ctrl_*", pgRNA_target_single) ~"ctrl_gene",
       grepl("*_ctrl$", pgRNA_target_single) ~"gene_ctrl"
       )) %>%
-    dplyr::select("rep", "target_type",
-                  "pgRNA_target" = pgRNA_target_single,
-                  "intercept", "slope",
-                  "mean_observed_cs" = mean_observed_single_crispr,
-                  "mean_expected_cs" = mean_expected_single_crispr,
-                  "mean_gi_score" = single_target_gi_score)
+    dplyr::select(rep, target_type,
+                  pgRNA_target = pgRNA_target_single,
+                  intercept, slope,
+                  mean_expected_cs = mean_expected_single_crispr,
+                  mean_gi_score = single_target_gi_score) %>%
+    dplyr::distinct()
 
   all_gi_scores <- dplyr::bind_rows(gi_calc_double, gi_calc_single) %>%
     dplyr::left_join(target_results_df,
-    by = c("pgRNA_target" = "pgRNA_target_double", "rep" = "replicate"))
+    by = c("pgRNA_target" = "pgRNA_target_double", "rep" = "replicate")) %>%
+    dplyr::distinct()
 
   # Store the useful bits
   gimap_dataset$gi_scores <- all_gi_scores
@@ -205,8 +203,8 @@ calc_gi <- function(.data = NULL,
   # Store this
   gimap_dataset$results <-
     list(
-      overall = single_lm_df,
-      by_target = all_gi_scores
+      single_lm = single_lm_df,
+      double_lm = double_lm_df
     )
 
   return(gimap_dataset)
