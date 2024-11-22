@@ -94,7 +94,6 @@ calc_crispr <- function(.data = NULL,
     ) %>%
     dplyr::left_join(control_target_df,
       by = c("rep" = "rep", "control_gRNA_seq" = "control_gRNA_seq"),
-      relationship = "many-to-many",
       suffix = c("", "_control")
     ) %>%
     group_by(rep, pgRNA_target, targeting_gRNA_seq) %>%
@@ -102,13 +101,12 @@ calc_crispr <- function(.data = NULL,
     mutate(mean_single_target_crispr = mean(crispr_score, na.rm = TRUE)) %>%
     dplyr::select(rep,
       pgRNA_target,
-      gene_symbol,
       targeting_gRNA_seq,
-      control_gRNA_seq,
-      mean_single_target_crispr,
+      mean_single_target_crispr ,
       single_crispr_score = crispr_score,
       mean_double_control_crispr
-    )
+    ) %>%
+    dplyr::distinct()
 
   # Now put it all together into one df
   crispr_df <- lfc_df %>%
@@ -120,16 +118,17 @@ calc_crispr <- function(.data = NULL,
       gRNA2_seq,
       pgRNA_target_double = pgRNA_target
     ) %>%
+    dplyr::distinct() %>%
     # Join on single target crispr scores
     dplyr::left_join(single_target_df,
       by = c("rep" = "rep", "gRNA1_seq" = "targeting_gRNA_seq"),
-      relationship = "many-to-many",
-      suffix = c("_double", "_1")
+      suffix = c("_double", "_1"),
+      relationship == "one-to-many",
     ) %>%
     dplyr::left_join(single_target_df,
       by = c("rep" = "rep", "gRNA2_seq" = "targeting_gRNA_seq"),
-      relationship = "many-to-many",
-      suffix = c("_1", "_2")
+      suffix = c("_1", "_2"),
+      relationship == "one-to-many",
     ) %>%
     dplyr::select(
       pg_ids,
