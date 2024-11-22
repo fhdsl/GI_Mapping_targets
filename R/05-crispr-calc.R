@@ -68,7 +68,9 @@ calc_crispr <- function(.data = NULL,
       names_to = "position",
       values_to = "control_gRNA_seq"
     ) %>%
+    # If there's the same control sequence, and rep
     dplyr::group_by(rep, control_gRNA_seq) %>%
+    # Then take the mean for when controls have the same sequence
     dplyr::summarize(mean_double_control_crispr = mean(crispr_score, na.rm = TRUE)) %>%
     dplyr::select(rep, control_gRNA_seq, mean_double_control_crispr)
 
@@ -96,7 +98,7 @@ calc_crispr <- function(.data = NULL,
       suffix = c("", "_control")
     ) %>%
     group_by(rep, pgRNA_target, targeting_gRNA_seq) %>%
-    # Taking the mean of the single target crisprs
+    # Taking the mean of the single target crisprs that have the same targeting sequence
     mutate(mean_single_target_crispr = mean(crispr_score, na.rm = TRUE)) %>%
     dplyr::select(rep,
       pgRNA_target,
@@ -114,7 +116,6 @@ calc_crispr <- function(.data = NULL,
     dplyr::select(pg_ids,
       rep,
       double_crispr_score = crispr_score,
-      pgRNA_target,
       gRNA1_seq,
       gRNA2_seq,
       pgRNA_target_double = pgRNA_target
@@ -137,6 +138,7 @@ calc_crispr <- function(.data = NULL,
       single_crispr_score_1,
       single_crispr_score_2,
       pgRNA_target_double,
+      pgRNA_target_single = pgRNA_target_2,
       gene_symbol_1,
       gene_symbol_2,
       mean_single_target_crispr_1,

@@ -38,12 +38,12 @@ calc_gi <- function(.data = NULL,
       expected_crispr_single_2 = mean_single_target_crispr_2 + mean_double_control_crispr
     )
 
-  # Calculate means by targets
+  # Calculate means by targets, collapsing it if the other gene is a control
   double_mean_df <- gi_calc_df %>%
     dplyr::group_by(rep, pgRNA_target_double) %>%
     dplyr::summarize(
       mean_expected_double_crispr = mean(expected_crispr_double, na.rm = TRUE),
-      mean_observed_double_crispr = mean(double_crispr_score, na.rm = TRUE)
+      mean_observed_double_crispr = mean(double_crispr_score, na.rm = TRUE),
     )
 
   # Calculating mean crisprs
@@ -52,6 +52,7 @@ calc_gi <- function(.data = NULL,
     dplyr::select(
       rep,
       pgRNA_target_double,
+      pgRNA_target_single,
       mean_single_target_crispr_1,
       mean_single_target_crispr_2,
       expected_crispr_single_1,
@@ -91,7 +92,7 @@ calc_gi <- function(.data = NULL,
   ## calculate mean CRISPR score of single-targeting pgRNAs containing the same targeting
   ## sgRNA sequence but different control sgRNA sequences
   single_mean_df <- reshaped_single_df %>%
-    dplyr::group_by(rep, gene_symbol) %>%
+    dplyr::group_by(rep, pgRNA_target_single) %>%
     dplyr::summarize(
       mean_expected_single_crispr = mean(expected_crispr_single, na.rm = TRUE),
       mean_observed_single_crispr = mean(observed_crispr_single, na.rm = TRUE)
@@ -143,7 +144,7 @@ calc_gi <- function(.data = NULL,
     )
 
   # Which replicates we have?
-  replicates <- unique(gi_calc_adj$rep)
+  replicates <- unique(gi_calc_df$rep)
 
   # TODO: this is an lapply inside an lapply at the end of the day. Not ideal
   target_results <- lapply(replicates, function(replicate) {
@@ -161,33 +162,18 @@ calc_gi <- function(.data = NULL,
     tidyr::pivot_wider(
       names_from = replicate,
       values_from = c(
-        p_val_ttest,
-        p_val_wil,
-        fdr_vals_ttest,
-        fdr_vals_wil
+        p_val,
+        fdr
       )
     )
 
   # Store the useful bits
-  gimap_dataset$gi_scores <- gi_calc_adj %>%
-    dplyr::select(
-      pgRNA_target_double,
-      rep,
-      double_target_gi_score,
-      single_target_gi_score_1,
-      single_target_gi_score_2,
-      expected_crispr_single_1,
-      expected_crispr_single_2,
-      expected_crispr_double,
-      pgRNA1_seq,
-      pgRNA2_seq
-    ) %>%
-    dplyr::distinct()
+  gimap_dataset$gi_scores <- gi_calc_double
 
   # Store this
   gimap_dataset$results <-
     list(
-      overall = single_lm,
+      overall = single_lm_df,
       by_target = target_results_df
     )
 
@@ -215,50 +201,24 @@ gimap_rep_stats <- function(replicate, gi_calc_double,  gi_calc_single) {
   per_rep_stats_single <- gi_calc_single %>%
     dplyr::filter(rep == replicate)
 
-  # What's the target list
-  double_targets <- unique(per_rep_stats_double$pgRNA_target_double)
-
-  # Run the test for each target
-  p_vals <- lapply(double_targets, function(double_target) {
-
-    targets <- strsplit(double_target, "_")[[1]]
-    target_1 <- targets[1]
-    target_2 <- targets[2]
-
-    rep_gi_scores <- per_rep_stats_double %>%
-      group_by(pgRNA_target_double) %>%
-      mutate(p_val = t.test(x = per_rep_stats_single$mean_observed_single_crispr,
-                            y = double_target_gi_score,
-                            paired = FALSE)$p.value)
+  rep_gi_scores <- per_rep_stats_double %>%
+    group_by(pgRNA_target_double) %>%
+    mutate(p_val = t.test(x = per_rep_stats_single$mean_observed_single_crispr,
+                          y = double_target_gi_score,
+                          paired = FALSE)$p.value)
 
 
-    ## adjust for multiple testing using the Benjamini-Hochberg method
-    d_p_val <- rep_gi_scores %>%
-      dplyr::select(pgRNA_target_double, p_val) %>%
-      arrange(p_val) %>%
-      distinct(p_val, .keep_all = TRUE)
+  ## adjust for multiple testing using the Benjamini-Hochberg method
+  d_p_val <- rep_gi_scores %>%
+    dplyr::select(pgRNA_target_double, p_val) %>%
+    arrange(p_val) %>%
+    distinct(p_val, .keep_all = TRUE)
 
-    fdr_vals <- p.adjust(d_p_val$p_val, method = "BH")
+  fdr_vals <- p.adjust(d_p_val$p_val, method = "BH")
 
-    d_fdr <- tibble("fdr" = fdr_vals) %>%
-      bind_cols(d_p_val) %>%
-      dplyr::select(-p_val)
+  d_fdr <- tibble("fdr" = fdr_vals) %>%
+     bind_cols(d_p_val) %>%
+    dplyr::select(pgRNA_target_double, p_val, fdr)
 
-    ## add FDR values back into the double-targeting DF
-    p_vals <- left_join(rep_gi_scores, d_fdr, by = "pgRNA_target_double")
-
-    return(p_vals)
-  })
-
-  # Put this together in a dataframe for this replicate
-  p_vals_df <- data.frame(
-    targets = double_targets,
-    bind_rows(p_vals)
-  )
-
-  # Adjust for multiple testing using the Benjamini-Hochberg method
-  p_vals_df$fdr_vals_ttest <- p.adjust(p_vals_df$p_val_ttest, method = "BH")
-  p_vals_df$fdr_vals_wil <- p.adjust(p_vals_df$p_val_wil, method = "BH")
-
-  return(p_vals_df)
+  return(d_fdr)
 }
