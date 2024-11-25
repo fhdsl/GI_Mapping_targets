@@ -23,6 +23,4 @@ We also have tutorial examples that show how to run timepoint or treatment exper
 
 Follow the steps there that will walk you through the example data. Then you can tailor that tutorial to use your own data.
 
-
-
-[See metrics about this repository here](https://cauldron.io/project/8779/stats.svg)
+![See metrics about this repository here](https://cauldron.io/project/8779/stats.svg)
