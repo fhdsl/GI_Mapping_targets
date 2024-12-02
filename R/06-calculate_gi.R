@@ -33,9 +33,9 @@ calc_gi <- function(.data = NULL,
   ## CRISPR scores for that paralog pair
   gi_calc_df <- gimap_dataset$crispr_score %>%
     dplyr::mutate(
-      expected_crispr_double = mean_single_target_crispr_1 + mean_single_target_crispr_2,
-      expected_crispr_single_1 = mean_single_target_crispr_1 + mean_double_control_crispr,
-      expected_crispr_single_2 = mean_single_target_crispr_2 + mean_double_control_crispr
+      expected_crispr_double = single_crispr_score_1 + single_crispr_score_2,
+      expected_crispr_single_1 = single_crispr_score_1 + mean_double_control_crispr,
+      expected_crispr_single_2 = single_crispr_score_2 + mean_double_control_crispr
     )
 
   # Calculate means by targets, collapsing it if the other gene is a control
@@ -52,10 +52,15 @@ calc_gi <- function(.data = NULL,
     dplyr::select(
       rep,
       pgRNA_target_double,
+<<<<<<< Updated upstream
       pgRNA_target_single_1,
       pgRNA_target_single_2,
       mean_single_target_crispr_1,
       mean_single_target_crispr_2,
+=======
+      single_crispr_score_1,
+      single_crispr_score_2,
+>>>>>>> Stashed changes
       expected_crispr_single_1,
       expected_crispr_single_2,
       gene_symbol_1,
@@ -79,8 +84,8 @@ calc_gi <- function(.data = NULL,
     ) %>%
     tidyr::pivot_longer(
       cols = c(
-        mean_single_target_crispr_1,
-        mean_single_target_crispr_2
+        single_crispr_score_1,
+        single_crispr_score_2
       ),
       values_to = "observed_crispr_single",
       names_to = "which_obs"
