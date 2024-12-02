@@ -73,6 +73,7 @@ calc_crispr <- function(.data = NULL,
     # Then take the mean for when controls have the same sequence
     dplyr::summarize(mean_double_control_crispr = mean(crispr_score, na.rm = TRUE)) %>%
     dplyr::select(rep, control_gRNA_seq, mean_double_control_crispr)
+  # This means we have a mean double control crispr for each rep and control sequence
 
   # Calculate CRISPR scores for single targets
   single_target_df <- lfc_df %>%

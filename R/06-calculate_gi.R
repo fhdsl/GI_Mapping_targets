@@ -22,6 +22,28 @@
 #' }
 calc_gi <- function(.data = NULL,
                     gimap_dataset) {
+
+  #Controls
+  #Replicates
+  #Means
+
+
+  # Summary the calculation
+  # single_target_crispr_1 = geneA_nt1, geneA_nt2...
+  # single_target_crispr_2 = nt1_geneB, nt2_geneB...
+  # double_crispr_score = geneA_geneBpg1, geneA_geneBpg2...
+
+  # mean_double_control_crispr = mean for the same control sequence
+
+  # expected_crispr_double = single_target_crispr_1 + single_target_crispr_2
+  # expected_crispr_single_1 = single_target_crispr_1 + mean_double_control_crispr
+  # expected_crispr_single_2 = single_target_crispr_2 + mean_double_control_crispr
+
+  # linear model is lm(mean_observed_single_crispr ~ mean_expected_single_crispr)
+
+  # single_target_gi_score = observed_single_crispr - (intercept + slope * expected_single_crispr)
+  # double_target_gi_score = double_crispr_score - (intercept + slope * expected_double_crispr)
+
   # Code adapted from
   # https://github.com/FredHutch/GI_mapping/blob/main/workflow/scripts/04-calculate_GI_scores.Rmd
 
@@ -52,15 +74,10 @@ calc_gi <- function(.data = NULL,
     dplyr::select(
       rep,
       pgRNA_target_double,
-<<<<<<< Updated upstream
       pgRNA_target_single_1,
       pgRNA_target_single_2,
       mean_single_target_crispr_1,
       mean_single_target_crispr_2,
-=======
-      single_crispr_score_1,
-      single_crispr_score_2,
->>>>>>> Stashed changes
       expected_crispr_single_1,
       expected_crispr_single_2,
       gene_symbol_1,
@@ -84,8 +101,8 @@ calc_gi <- function(.data = NULL,
     ) %>%
     tidyr::pivot_longer(
       cols = c(
-        single_crispr_score_1,
-        single_crispr_score_2
+        pgRNA_target_single_1,
+        pgRNA_target_single_2
       ),
       values_to = "observed_crispr_single",
       names_to = "which_obs"
@@ -241,8 +258,9 @@ gimap_rep_stats <- function(replicate, gi_calc_double,  gi_calc_single) {
 
   rep_gi_scores <- per_rep_stats_double %>%
     group_by(pgRNA_target_double) %>%
-    mutate(p_val = t.test(x = single_target_gi_score,
-                          y = double_target_gi_score,
+    # TODO make this so its all single targets not just the oens that are a part of this double construct
+    mutate(p_val = t.test(x = single_target_gi_score, # 1000's of single constructs here
+                          y = double_target_gi_score, # all 16 construct guides here
                           paired = FALSE)$p.value)
 
 
