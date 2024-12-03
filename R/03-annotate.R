@@ -2,10 +2,10 @@
 #' @description In this function, a `gimap_dataset` is annotated as far as which genes should be used as controls.
 #' @param .data Data can be piped in with tidyverse pipes from function to function. But the data must still be a gimap_dataset
 #' @param gimap_dataset A special dataset structure that is setup using the `setup_data()` function.
-#' @param cell_line which cell line are you using? (e.g., HELA, PC9, etc.). Required argument
-#' @param cn_annotate TRUE or FALSE you'd also like to have Copy number annotation from DepMap. These data are optional
 #' @param annotation_file If no file is given, will attempt to use the design file from https://media.addgene.org/cms/filer_public/a9/9a/a99a9328-324b-42ff-8ccc-30c544b899e4/pgrna_library.xlsx
 #' @param control_genes A vector of gene symbols (e.g. AAMP) that should be labeled as control genes. These will be used for log fold change calculations. If no list is given then DepMap Public 23Q4 Achilles_common_essentials.csv is used https://depmap.org/portal/download/all/
+#' @param depmap_annotate TRUE or FALSE you'd also like to have DepMap annotation. These data are optional
+#' @param cell_line which cell line are you using? (e.g., HELA, PC9, etc.). Required argument if demap_annotate is TRUE.
 #' @importFrom stringr word
 #' @export
 #' @examples \dontrun{
@@ -24,13 +24,15 @@
 #' }
 gimap_annotate <- function(.data = NULL,
                            gimap_dataset,
-                           cell_line,
+                           annotation_file = NULL,
                            control_genes = NULL,
-                           cn_annotate = TRUE,
-                           annotation_file = NULL) {
+                           depmap_annotate = TRUE,
+                           cell_line = NULL) {
   if (!is.null(.data)) gimap_dataset <- .data
 
   if (!("gimap_dataset" %in% class(gimap_dataset))) stop("This function only works with gimap_dataset objects which can be made with the setup_data() function.")
+
+  if (depmap_annotate & is.null(cell_line)) stop("If you want DepMap annotation you must specify which cell line you are using")
 
   # Get the annotation data based on the pg construct design
   if (!is.null(annotation_file)) {
@@ -54,33 +56,33 @@ gimap_annotate <- function(.data = NULL,
   }
 
   ############################ Get TPM data ####################################
-  # This is not optional because its used to flag things
-  ## get TPM and CN information (w/ option for user to upload their own info)
-  depmap_metadata <- readr::read_csv("https://figshare.com/ndownloader/files/35020903", show_col_types = FALSE)
+  if (depmap_annotate) {
+    # This is used to flag things
+    ## get TPM and CN information (w/ option for user to upload their own info)
+    depmap_metadata <- readr::read_csv("https://figshare.com/ndownloader/files/35020903", show_col_types = FALSE)
 
-  my_depmap_id <- depmap_metadata %>%
-    dplyr::filter(stripped_cell_line_name == toupper(cell_line)) %>%
-    dplyr::pull(DepMap_ID)
+    my_depmap_id <- depmap_metadata %>%
+      dplyr::filter(stripped_cell_line_name == toupper(cell_line)) %>%
+      dplyr::pull(DepMap_ID)
 
-  if (length(my_depmap_id) == 0) stop("The cell line specified, ", cell_line, "was not found in the DepMap data. Run supported_cell_lines() to see the full list")
+    if (length(my_depmap_id) == 0) stop("The cell line specified, ", cell_line, "was not found in the DepMap data. Run supported_cell_lines() to see the full list")
 
-  tpm_file <- file.path(system.file("extdata", package = "gimap"), "CCLE_expression.csv")
+    tpm_file <- file.path(system.file("extdata", package = "gimap"), "CCLE_expression.csv")
 
-  if (!file.exists(tpm_file)) tpm_setup()
+    if (!file.exists(tpm_file)) tpm_setup()
 
-  depmap_tpm <- readr::read_csv(tpm_file,
-    show_col_types = FALSE,
-    col_select = c("genes", dplyr::all_of(my_depmap_id))
-  ) %>%
-    dplyr::rename(log2_tpm = my_depmap_id) %>%
-    dplyr::mutate(expressed_flag = dplyr::case_when(
-      log2_tpm < 1 ~ FALSE,
-      log2_tpm >= 1 ~ TRUE,
-      is.na(log2_tpm) ~ NA
-    ))
+    depmap_tpm <- readr::read_csv(tpm_file,
+      show_col_types = FALSE,
+      col_select = c("genes", dplyr::all_of(my_depmap_id))
+    ) %>%
+      dplyr::rename(log2_tpm = my_depmap_id) %>%
+      dplyr::mutate(expressed_flag = dplyr::case_when(
+        log2_tpm < 1 ~ FALSE,
+        log2_tpm >= 1 ~ TRUE,
+        is.na(log2_tpm) ~ NA
+      ))
 
-  ############################ COPY NUMBER ANNOTATION ##########################
-  if (cn_annotate) {
+    ############################ COPY NUMBER ANNOTATION ##########################
     cn_file <- file.path(system.file("extdata", package = "gimap"), "CCLE_gene_cn.csv")
     if (!file.exists(cn_file)) cn_setup()
 
@@ -102,32 +104,7 @@ gimap_annotate <- function(.data = NULL,
   annotation_df <- annotation_df %>%
     dplyr::mutate(
       gene1_essential_flag = gene1_symbol %in% control_genes,
-      gene2_essential_flag = gene2_symbol %in% control_genes
-    ) %>%
-    dplyr::left_join(depmap_tpm, by = c("gene1_symbol" = "genes")) %>%
-    dplyr::rename(gene1_expressed_flag = expressed_flag) %>%
-    dplyr::left_join(depmap_tpm, by = c("gene2_symbol" = "genes"), suffix = c("_gene1", "_gene2")) %>%
-    dplyr::rename(gene2_expressed_flag = expressed_flag) %>%
-    dplyr::mutate(norm_ctrl_flag = dplyr::case_when(
-      target_type == "gene_gene" ~ "double_targeting",
-      target_type == "gene_ctrl" & gene1_essential_flag == TRUE ~ "positive_control",
-      target_type == "ctrl_gene" & gene2_essential_flag == TRUE ~ "positive_control",
-      target_type == "gene_ctrl" & gene1_essential_flag != TRUE ~ "single_targeting",
-      target_type == "ctrl_gene" & gene2_essential_flag != TRUE ~ "single_targeting",
-      target_type == "ctrl_ctrl" ~ "negative_control"
-    )) %>%
-    dplyr::mutate(
-      norm_ctrl_flag = factor(norm_ctrl_flag, levels = c(
-        "negative_control",
-        "positive_control",
-        "single_targeting",
-        "double_targeting"
-      )),
-      unexpressed_ctrl_flag = dplyr::case_when(
-        norm_ctrl_flag == "double_targeting" & gene1_expressed_flag == FALSE & gene2_expressed_flag == FALSE ~ TRUE,
-        norm_ctrl_flag == "single_targeting" & (gene1_expressed_flag == FALSE | gene2_expressed_flag == FALSE) ~ TRUE,
-        TRUE ~ FALSE
-      ),
+      gene2_essential_flag = gene2_symbol %in% control_genes,
       pgRNA_target = dplyr::case_when(
         target_type == "gene_gene" ~ paste(gene1_symbol, gene2_symbol, sep = "_"),
         target_type == "gene_ctrl" ~ paste(gene1_symbol, "ctrl", sep = "_"),
@@ -136,6 +113,34 @@ gimap_annotate <- function(.data = NULL,
       )
     )
 
+  if (depmap_annotate) {
+    annotation_df <- annotation_df %>%
+      dplyr::left_join(depmap_tpm, by = c("gene1_symbol" = "genes")) %>%
+      dplyr::rename(gene1_expressed_flag = expressed_flag) %>%
+      dplyr::left_join(depmap_tpm, by = c("gene2_symbol" = "genes"), suffix = c("_gene1", "_gene2")) %>%
+      dplyr::rename(gene2_expressed_flag = expressed_flag) %>%
+      dplyr::mutate(norm_ctrl_flag = dplyr::case_when(
+        target_type == "gene_gene" ~ "double_targeting",
+        target_type == "gene_ctrl" & gene1_essential_flag == TRUE ~ "positive_control",
+        target_type == "ctrl_gene" & gene2_essential_flag == TRUE ~ "positive_control",
+        target_type == "gene_ctrl" & gene1_essential_flag != TRUE ~ "single_targeting",
+        target_type == "ctrl_gene" & gene2_essential_flag != TRUE ~ "single_targeting",
+        target_type == "ctrl_ctrl" ~ "negative_control"
+      )) %>%
+      dplyr::mutate(
+        norm_ctrl_flag = factor(norm_ctrl_flag, levels = c(
+          "negative_control",
+          "positive_control",
+          "single_targeting",
+          "double_targeting"
+        )),
+        unexpressed_ctrl_flag = dplyr::case_when(
+          norm_ctrl_flag == "double_targeting" & gene1_expressed_flag == FALSE & gene2_expressed_flag == FALSE ~ TRUE,
+          norm_ctrl_flag == "single_targeting" & (gene1_expressed_flag == FALSE | gene2_expressed_flag == FALSE) ~ TRUE,
+          TRUE ~ FALSE
+        )
+      )
+  }
   ################################ STORE IT ####################################
 
   if (gimap_dataset$filtered_data$filter_step_run) {

@@ -1,8 +1,8 @@
 ---
-title: "gimap for timepoint experiment"
+title: "gimap for Timepoint Experiment"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{getting-started}
+  %\VignetteIndexEntry{gimap for Timepoint Experiment}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
