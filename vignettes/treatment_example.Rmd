@@ -45,7 +45,7 @@ Let's examine this example pgPEN counts table. It's divided into columns contain
 - `drug1A`: Drug treatment for Replicate A
 - `drug2B`: Drug treatment for Replicate B
 
-For the purposes of this tutorial, we can grab example data from the package. 
+For the purposes of this tutorial, we can grab example data from the package.
 
 ```{r}
 example_data <- get_example_data("count_treatment")
@@ -59,13 +59,13 @@ colnames(example_data)
 
 ## Setting up data
 
-We're going to set up three datasets that we will provide to the `set_up()` function to create a `gimap` dataset object. 
+We're going to set up three datasets that we will provide to the `set_up()` function to create a `gimap` dataset object.
 
 - `counts` - the counts generated from pgPEN
 - `pg_ids` - the IDs that correspond to the rows of the counts and specify the construct
 - `sample_metadata` - metadata that describes the columns of the counts including their timepoints
 
-For this example we are using a treatment dataset where there is a pretreatment sample, two vehicle replicates and two drug treated replicates. 
+For this example we are using a treatment dataset where there is a pretreatment sample, two vehicle replicates and two drug treated replicates.
 
 ```{r}
 counts <- example_data %>%
@@ -90,7 +90,7 @@ Sample metadata is the information that describes the samples and is sorted the 
 You need to have two columns in the metadata you provide. You'll need to specify the names of these columns in the `gimap_annotate()` function.
 
 - `col_names` - Must match the colnames of the counts data being submitted
-- `treatments` - A factor variable that describes the treatments for these data. The label for the control specified in this column will need to be supplied to the `gimap_normalize()` function. 
+- `treatments` - A factor variable that describes the treatments for these data. The label for the control specified in this column will need to be supplied to the `gimap_normalize()` function.
 
 ```{r}
 sample_metadata <- data.frame(
@@ -127,7 +127,7 @@ You'll notice that this set up gives us a list of formatted data. This contains 
 str(gimap_dataset)
 ```
 
-Let's see how many rows of data we have. 
+Let's see how many rows of data we have.
 
 ```{r}
 nrow(gimap_dataset$transformed_data$log2_cpm)
@@ -177,7 +177,7 @@ gimap_filtered <- gimap_dataset %>%
   gimap_filter()
 ```
 
-How many rows of data do we have now after filtering? 
+How many rows of data do we have now after filtering?
 
 ```{r}
 nrow(gimap_filtered$filtered_data$transformed_log2_cpm)
@@ -231,19 +231,6 @@ Take a look at a preview of the CRISPR scores:
 
 ```{r}
 head(gimap_dataset$crispr_score)
-```
-
-Take a look at the overall stats:
-
-```{r}
-gimap_dataset$results$overall
-```
-
-Lastly, let's take a look at the by target results. We can arrange by results using `dplyr::arrange()`
-
-```{r}
-gimap_dataset$results$by_target %>%
-  dplyr::arrange(fdr_vals_wil_dmsoA_dmso)
 ```
 
 ## Saving results to files

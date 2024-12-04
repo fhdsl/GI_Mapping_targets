@@ -228,12 +228,6 @@ Take a look at a preview of the crispr scores:
 head(gimap_dataset$crispr_score)
 ```
 
-Take a look at the overall stats:
-
-```{r}
-gimap_dataset$results$overall
-```
-
 ## Saving results to files
 
 We can save the genetic interactions scores like this:
