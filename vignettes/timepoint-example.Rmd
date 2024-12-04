@@ -239,14 +239,9 @@ readr::write_tsv(gimap_dataset$gi_scores, file.path(output_dir, "gi_scores.tsv")
 Similarly let's save the CRISPR scores.
 
 ```{r}
-readr::write_tsv(gimap_dataset$crispr_score, file.path(output_dir, "crispr_scores.tsv"))
-```
+readr::write_tsv(gimap_dataset$single_crispr_score, file.path(output_dir, "single_crispr_scores.tsv"))
 
-We can extract and save the stats results to the TSV
-
-```{r}
-readr::write_tsv(gimap_dataset$results$overall, file.path(output_dir, "overall_stats.tsv"))
-readr::write_tsv(gimap_dataset$results$by_target, file.path(output_dir, "by_target_stats.tsv"))
+readr::write_tsv(gimap_dataset$double_crispr_score, file.path(output_dir, "double_crispr_scores.tsv"))
 ```
 
 We can save all these data as an RDS.
