@@ -51,135 +51,38 @@ calc_gi <- function(.data = NULL,
 
   if (!("gimap_dataset" %in% class(gimap_dataset))) stop("This function only works with gimap_dataset objects which can be made with the setup_data() function.")
 
-  ## calculate expected double-targeting GI score by summing the two mean single-targeting
-  ## CRISPR scores for that paralog pair
-  gi_calc_df <- gimap_dataset$crispr_score %>%
-    dplyr::mutate(
-      expected_crispr_double = single_crispr_score_1 + single_crispr_score_2,
-      expected_crispr_single_1 = single_crispr_score_1 + mean_double_control_crispr,
-      expected_crispr_single_2 = single_crispr_score_2 + mean_double_control_crispr
-    )
-
-  # Calculate means by targets, collapsing it if the other gene is a control
-  double_mean_df <- gi_calc_df %>%
-    dplyr::group_by(rep, pgRNA_target_double) %>%
-    dplyr::summarize(
-      mean_expected_double_crispr = mean(expected_crispr_double, na.rm = TRUE),
-      mean_observed_double_crispr = mean(double_crispr_score, na.rm = TRUE),
-    )
-
-  # Calculating mean crisprs
-  reshaped_single_df <- gi_calc_df %>%
-    # reshaping the data a bit so we can do the math later
-    dplyr::select(
-      rep,
-      pgRNA_target_double,
-      pgRNA_target_single_1,
-      pgRNA_target_single_2,
-      mean_single_target_crispr_1,
-      mean_single_target_crispr_2,
-      expected_crispr_single_1,
-      expected_crispr_single_2,
-      gene_symbol_1,
-      gene_symbol_2
-    ) %>%
-    tidyr::pivot_longer(
-      cols = c(
-        gene_symbol_1,
-        gene_symbol_2
-      ),
-      values_to = "gene_symbol",
-      names_to = "which_gene"
-    ) %>%
-    tidyr::pivot_longer(
-      cols = c(
-        expected_crispr_single_1,
-        expected_crispr_single_2
-      ),
-      values_to = "expected_crispr_single",
-      names_to = "which_expected"
-    ) %>%
-    tidyr::pivot_longer(
-      cols = c(
-        pgRNA_target_single_1,
-        pgRNA_target_single_2
-      ),
-      values_to = "observed_crispr_single",
-      names_to = "which_obs"
-    ) %>%
-    tidyr::pivot_longer(
-      cols = c(
-        pgRNA_target_single_1,
-        pgRNA_target_single_2
-      ),
-      values_to = "pgRNA_target_single",
-      names_to = "which_target"
-    ) %>%
-    dplyr::filter( )
-    dplyr::select(rep,
-                  pgRNA_target_single,
-                  observed_crispr_single,
-                  expected_crispr_single) %>%
-    # Because of the pivoting we have some duplicates
-    # So we want to get down to non-redundant data
-    dplyr::distinct()
-
-
-  ## calculate mean CRISPR score of single-targeting pgRNAs containing the same targeting
-  ## sgRNA sequence but different control sgRNA sequences
-  single_mean_df <- reshaped_single_df %>%
-    dplyr::group_by(rep, pgRNA_target_single) %>%
-    dplyr::summarize(
-      mean_expected_single_crispr = mean(expected_crispr_single, na.rm = TRUE),
-      mean_observed_single_crispr = mean(observed_crispr_single, na.rm = TRUE)
-    )
-
   # Calculate the linear models from this
-  single_lm_df <- single_mean_df %>%
-    group_modify(~ broom::tidy(lm(mean_observed_single_crispr ~ mean_expected_single_crispr, data = .x)))
-
-  # Run the overall linear model for single targets
-  single_stats <- single_lm_df %>%
+  single_lm_df <- gimap_dataset$single_crispr_score %>%
+    dplyr::filter(!is.na(single_crispr_score), !is.na(expected_crispr_single)) %>%
+    dplyr::ungroup() %>%
+    dplyr::group_by(rep) %>%
+    group_modify(~ broom::tidy(lm(single_crispr_score ~ expected_crispr_single, data = .x))) %>%
     dplyr::select(term, estimate, rep) %>%
     pivot_wider(
       names_from = term,
       values_from = estimate
     ) %>%
-    rename(intercept = "(Intercept)", slope = mean_expected_single_crispr)
+    rename(intercept = "(Intercept)", slope = expected_crispr_single)
 
   message("Calculating Genetic Interaction scores")
 
   # Do the linear model adjustments
-  gi_calc_single <- reshaped_single_df %>%
-    # Tack on the mean expected double crispr
-    dplyr::left_join(dplyr::select(single_mean_df,
-                                   mean_observed_single_crispr,
-                                   mean_expected_single_crispr,
-                                   rep,
-                                   pgRNA_target_single),
-                     by = c("rep", "pgRNA_target_single")) %>%
-    dplyr::left_join(single_stats, by = "rep") %>%
+  gi_calc_single <- gimap_dataset$single_crispr_score %>%
+    dplyr::left_join(single_lm_df, by = "rep") %>%
     dplyr::mutate(
-      single_target_gi_score = mean_observed_single_crispr - (intercept + slope * mean_expected_single_crispr)
+      single_target_gi_score = single_crispr_score - (intercept + slope * expected_crispr_single)
     )
 
   # Do the linear model adjustments but don't collapse double
-  gi_calc_double <- gi_calc_df %>%
-    # Tack on the mean expected double crispr
-    dplyr::left_join(dplyr::select(double_mean_df,
-                                   mean_observed_double_crispr,
-                                   mean_expected_double_crispr,
-                                   rep,
-                                   pgRNA_target_double),
-                     by = c("rep", "pgRNA_target_double")) %>%
+  gi_calc_double <- gimap_dataset$double_crispr_score %>%
     # Using the single target's linear model here
-    dplyr::left_join(single_stats, by = "rep") %>%
+    dplyr::left_join(single_lm_df, by = "rep") %>%
     dplyr::mutate(
-      double_target_gi_score = double_crispr_score - (intercept + slope * mean_expected_double_crispr)
+      double_target_gi_score = double_crispr_score - (intercept + slope * expected_crispr_double)
     )
 
   # Which replicates we have?
-  replicates <- unique(gi_calc_df$rep)
+  replicates <- unique(gi_calc_double$rep)
 
   # TODO: this is an lapply inside an lapply at the end of the day. Not ideal
   target_results <- lapply(replicates, function(replicate) {
@@ -193,35 +96,44 @@ calc_gi <- function(.data = NULL,
   names(target_results) <- replicates
 
   # Turn into a data.frame
-  target_results_df <- dplyr::bind_rows(target_results, .id = "replicate")
+  target_results_df <- dplyr::bind_rows(target_results, .id = "rep")
 
-  ### Now just cleaning up for storage
+  ## Clean up the data and get some means
   gi_calc_double <- gi_calc_double %>%
+    dplyr::group_by(rep,
+                    pgRNA_target) %>%
+    dplyr::summarize(mean_expected_cs = mean(expected_crispr_double, na.rm = TRUE),
+                     mean_gi_score = mean(double_target_gi_score, na.rm = TRUE)) %>%
     # Collapse to just stats and don't care about pg_ids anymore
     dplyr::select(rep,
-                  pgRNA_target = pgRNA_target_double,
-                  intercept, slope,
-                  mean_expected_cs = mean_expected_double_crispr,
-                  mean_gi_score = mean_observed_double_crispr) %>%
+                  pgRNA_target,
+                  mean_expected_cs,
+                  mean_gi_score) %>%
     dplyr::mutate(target_type = "gene_gene") %>%
     dplyr::distinct()
 
+  # Same kind of reformatting for single
   gi_calc_single <- gi_calc_single %>%
+    dplyr::group_by(rep,
+                    pgRNA_target) %>%
+    dplyr::summarize(mean_expected_cs = mean(expected_crispr_single, na.rm = TRUE),
+                     mean_gi_score = mean(single_target_gi_score, na.rm = TRUE)) %>%
     dplyr::mutate(target_type = dplyr::case_when(
-      grepl("^ctrl_*", pgRNA_target_single) ~"ctrl_gene",
-      grepl("*_ctrl$", pgRNA_target_single) ~"gene_ctrl"
+      grepl("^ctrl_*", pgRNA_target) ~"ctrl_gene",
+      grepl("*_ctrl$", pgRNA_target) ~"gene_ctrl"
       )) %>%
     dplyr::select(rep, target_type,
-                  pgRNA_target = pgRNA_target_single,
-                  intercept, slope,
-                  mean_expected_cs = mean_expected_single_crispr,
-                  mean_gi_score = single_target_gi_score) %>%
+                  pgRNA_target,
+                  mean_expected_cs,
+                  mean_gi_score) %>%
     dplyr::distinct()
 
-  all_gi_scores <- dplyr::bind_rows(gi_calc_double, gi_calc_single) %>%
+  all_gi_scores <- dplyr::bind_rows(gi_calc_double, gi_calc_single)
+
+  # Add on test results
+  all_gi_scores <- all_gi_scores %>%
     dplyr::left_join(target_results_df,
-    by = c("pgRNA_target" = "pgRNA_target_double", "rep" = "replicate")) %>%
-    dplyr::distinct()
+                     by = c("pgRNA_target", "rep"))
 
   # Store the useful bits
   gimap_dataset$gi_scores <- all_gi_scores
@@ -229,8 +141,7 @@ calc_gi <- function(.data = NULL,
   # Store this
   gimap_dataset$results <-
     list(
-      single_lm = single_lm_df,
-      double_lm = double_lm_df
+      single_lm = single_lm_df
     )
 
   return(gimap_dataset)
@@ -257,16 +168,16 @@ gimap_rep_stats <- function(replicate, gi_calc_double,  gi_calc_single) {
     dplyr::filter(rep == replicate)
 
   rep_gi_scores <- per_rep_stats_double %>%
-    group_by(pgRNA_target_double) %>%
+    group_by(pgRNA_target) %>%
     # TODO make this so its all single targets not just the oens that are a part of this double construct
-    mutate(p_val = t.test(x = single_target_gi_score, # 1000's of single constructs here
+    mutate(p_val = t.test(x = per_rep_stats_single$single_target_gi_score, # 1000's of single constructs here
                           y = double_target_gi_score, # all 16 construct guides here
                           paired = FALSE)$p.value)
 
 
   ## adjust for multiple testing using the Benjamini-Hochberg method
   d_p_val <- rep_gi_scores %>%
-    dplyr::select(pgRNA_target_double, p_val) %>%
+    dplyr::select(pgRNA_target, p_val) %>%
     arrange(p_val) %>%
     distinct(p_val, .keep_all = TRUE)
 
@@ -274,7 +185,7 @@ gimap_rep_stats <- function(replicate, gi_calc_double,  gi_calc_single) {
 
   d_fdr <- tibble("fdr" = fdr_vals) %>%
      bind_cols(d_p_val) %>%
-    dplyr::select(pgRNA_target_double, p_val, fdr)
+    dplyr::select(pgRNA_target, p_val, fdr)
 
   return(d_fdr)
 }

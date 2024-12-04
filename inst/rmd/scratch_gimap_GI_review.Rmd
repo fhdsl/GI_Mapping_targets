@@ -49,6 +49,7 @@ old_gi_results %<>% mutate(
 
 ```{r}
 colnames(gimap_dataset$gi_scores)
+nrow(gimap_dataset$gi_scores)
 ```
 
 ```{r}
@@ -94,8 +95,6 @@ head(old_gi_results)
 Have to drop NA's because the gimap results include `Day05_RepA_early` datapoints while the GI Mapping doesn't. Also have to drop NAs because there are GI Mapping targets that aren't represented in the gimap targets?
 
 ```{r}
-View(gimap_dataset$gi_scores)
-
 # Reshape the data so we can plot
 joined_df <- gimap_dataset$gi_scores %>% 
   dplyr::inner_join(old_gi_results, 
@@ -110,6 +109,10 @@ joined_df <- gimap_dataset$gi_scores %>%
 joined_df %>% 
   ggplot(aes(x = mean_gi_score, y = mean_GI_score)) +
   geom_point() +
+  xlab("New Mean GI score") + 
+  ylab("Old Mean GI score") + 
   facet_wrap(~target_type) +
   theme(legend.position = "none")
+
+ggplot2::ggsave("comparison.png")
 ```
