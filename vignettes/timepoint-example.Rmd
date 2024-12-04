@@ -47,7 +47,7 @@ Let's examine this example pgPEN counts table. It's divided into columns contain
 - `Day22_RepA`: Gene Counts from Day 22 for Replicate A
 - `Day22_RepB`: Gene Counts from Day 22 for Replicate B
 
-For the purposes of this tutorial, we can grab example data from the package. 
+For the purposes of this tutorial, we can grab example data from the package.
 
 ```{r}
 example_data <- get_example_data("count")
@@ -61,13 +61,13 @@ colnames(example_data)
 
 ## Setting up data
 
-We're going to set up three datasets that we will provide to the `set_up()` function to create a `gimap` dataset object. 
+We're going to set up three datasets that we will provide to the `set_up()` function to create a `gimap` dataset object.
 
 - `counts` - the counts generated from pgPEN
 - `pg_ids` - the IDs that correspond to the rows of the counts and specify the construct
 - `sample_metadata` - metadata that describes the columns of the counts including their timepoints
 
-For this example we are using a timepoint dataset. 
+For this example we are using a timepoint dataset.
 
 Required for a timepoint analysis is a Day 0 (or plasmid) sample, and at least one further timepoint sample. The T0 sample, or plasmid sample, will represent the entire library before any type of selection has occurred during the length of the screen. This is the baseline for guide RNA representation. The length of time cells should remain in culture throughout the screen is heavily dependent on the type of selection occurring, helpful advice can be found in (https://www.nature.com/articles/s43586-021-00093-4). QC analysis will follow to correlate replicates if inputted. Comparison of early and late timepoints is possible in this function, but not required if early timepoints were not taken.
 
@@ -232,13 +232,6 @@ Take a look at the overall stats:
 
 ```{r}
 gimap_dataset$results$overall
-```
-
-Lastly, let's take a look at the by target results. We can arrange by results using `dplyr::arrange()`
-
-```{r}
-gimap_dataset$results$by_target %>%
-  dplyr::arrange(fdr_vals_wil_Day22_RepA_late)
 ```
 
 ## Saving results to files
