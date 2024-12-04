@@ -99,24 +99,25 @@ calc_crispr <- function(.data = NULL,
     ) %>%
     group_by(rep, pgRNA_target, targeting_gRNA_seq) %>%
     # Taking the mean of the single target crisprs that have the same targeting sequence
-    mutate(mean_single_target_crispr = mean(crispr_score, na.rm = TRUE)) %>%
+    mutate(mean_single_crispr = mean(crispr_score, na.rm = TRUE)) %>%
     dplyr::select(rep,
       pgRNA_target,
       targeting_gRNA_seq,
       control_gRNA_seq,
-      mean_single_target_crispr,
-      single_crispr_score = crispr_score,
+      single_crispr = crispr_score,
+      mean_single_crispr,
       mean_double_control_crispr
     ) %>%
     dplyr::distinct() %>%
     ## calculate expected double-targeting GI score by summing the two mean single-targeting
     ## CRISPR scores for that paralog pair
     dplyr::mutate(
-      expected_crispr_single = single_crispr_score + mean_double_control_crispr,
+      expected_single_crispr = single_crispr + mean_double_control_crispr,
     )
 
+  # Calculate expected
   expected_single_crispr_df <- single_crispr_df %>%
-    dplyr::select(rep, pgRNA_target, targeting_gRNA_seq, mean_single_target_crispr) %>%
+    dplyr::select(rep, pgRNA_target, targeting_gRNA_seq, mean_single_crispr) %>%
     dplyr::distinct()
 
   # Now put it all together into one df
@@ -136,15 +137,15 @@ calc_crispr <- function(.data = NULL,
                      suffix = c("", "_2")) %>%
     dplyr::select(pg_ids,
                   rep,
-                  double_crispr_score = crispr_score,
+                  double_crispr = crispr_score,
                   gRNA1_seq,
                   gRNA2_seq,
                   pgRNA_target,
-                  mean_single_target_crispr_1 = mean_single_target_crispr,
-                  mean_single_target_crispr_2
+                  mean_single_crispr_1 = mean_single_crispr,
+                  mean_single_crispr_2
     ) %>%
     dplyr::mutate(
-      expected_crispr_double = mean_single_target_crispr_1 + mean_single_target_crispr_2
+      expected_double_crispr = mean_single_crispr_1 + mean_single_crispr_2
     )
 
   # Save at the target level
