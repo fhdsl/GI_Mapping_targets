@@ -61,6 +61,14 @@ There are four target types included in the custom Berger lab pgPEN library
 - `positive_control` - these cells have one **essential control** gene that has been knocked out with pgRNA and another that is designed to NOT target any genes. These are also noted as This is includes `"gene_ctrl"` and `"ctrl_gene"` but for when the gene is an essential gene, e.g. "GAPDH" or something that is just always run.
 - `negative_control` - these cells have two pgRNAs designed to NOT target any genes. This is noted as `"ctrl_ctrl"`.
 
+In the instance of a single gene pair: e.g. `geneA_geneB`, there are 32 different constructs related to it. `32 = 16 single targeting and 16 double targeting`
+
+- There are 16 `double targeting`: `geneA_geneBpg1, geneA_geneBpg2, ... geneA_geneBpg16`.
+- 4 unique targeting sequences for `gene A` * 4 unique targeting sequences for `gene B` = 16 unique combos of double targeting constructs.
+- There are 16 `single targeting` in relation to this `geneA_geneB` construct there are: `geneA_ctrl` and `ctrl_geneB` sequences.
+- (4 unique targeting sequences (`"geneA"`) * 2 non targeting sequences (`"ctrl"`) = 8 constructs)
+- (2 non targeting sequences (`"ctrl"`) * 4 unique targeting sequences (`"geneB"`) = 8 constructs)
+
 #### Expected CRISPR scores
 
 Expected CRISPR scores are calculated based on the pgRNAs included.
