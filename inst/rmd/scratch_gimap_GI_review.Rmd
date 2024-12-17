@@ -15,11 +15,12 @@ devtools::load_all()
 ## Get the gimap GI results
 
 ```{r}
- gimap_dataset <- get_example_data("gimap") %>%
-   gimap_filter() %>%
-   gimap_annotate(cell_line = "HELA") %>%
-   gimap_normalize(
-     timepoints = "day") %>%
+gimap_dataset <- get_example_data("gimap") %>%
+  gimap_filter() %>%
+  gimap_annotate(cell_line = "HELA") %>%
+  gimap_normalize(
+    timepoints = "day"
+  ) %>%
   calc_crispr() %>%
   calc_gi()
 ```
@@ -48,6 +49,7 @@ old_gi_results %<>% mutate(
 
 ```{r}
 colnames(gimap_dataset$gi_scores)
+nrow(gimap_dataset$gi_scores)
 ```
 
 ```{r}
@@ -61,15 +63,11 @@ Columns in the GI Mapping results not in the gimap results seem to include model
 ### Target overlap
 
 ```{r}
-
 length(unique(gimap_dataset$normalized_log_fc$pgRNA_target))
-
 length(unique(old_gi_results$pgRNA_target))
-length(unique(gimap_dataset$gi_scores$pgRNA_target_double))
-length(intersect(unique(old_gi_results$pgRNA_target), unique(gimap_dataset$gi_scores$pgRNA_target_double)))
+length(unique(gimap_dataset$gi_scores$pgRNA_target))
+length(intersect(unique(old_gi_results$pgRNA_target), unique(gimap_dataset$gi_scores$pgRNA_target)))
 ```
-
-Only 1/3 of the GI Mapping targets are represented in the gimap results...
 
 ### Number of observations/rows total and rep column overlap
 
@@ -90,45 +88,31 @@ While the replicate values themselves can't be completely synced like we've done
 
 ```{r}
 head(old_gi_results)
-
-```
-
-```{r}
-joindf <- dplyr::full_join(old_gi_results, gimap_dataset$gi_scores,
-                           by = c("pgRNA_target" = "pgRNA_target_double", "rep"),
-                           suffix = c("_old", "_new"))
 ```
 
 ## Split out the comparisons we want to make
 
-Have to drop NA's because the gimap results include Day05_RepA_early datapoints while the GI Mapping doesn't. Also have to drop NAs because there are GI Mapping targets that aren't represented in the gimap targets?
+Have to drop NA's because the gimap results include `Day05_RepA_early` datapoints while the GI Mapping doesn't. Also have to drop NAs because there are GI Mapping targets that aren't represented in the gimap targets?
 
 ```{r}
-joined_df <- rbind(
-  #join the gene_ctrl
-  full_join(
-    old_gi_results %>% filter(target_type == "gene_ctrl") %>% select(c("pgRNA_target", "paralog_pair", "mean_GI_score", "rep")),
-    gimap_dataset$gi_scores %>% separate(pgRNA_target_double, c("gene1", "gene2"), sep="_", remove = FALSE) %>% mutate(ctrl = "ctrl") %>% unite("pgRNA_target_summary", c("gene1", "ctrl"), sep="_") %>% select(c("pgRNA_target_summary", "pgRNA_target_double", "single_target_gi_score_1", "rep")),
-    by = c("pgRNA_target" = "pgRNA_target_summary", "paralog_pair"="pgRNA_target_double", "rep"),
-    suffix = c("_old", "_new")
-    ) %>% mutate(target_type = "gene_ctrl") %>% distinct() %>% select(c("pgRNA_target", "mean_GI_score", "rep", "single_target_gi_score_1", "target_type")) %>% `colnames<-`(c("pgRNA_target", "GI_Mapping_GI_score", "rep", "gimap_GI_score", "target_type")) %>% drop_na(),
-  # join the ctrl_gene
-  full_join(
-    old_gi_results %>% filter(target_type == "ctrl_gene") %>% select(c("pgRNA_target", "paralog_pair", "mean_GI_score", "rep")),
-    gimap_dataset$gi_scores %>% separate(pgRNA_target_double, c("gene1", "gene2"), sep="_", remove=FALSE) %>% mutate(ctrl = "ctrl") %>% unite("pgRNA_target_summary", c("ctrl", "gene2"), sep="_") %>% select(c("pgRNA_target_summary", "pgRNA_target_double", "single_target_gi_score_2", "rep")),
-    by = c("pgRNA_target" = "pgRNA_target_summary", "rep"),
-    suffix = c("_old", "_new")
-    ) %>% mutate(target_type = "ctrl_gene") %>% distinct() %>% select(c("pgRNA_target", "mean_GI_score", "rep", "single_target_gi_score_2", "target_type")) %>% `colnames<-`(c("pgRNA_target", "GI_Mapping_GI_score", "rep", "gimap_GI_score", "target_type")) %>% drop_na(),
-  #join the gene_gene
-  full_join(
-    old_gi_results %>% filter(target_type == "gene_gene") %>% select(c("pgRNA_target", "mean_GI_score", "rep")),
-    gimap_dataset$gi_scores %>% select(c("pgRNA_target_double", "double_target_gi_score", "rep")),
-    by = c("pgRNA_target" = "pgRNA_target_double", "rep"),
-    suffix = c("_old", "_new")
-  ) %>% mutate(target_type = "gene_gene") %>% `colnames<-`(c("pgRNA_target", "GI_Mapping_GI_score", "rep", "gimap_GI_score", "target_type")) %>% drop_na()
-)
+# Reshape the data so we can plot
+joined_df <- gimap_dataset$gi_scores %>% 
+  dplyr::inner_join(old_gi_results, 
+                   by = c("pgRNA_target", "rep", "target_type"), 
+                   suffix = c("_new", "_old")) %>% 
+  dplyr::filter(!grepl("Day05", rep))
 ```
 
+
+
 ```{r}
-joined_df %>% ggplot(aes(x=gimap_GI_score, y=GI_Mapping_GI_score, color=target_type)) + geom_point() + facet_wrap(rep~target_type) + theme(legend.position = "none")
+joined_df %>% 
+  ggplot(aes(x = mean_gi_score, y = mean_GI_score)) +
+  geom_point() +
+  xlab("New Mean GI score") + 
+  ylab("Old Mean GI score") + 
+  facet_wrap(~target_type) +
+  theme(legend.position = "none")
+
+ggplot2::ggsave("comparison.png")
 ```
