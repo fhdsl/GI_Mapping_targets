@@ -4,7 +4,7 @@
 \alias{gimap_rep_stats}
 \title{Do tests for each replicate --an internal function used by calc_gi() function}
 \usage{
-gimap_rep_stats(replicate, gi_calc_adj)
+gimap_rep_stats(replicate, gi_calc_double, gi_calc_single)
 }
 \arguments{
 \item{replicate}{a name of a replicate to filter out from gi_calc_adj}

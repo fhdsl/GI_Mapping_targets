@@ -1,5 +1,10 @@
 #' Calculate CRISPR scores
-#' @description This calculates the log fold change for a gimap dataset based on the annotation and metadata provided.
+#' @description This calculates CRISPR scores for a gimap dataset based on the annotation and metadata provided.
+#' Since the pgPEN library uses non-targeting controls, we adjust for the fact that single-targeting pgRNAs generate only two double-strand breaks (1 per allele), whereas the double-targeting pgRNAs generate four DSBs. To do this, we set the median LFC of each group to zero.
+#'
+#'Calculate medians of based on single and double targeting and subtract these medians from `log2FC adjusted`
+#' `crispr score = log2FC adjusted - median for each target type`
+#'
 #' @param .data Data can be piped in with tidyverse pipes from function to function. But the data must still be a gimap_dataset
 #' @param gimap_dataset A special dataset structure that is setup using the `setup_data()` function.
 #' @export
@@ -45,13 +50,13 @@ calc_crispr <- function(.data = NULL,
 
   # Calculate medians based on single, double targeting as well as if they are unexpressed control genes
   medians_df <- source_data %>%
-    dplyr::group_by(target_type, unexpressed_ctrl_flag) %>%
+    dplyr::group_by(target_type) %>%
     dplyr::summarize(median = median(lfc_adj, na.rm = TRUE))
 
   message("Calculating CRISPR score")
 
   lfc_df <- source_data %>%
-    dplyr::left_join(medians_df, by = c("target_type", "unexpressed_ctrl_flag")) %>%
+    dplyr::left_join(medians_df, by = c("target_type")) %>%
     dplyr::mutate(
       # Since the pgPEN library uses non-targeting controls, we adjusted for the
       # fact that single-targeting pgRNAs generate only two double-strand breaks

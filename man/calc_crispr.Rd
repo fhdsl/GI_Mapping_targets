@@ -12,7 +12,11 @@ calc_crispr(.data = NULL, gimap_dataset)
 \item{gimap_dataset}{A special dataset structure that is setup using the `setup_data()` function.}
 }
 \description{
-This calculates the log fold change for a gimap dataset based on the annotation and metadata provided.
+This calculates CRISPR scores for a gimap dataset based on the annotation and metadata provided.
+Since the pgPEN library uses non-targeting controls, we adjust for the fact that single-targeting pgRNAs generate only two double-strand breaks (1 per allele), whereas the double-targeting pgRNAs generate four DSBs. To do this, we set the median LFC of each group to zero.
+
+Calculate medians of based on single and double targeting and subtract these medians from `log2FC adjusted`
+`crispr score = log2FC adjusted - median for each target type`
 }
 \examples{
 \dontrun{
