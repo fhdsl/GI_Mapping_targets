@@ -13,7 +13,7 @@ library(tidyverse)
 
 
 plot_main_scatter <- function(old_gi_results){
-
+  #NEED the mean_expected_CS, mean_observed_CS, broad_target_type (single_targeting, double_targeting) columns for this dataset
   regression_data <- old_gi_results %>%
     filter(broad_target_type == "single_targeting")
 
@@ -23,7 +23,7 @@ plot_main_scatter <- function(old_gi_results){
     ggplot(aes(x=mean_expected_CS, 
                y=mean_observed_CS, 
                color=broad_target_type)) + 
-    geom_point(alpha=0.8) + 
+    geom_point(alpha=0.7) + 
     scale_color_manual(values = c("single_targeting" = "gray50", 
                                   "double_targeting" = "mediumpurple3"), 
                        labels = c("single_targeting" = "control", 
@@ -51,3 +51,44 @@ plot_main_scatter <- function(old_gi_results){
 # Not sure if this is handling the +- residuals lines correctly or not
 
 # Want to rewrite this to work with the new gimap results as input instead
+
+plot_rank_scatter <- function(old_gi_results){
+  ## Only need the mean_GI_score column for this graph (they said they didn't need the inset)
+  old_gi_results %>%
+    mutate(Rank = dense_rank(mean_GI_score)) %>%
+    ggplot(aes(x=Rank, 
+               y=mean_GI_score)) + 
+    geom_point(alpha=0.7) +
+    theme(panel.background = element_blank(), 
+          panel.grid = element_blank()) + 
+    theme_classic() +
+    ylab("GI score") +
+    geom_hline(yintercept = 0) +
+    geom_hline(yintercept = -0.5, linetype = "dashed") +
+    geom_hline(yintercept = 0.25, linetype = "dashed")
+}
+
+plot_volcano <- function(old_gi_results){
+  ## NEED THE FDR and mean_GI_score columns for this graph.
+  old_gi_results %>%
+    mutate(logfdr = -log10(fdr),
+           pointColor = case_when(logfdr < 1 ~ "darkgrey",
+                                  ((mean_GI_score < -0.5) & (logfdr > 1)) ~ "dodgerblue3",
+                                  ((mean_GI_score > 0.25) & (logfdr > 1)) ~ "darkred",
+                                  .default="black")) %>%
+    ggplot(aes(x = mean_GI_score,
+               y = logfdr,
+               color = pointColor)) +
+    geom_point() +
+    geom_hline(yintercept = 1, linetype = "dashed") +
+    geom_vline(xintercept = -0.5, linetype = "dashed") +
+    geom_vline(xintercept = 0.25, linetype = "dashed") +
+    theme(legend.position = "none") +
+    scale_color_manual(values = c("darkgrey" = "darkgrey", 
+                                  "dodgerblue3" = "dodgerblue3", 
+                                  "darkred" = "darkred",
+                                  "black" = "black")) +
+    ylab("-log10(FDR)")
+}
+
+
