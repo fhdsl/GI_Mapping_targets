@@ -101,9 +101,13 @@ log2((counts / total counts for sample)) * 1 million) + 1)
 ```
 log2FC = log2CPM for each sample - pretreament log2CPM
 ```
-3. `Normalize by negative and positive controls` - Calculate a negative control median for each sample and a positive control median for each sample and divide each log2FC by this value.
+
+3. `Normalize by negative and positive controls` - Calculate a negative control median for each sample and a positive control median for each sample and divide each log2FC by this value. In this version then we are normalizing by the median difference of the negative and positive controls.
 ```
-log2FC adjusted = log2FC / (median negative control for a sample - median positive control for a sample)
+# FOR EACH SAMPLE:
+log2FC adjusted =
+(log2FC - log2FC median negative control) /
+(log2FC median negative control - median log2FC positive control)
 ```
 
 ### CRISPR scores
