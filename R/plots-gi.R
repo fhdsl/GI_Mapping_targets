@@ -8,7 +8,7 @@ library(tidyverse)
 #The solid line is the linear regression line for the negative control (single KO) pgRNAs, 
 #while dashed lines indicate ± 2 residuals.
 
-plot_main_scatter <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop = c("Day05_RepA_early")){
+plot_exp_v_obs_scatter <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop = c("Day05_RepA_early")){
   regression_data <- gimap_dataset$gi_scores %>%
     filter(target_type != "gene_gene") %>% #get only single targeting
     filter(!(rep %in% reps_to_drop))
