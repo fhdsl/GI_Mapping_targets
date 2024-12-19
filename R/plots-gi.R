@@ -96,4 +96,26 @@ plot_volcano <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop = c("Day0
   } else{ return(gplot) }
 }
 
+plot_targets_bar <- function(gimap_dataset, target1, target2, reps_to_drop = c("Day05_RepA_early")){
+  gimap_dataset$gi_scores %>%
+    filter(!(rep %in% reps_to_drop)) %>%
+    filter((grepl(target1,pgRNA_target)) | (grepl(target2, pgRNA_target))) %>%
+    ggplot(aes(y = mean_observed_cs,
+               x = target_type,
+               fill = target_type)) +
+    geom_bar(stat = "identity") +
+    geom_point(pch = 21, size=3) +
+    theme_bw() +
+    ylab("CRISPR score") +
+    xlab("") +
+    ggtitle(paste0(target1, "/", target2)) +
+    geom_hline(yintercept = 0) +
+    scale_x_discrete(labels = c("ctrl_gene" = paste0(target2, " KO"), #this assumes that target2 is the ctrl_{target2} gene
+                                "gene_ctrl" = paste0(target1, " KO"), #this assumes that target1 is the {target1}_ctrl gene
+                                "gene_gene" = "DKO")) +
+    theme(legend.position = "none",
+          panel.background = element_blank(),
+          panel.grid = element_blank(),
+          axis.text.x = element_text(angle = 45, hjust=1))
+}
 
