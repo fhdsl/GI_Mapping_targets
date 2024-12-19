@@ -121,11 +121,13 @@ calc_gi <- function(.data = NULL,
     dplyr::group_by(rep,
                     pgRNA_target) %>%
     dplyr::summarize(mean_expected_cs = mean(expected_double_crispr, na.rm = TRUE),
+                     mean_observed_cs = mean(double_crispr, na.rm = TRUE),
                      mean_gi_score = mean(double_gi_score, na.rm = TRUE)) %>%
     # Collapse to just stats and don't care about pg_ids anymore
     dplyr::select(rep,
                   pgRNA_target,
                   mean_expected_cs,
+                  mean_observed_cs,
                   mean_gi_score) %>%
     dplyr::mutate(target_type = "gene_gene") %>%
     dplyr::distinct()
@@ -135,6 +137,7 @@ calc_gi <- function(.data = NULL,
     dplyr::group_by(rep,
                     pgRNA_target) %>%
     dplyr::summarize(mean_expected_cs = mean(expected_single_crispr, na.rm = TRUE),
+                     mean_observed_cs = mean(single_crispr, na.rm = TRUE),
                      mean_gi_score = mean(single_gi_score, na.rm = TRUE)) %>%
     dplyr::mutate(target_type = dplyr::case_when(
       grepl("^ctrl_*", pgRNA_target) ~"ctrl_gene",
@@ -144,6 +147,7 @@ calc_gi <- function(.data = NULL,
                   target_type,
                   pgRNA_target,
                   mean_expected_cs,
+                  mean_observed_cs,
                   mean_gi_score) %>%
     dplyr::distinct()
 
