@@ -100,7 +100,7 @@ plot_targets_bar <- function(gimap_dataset, target1, target2, reps_to_drop = c("
   gimap_dataset$gi_scores %>%
     filter(!(rep %in% reps_to_drop)) %>%
     filter((grepl(target1,pgRNA_target)) | (grepl(target2, pgRNA_target))) %>%
-    ggplot(aes(y = mean_observed_cs,
+    ggplot(aes(y = mean_observed_cs, #This is not the right column
                x = target_type,
                fill = target_type)) +
     geom_bar(stat = "identity") +
