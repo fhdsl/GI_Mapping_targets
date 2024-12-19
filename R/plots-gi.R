@@ -8,78 +8,79 @@ library(tidyverse)
 #The solid line is the linear regression line for the negative control (single KO) pgRNAs, 
 #while dashed lines indicate ± 2 residuals.
 
-## Input is the old results from GI Mapping (old_gi_results <- readRDS("d.HeLa_GI_scores_target"))
-## column names include broad_target_type, mean_observed_CS, and mean_expected_CS (as well as others, but those are the relevant ones for this plot)
-
-
-plot_main_scatter <- function(old_gi_results){
-  #NEED the mean_expected_CS, mean_observed_CS, broad_target_type (single_targeting, double_targeting) columns for this dataset
-  regression_data <- old_gi_results %>%
-    filter(broad_target_type == "single_targeting")
-
-  model <- lm(mean_observed_CS ~ mean_expected_CS, data = regression_data)
-
-  old_gi_results %>% 
-    ggplot(aes(x=mean_expected_CS, 
-               y=mean_observed_CS, 
-               color=broad_target_type)) + 
-    geom_point(alpha=0.7) + 
-    scale_color_manual(values = c("single_targeting" = "gray50", 
-                                  "double_targeting" = "mediumpurple3"), 
-                       labels = c("single_targeting" = "control", 
-                                  "double_targeting" = "DKO")) + 
-    theme(panel.background = element_blank(), 
-          panel.grid = element_blank()) + 
+plot_main_scatter <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop = c("Day05_RepA_early")){
+  regression_data <- gimap_dataset$gi_scores %>%
+    filter(target_type != "gene_gene") %>% #get only single targeting
+    filter(!(rep %in% reps_to_drop))
+  
+  model <- lm(mean_observed_cs ~ mean_expected_cs, data = regression_data)
+  
+  gplot <- gimap_dataset$gi_scores %>%
+    filter(!(rep %in% reps_to_drop)) %>%
+    mutate(broad_target_type = case_when(target_type == "gene_gene" ~ "DKO",
+                                         target_type == "ctrl_gene" ~ "control",
+                                         target_type == "gene_ctrl" ~ "control")) %>%
+    ggplot(aes(x=mean_expected_cs,
+               y=mean_observed_cs,
+               color = broad_target_type)) +
+    geom_point(size=1, alpha=0.7) +
+    scale_color_manual(values = c("control" = "gray50",
+                                  "DKO" = "mediumpurple3")) + 
     theme_classic() +
-    scale_x_continuous(breaks=seq(-5, 1), 
-                       labels = seq(-5, 1)) + 
     theme(legend.position = "inside", 
-          legend.position.inside = c(0.2, 0.8)) + 
-    theme(legend.title = element_blank()) + 
+          legend.position.inside = c(0.1, 0.9),
+          legend.title = element_blank()) +
     xlab("Expected CRISPR score\n(paralog 1 KO + paralog 2 KO)") + 
     ylab("Observed CRISPR score\n(paralog 1 & 2 DKO)") +
-    geom_abline(slope = model$coefficients[["mean_expected_CS"]], 
+    geom_abline(slope = model$coefficients[["mean_expected_cs"]], 
                 intercept = model$coefficients[["(Intercept)"]]) +
-    geom_abline(slope = model$coefficients[["mean_expected_CS"]], 
+    geom_abline(slope = model$coefficients[["mean_expected_cs"]], 
                 intercept = model$coefficients[["(Intercept)"]] + quantile(model$residuals)["75%"], 
                 linetype=3) +
-    geom_abline(slope = model$coefficients[["mean_expected_CS"]], 
+    geom_abline(slope = model$coefficients[["mean_expected_cs"]], 
                 intercept = model$coefficients[["(Intercept)"]] + quantile(model$residuals)["25%"], 
                 linetype=3)
+    
+  if (facet_rep){
+    return(gplot + facet_wrap(~rep))
+  } else{ return(gplot) }  
 }
 
-# Not sure if this is handling the +- residuals lines correctly or not
-
-# Want to rewrite this to work with the new gimap results as input instead
-
-plot_rank_scatter <- function(old_gi_results){
-  ## Only need the mean_GI_score column for this graph (they said they didn't need the inset)
-  old_gi_results %>%
-    mutate(Rank = dense_rank(mean_GI_score)) %>%
-    ggplot(aes(x=Rank, 
-               y=mean_GI_score)) + 
-    geom_point(alpha=0.7) +
-    theme(panel.background = element_blank(), 
-          panel.grid = element_blank()) + 
-    theme_classic() +
-    ylab("GI score") +
-    geom_hline(yintercept = 0) +
-    geom_hline(yintercept = -0.5, linetype = "dashed") +
-    geom_hline(yintercept = 0.25, linetype = "dashed")
+plot_rank_scatter <- function(gimap_dataset, reps_to_drop = c("Day05_RepA_early")){
+  return(
+    gimap_dataset$gi_scores %>%
+      filter(target_type == "gene_gene") %>% #get only double targeting
+      filter(!(rep %in% reps_to_drop)) %>%
+      mutate(Rank = dense_rank(mean_gi_score)) %>%
+      ggplot(aes(x=Rank, 
+                 y=mean_gi_score,
+                 color = rep)) + 
+      geom_point(size=1, alpha=0.7) +
+      theme_classic() +
+      theme(legend.position = "inside", 
+            legend.position.inside = c(0.9, 0.1),
+            legend.title = element_blank()) +
+      ylab("GI score") +
+      geom_hline(yintercept = 0) +
+      geom_hline(yintercept = -0.5, linetype = "dashed") +
+      geom_hline(yintercept = 0.25, linetype = "dashed")
+  )
 }
 
-plot_volcano <- function(old_gi_results){
-  ## NEED THE FDR and mean_GI_score columns for this graph.
-  old_gi_results %>%
+plot_volcano <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop = c("Day05_RepA_early")){
+  gplot <- gimap_dataset$gi_scores %>%
+    filter(target_type == "gene_gene") %>% #get only double targeting
+    filter(!(rep %in% reps_to_drop)) %>%
     mutate(logfdr = -log10(fdr),
            pointColor = case_when(logfdr < 1 ~ "darkgrey",
-                                  ((mean_GI_score < -0.5) & (logfdr > 1)) ~ "dodgerblue3",
-                                  ((mean_GI_score > 0.25) & (logfdr > 1)) ~ "darkred",
+                                  ((mean_gi_score < -0.5) & (logfdr > 1)) ~ "dodgerblue3",
+                                  ((mean_gi_score > 0.25) & (logfdr > 1)) ~ "darkred",
                                   .default="black")) %>%
-    ggplot(aes(x = mean_GI_score,
+    ggplot(aes(x = mean_gi_score,
                y = logfdr,
                color = pointColor)) +
-    geom_point() +
+    geom_point(size=1, alpha=0.7) +
+    theme_classic() +
     geom_hline(yintercept = 1, linetype = "dashed") +
     geom_vline(xintercept = -0.5, linetype = "dashed") +
     geom_vline(xintercept = 0.25, linetype = "dashed") +
@@ -89,6 +90,10 @@ plot_volcano <- function(old_gi_results){
                                   "darkred" = "darkred",
                                   "black" = "black")) +
     ylab("-log10(FDR)")
+  
+  if (facet_rep){
+    return(gplot + facet_wrap(~rep))
+  } else{ return(gplot) }
 }
 
 
