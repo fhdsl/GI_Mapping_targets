@@ -24,7 +24,6 @@ setup_data <- function(counts = NULL,
     raw_counts = NULL,
     counts_per_sample = NULL,
     transformed_data = list(
-      count_norm = NULL,
       cpm = NULL,
       log2_cpm = NULL
     ),
@@ -42,8 +41,10 @@ setup_data <- function(counts = NULL,
     comparisons = NULL,
     annotation = NULL,
     normalized_log_fc = NULL,
-    crispr_score = NULL,
-    results = NULL
+    single_crispr_score = NULL,
+    double_crispr_score = NULL,
+    gi_scores = NULL,
+    overall_results = NULL
   )
 
   class(new_data) <- c("list", "gimap_dataset")
@@ -77,7 +78,6 @@ setup_data <- function(counts = NULL,
   new_data$counts_per_sample <- apply(counts, 2, sum)
 
   # Transform the data
-  new_data$transformed_data$count_norm <- apply(counts, 2, function(x) -log10((x + 1) / sum(x)))
   new_data$transformed_data$cpm <- apply(counts, 2, function(x) (x / sum(x)) * 1e6)
   new_data$transformed_data$log2_cpm <- log2(new_data$transformed_data$cpm + 1)
 

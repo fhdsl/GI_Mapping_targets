@@ -1,5 +1,10 @@
 #' Calculate CRISPR scores
-#' @description This calculates the log fold change for a gimap dataset based on the annotation and metadata provided.
+#' @description This calculates CRISPR scores for a gimap dataset based on the annotation and metadata provided.
+#' Since the pgPEN library uses non-targeting controls, we adjust for the fact that single-targeting pgRNAs generate only two double-strand breaks (1 per allele), whereas the double-targeting pgRNAs generate four DSBs. To do this, we set the median LFC of each group to zero.
+#'
+#'Calculate medians of based on single and double targeting and subtract these medians from `log2FC adjusted`
+#' `crispr score = log2FC adjusted - median for each target type`
+#'
 #' @param .data Data can be piped in with tidyverse pipes from function to function. But the data must still be a gimap_dataset
 #' @param gimap_dataset A special dataset structure that is setup using the `setup_data()` function.
 #' @export
@@ -45,13 +50,13 @@ calc_crispr <- function(.data = NULL,
 
   # Calculate medians based on single, double targeting as well as if they are unexpressed control genes
   medians_df <- source_data %>%
-    dplyr::group_by(target_type, unexpressed_ctrl_flag) %>%
+    dplyr::group_by(target_type) %>%
     dplyr::summarize(median = median(lfc_adj, na.rm = TRUE))
 
   message("Calculating CRISPR score")
 
   lfc_df <- source_data %>%
-    dplyr::left_join(medians_df, by = c("target_type", "unexpressed_ctrl_flag")) %>%
+    dplyr::left_join(medians_df, by = c("target_type")) %>%
     dplyr::mutate(
       # Since the pgPEN library uses non-targeting controls, we adjusted for the
       # fact that single-targeting pgRNAs generate only two double-strand breaks
@@ -68,12 +73,15 @@ calc_crispr <- function(.data = NULL,
       names_to = "position",
       values_to = "control_gRNA_seq"
     ) %>%
+    # If there's the same control sequence, and rep
     dplyr::group_by(rep, control_gRNA_seq) %>%
+    # Then take the mean for when controls have the same sequence
     dplyr::summarize(mean_double_control_crispr = mean(crispr_score, na.rm = TRUE)) %>%
     dplyr::select(rep, control_gRNA_seq, mean_double_control_crispr)
+  # This means we have a mean double control crispr for each rep and control sequence
 
   # Calculate CRISPR scores for single targets
-  single_target_df <- lfc_df %>%
+  single_crispr_df <- lfc_df %>%
     dplyr::filter(target_type %in% c("ctrl_gene", "gene_ctrl")) %>%
     # We will be joining things based on the gRNA sequences so we do some recoding here
     mutate(
@@ -92,61 +100,62 @@ calc_crispr <- function(.data = NULL,
     ) %>%
     dplyr::left_join(control_target_df,
       by = c("rep" = "rep", "control_gRNA_seq" = "control_gRNA_seq"),
-      relationship = "many-to-many",
       suffix = c("", "_control")
     ) %>%
     group_by(rep, pgRNA_target, targeting_gRNA_seq) %>%
-    # Taking the mean of the single target crisprs
-    mutate(mean_single_target_crispr = mean(crispr_score, na.rm = TRUE)) %>%
+    # Taking the mean of the single target crisprs that have the same targeting sequence
+    mutate(mean_single_crispr = mean(crispr_score, na.rm = TRUE)) %>%
     dplyr::select(rep,
       pgRNA_target,
-      gene_symbol,
       targeting_gRNA_seq,
-      mean_single_target_crispr,
-      single_crispr_score = crispr_score,
+      control_gRNA_seq,
+      single_crispr = crispr_score,
+      mean_single_crispr,
       mean_double_control_crispr
+    ) %>%
+    dplyr::distinct() %>%
+    ## calculate expected double-targeting GI score by summing the two mean single-targeting
+    ## CRISPR scores for that paralog pair
+    dplyr::mutate(
+      expected_single_crispr = single_crispr + mean_double_control_crispr,
     )
 
+  # Calculate expected
+  expected_single_crispr_df <- single_crispr_df %>%
+    dplyr::select(rep, pgRNA_target, targeting_gRNA_seq, mean_single_crispr) %>%
+    dplyr::distinct()
+
   # Now put it all together into one df
-  crispr_df <- lfc_df %>%
+  double_crispr_df <- lfc_df %>%
     dplyr::filter(target_type == "gene_gene") %>%
     dplyr::select(pg_ids,
       rep,
-      double_crispr_score = crispr_score,
-      pgRNA_target,
+      crispr_score,
       gRNA1_seq,
       gRNA2_seq,
-      pgRNA_target_double = pgRNA_target
+      pgRNA_target
     ) %>%
-    # Join on single target crispr scores
-    dplyr::left_join(single_target_df,
-      by = c("rep" = "rep", "gRNA1_seq" = "targeting_gRNA_seq"),
-      relationship = "many-to-many",
-      suffix = c("_double", "_1")
+    dplyr::distinct() %>%
+    dplyr::left_join(expected_single_crispr_df, by = c("rep" = "rep", "gRNA1_seq" = "targeting_gRNA_seq"),
+                     suffix = c("", "_1")) %>%
+    dplyr::left_join(expected_single_crispr_df, by = c("rep" = "rep", "gRNA2_seq" = "targeting_gRNA_seq"),
+                     suffix = c("", "_2")) %>%
+    dplyr::select(pg_ids,
+                  rep,
+                  double_crispr = crispr_score,
+                  gRNA1_seq,
+                  gRNA2_seq,
+                  pgRNA_target,
+                  mean_single_crispr_1 = mean_single_crispr,
+                  mean_single_crispr_2
     ) %>%
-    dplyr::left_join(single_target_df,
-      by = c("rep" = "rep", "gRNA2_seq" = "targeting_gRNA_seq"),
-      relationship = "many-to-many",
-      suffix = c("_1", "_2")
-    ) %>%
-    dplyr::select(
-      pg_ids,
-      rep,
-      double_crispr_score,
-      single_crispr_score_1,
-      single_crispr_score_2,
-      pgRNA_target_double,
-      gene_symbol_1,
-      gene_symbol_2,
-      mean_single_target_crispr_1,
-      mean_single_target_crispr_2,
-      pgRNA1_seq = gRNA1_seq,
-      pgRNA2_seq = gRNA2_seq,
-      mean_double_control_crispr = mean_double_control_crispr_1
+    dplyr::mutate(
+      expected_double_crispr = mean_single_crispr_1 + mean_single_crispr_2
     )
 
   # Save at the target level
-  gimap_dataset$crispr_score <- crispr_df
+  gimap_dataset$single_crispr_score <- single_crispr_df
+  gimap_dataset$double_crispr_score <- double_crispr_df
 
   return(gimap_dataset)
 }
