@@ -1,5 +1,5 @@
 utils::globalVariables(c(
-  "timepoints", "value", "timepoint_avg", "target_type",
+  "mean_observed_cs", "timepoints", "value", "timepoint_avg", "target_type",
   "unexpressed_ctrl_flag", "median", "lfc_adj", "median", "gRNA1_seq", "gRNA2_seq",
   "control_gRNA_seq", "crispr_score", "pgRNA_target", "mean_double_control_crispr",
   "pgRNA_target", "targeting_gRNA_seq", "mean_single_crispr", "double_crispr_score",
@@ -90,33 +90,6 @@ get_example_data <- function(which_data) {
   } else {
     stop("Specification for `which_data` not understood; Need to use 'gimap', 'count', 'meta', or 'annotation' ")
   }
-}
-
-#' @import ggplot2
-
-## ggplot themes
-## see: https://www.rdocumentation.org/packages/ggplot2/versions/2.1.0/topics/theme_update
-## and https://stackoverflow.com/questions/23173915/can-ggplot-theme-formatting-be-saved-as-an-object
-plot_theme <- function() {
-  theme(
-    axis.text = element_text(colour = "black"),
-    axis.ticks = element_line(color = "black")
-  )
-}
-
-#' @import ggplot2
-plot_options <- function() {
-  list(theme_bw(base_size = 12))
-}
-
-#' @import kableExtra
-print_kbl <- function(tbl) {
-  kbl(tbl) %>%
-    kable_styling(
-      full_width = FALSE,
-      position = "left",
-      bootstrap_options = c("striped", "hover", "responsive")
-    )
 }
 
 
