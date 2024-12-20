@@ -6,6 +6,13 @@
 \usage{
 save_tbl(tbl, out_dir = NULL, params = NULL)
 }
+\arguments{
+\item{tbl}{a table you want to save}
+
+\item{out_dir}{the file path you want to save it to}
+
+\item{params}{any additional parameters needed}
+}
 \description{
 This function saves table
 }

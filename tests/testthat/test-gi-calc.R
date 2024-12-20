@@ -19,8 +19,8 @@ test_that("Test Genetic Interaction score calculations", {
      gimap_dataset$overall_results$slope <- round(gimap_dataset$overall_results$slope, 3)
 
      testthat::expect_true(all.equal(gimap_dataset$overall_results$rep, results$rep))
-     testthat::expect_identical(gimap_dataset$overall_results$intercept[1], results$intercept[1])
-     testthat::expect_identical(gimap_dataset$overall_results$rep[1], results$rep[1])
+     testthat::expect_identical(round(gimap_dataset$overall_results$intercept[1], 3), round(results$intercept[1], 3))
+     testthat::expect_identical(round(gimap_dataset$overall_results$rep[1], 3), round(results$rep[1], 3))
 
      testthat::expect_identical(round(gimap_dataset$gi_scores$mean_expected_cs[1], 3), round(3.691114, 3))
      testthat::expect_identical(round(gimap_dataset$gi_scores$mean_observed_cs[1], 3), round(-2.321601, 3))

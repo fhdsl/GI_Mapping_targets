@@ -2,20 +2,23 @@ utils::globalVariables(c(
   "timepoints", "value", "timepoint_avg", "target_type",
   "unexpressed_ctrl_flag", "median", "lfc_adj", "median", "gRNA1_seq", "gRNA2_seq",
   "control_gRNA_seq", "crispr_score", "pgRNA_target", "mean_double_control_crispr",
-  "pgRNA_target", "targeting_gRNA_seq", "mean_single_target_crispr", "double_crispr_score",
-  "single_crispr_score_1", "single_crispr_score_2", "pgRNA_target_double", "mean_single_target_crispr_1",
-  "mean_single_target_crispr_2", "mean_double_control_crispr_2", "pgRNA_target_double",
+  "pgRNA_target", "targeting_gRNA_seq", "mean_single_crispr", "double_crispr_score",
+  "single_crispr_score_1", "single_crispr_score_2", "pgRNA_target_double", "mean_single_crispr_1",
+  "mean_single_crispr_2", "mean_double_control_crispr_2",
   "expected_crispr", "term", "estimate", "mean_expected_crispr", "intercept", "slope",
-  "p_val_ttest", "p_val_wil", "fde_vals_ttest", "fdr_vals_wil", "double_target_gi_score",
-  "single_target_gi_score_1", "single_target_gi_score_2", "gene", "DepMap_ID",
+  "p_val_ttest", "p_val_wil", "fde_vals_ttest", "fdr_vals_wil", "double_gi_score",
+  "single_gi_score_1", "single_gi_score_2", "gene", "DepMap_ID",
   "gene1_symbol", "gene2_symbol", "expressed_flag", "norm_ctrl_flag", "bool_vals",
   "filter_name", "counts", "numzero", "name", "value", "lfc_plasmid_vs_late", "lfc_adj",
-  "pg_RNA_target_double", "double_target_gi_score", "count_normalized", "construct",
+   "double_gi_score", "count_normalized", "construct",
   "filterFlag", "plasmid_log2_cpm", "log2_cpm", "gene_symbol", "gene_symbol_1", "gene_symbol_2",
   "mean_double_control_crispr_1", "expected_crispr_double", "expected_crispr_single_1",
   "expected_crispr_single_2", "fdr_vals_ttest", "read_table", "stripped_cell_line_name",
   "comparison", ".", "col_names", "lfc_adj1", "t.test", "wilcox.test", "p.adjust",
-  "cor", "quantile", "var", "browseURL", "mean_expected_single_crispr", "expected_crispr_single"
+  "cor", "quantile", "var", "browseURL", 'single_crispr', "mean_single_crispr_2",
+  "mean_single_crispr_1", "expected_single_crispr", "double_crispr", "double_gi_score",
+  "fdr", "lfc",  "mean_expected_cs", "mean_gi_score", "mean_single_crispr",
+  "expected_double_crispr", "p_val", "single_gi_score"
 ))
 
 
@@ -116,49 +119,6 @@ print_kbl <- function(tbl) {
     )
 }
 
-#' Save tbl
-#' @description This function saves table
-#' @importFrom stringr str_split
-#' @importFrom readr write_tsv write_rds
-save_tbl <- function(tbl, out_dir = NULL, params = NULL) {
-  tbl_str <- deparse(substitute(tbl))
-  tbl_name <- str_split(tbl_str, pattern = "\\.")[[1]][2]
-  write_tsv(tbl, file.path(out_dir, "tables", "tsv", paste0(params$cell_line, "_", tbl_name, ".txt")))
-  write_rds(tbl, file.path(out_dir, "tables", "rds", paste0("d.", params$cell_line, "_", tbl_name)))
-}
-
-#' @import ggplot2
-save_plot <- function(plt, out_dir = NULL, params = list(cell_line = NULL)) {
-  plt_str <- deparse(substitute(plt))
-  if (!dir.exists(file.path(out_dir, "plots", "pdf"))) {
-    dir.create(file.path(out_dir, "plots", "pdf"), recursive = TRUE)
-  }
-  ggsave(
-    plot = plt,
-    filename = file.path(out_dir, "plots", "pdf", paste0(params$cell_line, "_", plt_str, ".pdf"))
-  )
-  if (!dir.exists(file.path(out_dir, "plots", "png"))) {
-    dir.create(file.path(out_dir, "plots", "png"), recursive = TRUE)
-  }
-  ggsave(
-    plot = plt,
-    filename = file.path(out_dir, "plots", "png", paste0(params$cell_line, "_", plt_str, ".png"))
-  )
-}
-
-make_out_dir <- function(out_dir) {
-  if (dir.exists(out_dir)) {
-    ## print a message with the output directory location
-    print(paste("Output directory already exists at:", out_dir, sep = " "))
-  } else {
-    ## make output dirs
-    dir.create(file.path(out_dir, "tables", "rds"), recursive = TRUE)
-    dir.create(file.path(out_dir, "tables", "tsv"), recursive = TRUE)
-    dir.create(file.path(out_dir, "plots", "png"), recursive = TRUE)
-    dir.create(file.path(out_dir, "plots", "pdf"), recursive = TRUE)
-    print(paste("Output directory created at:", out_dir, sep = " "))
-  }
-}
 
 #' Get file path to an default credentials RDS
 #' @export

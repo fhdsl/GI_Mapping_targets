@@ -13,3 +13,10 @@ gimap_QC_Report.html
 gimap_QC_Report.Rmd
 qc_plots
 missing_ids_file.csv
+CODE_OF_CONDUCT.md
+SECURITY.md
+gimap_QC_Report.Rmd
+gimap_QC_Report.html
+gimap_dataset_final.RDS’
+missing_ids_file.csv
+qc_plots/*
