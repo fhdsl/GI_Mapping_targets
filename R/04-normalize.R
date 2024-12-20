@@ -210,7 +210,7 @@ gimap_normalize <- function(.data = NULL,
       )
 
   # Save this at the construct level
-  gimap_dataset$normalized_log_fc <- lfc_df_adj
+  gimap_dataset$normalized_log_fc <- lfc_adj
 
   return(gimap_dataset)
 }
