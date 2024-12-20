@@ -187,34 +187,27 @@ gimap_normalize <- function(.data = NULL,
   comparison_df <- lfc_df %>%
     dplyr::mutate_at(dplyr::vars(!c(pg_ids, dplyr::ends_with("_control"))), ~ .x - ctrl_mean) %>%
     dplyr::select(!dplyr::matches(pg_ids) & !dplyr::ends_with("_control")) %>%
-    dplyr::left_join(gimap_dataset$annotation, by = c("pg_ids" = "pgRNA_id"))
+    dplyr::left_join(gimap_dataset$annotation, by = c("pg_ids" = "pgRNA_id")) %>%
+    tidyr::pivot_longer(dplyr::ends_with(treatment_group_names),
+                        names_to = "rep",
+                        values_to = "lfc"
+    )
 
   ########################### Perform adjustments #############################
 
-  ### Calculate medians
-  neg_control_median_df <- comparison_df %>%
-    dplyr::filter(norm_ctrl_flag == "negative_control") %>%
-    dplyr::select(dplyr::ends_with(treatment_group_names))
+  medians_df <- comparison_df %>%
+    dplyr::group_by(norm_ctrl_flag, rep) %>%
+    dplyr::summarize(median = median(lfc, na.rm = TRUE)) %>%
+    tidyr::pivot_wider(values_from = median,
+                       names_from = norm_ctrl_flag) %>%
+    dplyr::select(rep, negative_control, positive_control)
 
-  # Find a median for each rep, so apply across columns
-  neg_control_median <- apply(neg_control_median_df[, -1], 2, median, na.rm = TRUE)
-
-  # First and second adjustments to LFC
-  lfc_df_adj <- comparison_df %>%
-    # subtract the correct replicate negative control median from the late vs plasmid difference
-    mutate(across(names(neg_control_median), ~ . - neg_control_median[cur_column()])) %>%
-    tidyr::pivot_longer(dplyr::ends_with(treatment_group_names),
-      names_to = "rep",
-      values_to = "lfc"
-    ) %>%
-    group_by(rep) %>%
-    dplyr::mutate(
-      # Then, divide by the median of negative controls (double non-targeting) minus
-      # median of positive controls (targeting 1 essential gene).
-      # This will effectively set the median of the positive controls (essential genes) to -1.
-      lfc_adj = lfc / (median(lfc[norm_ctrl_flag == "negative_control"], na.rm = TRUE) - median(lfc[norm_ctrl_flag == "positive_control"], na.rm = TRUE))
-    ) %>%
-    ungroup()
+  # logFC adjusted = (log2FC - log2FC_negctls) / |log2FC_posctls|
+  lfc_adj <- comparison_df %>%
+    dplyr::left_join(medians_df, by = "rep") %>%
+      dplyr::mutate(
+        crispr_score = (lfc - negative_control) / abs(positive_control)
+      )
 
   # Save this at the construct level
   gimap_dataset$normalized_log_fc <- lfc_df_adj

@@ -143,3 +143,7 @@ save_example_data <- function() {
 
   saveRDS(gimap_dataset, file.path(dirname(example_folder), "gimap_dataset.RDS"))
 }
+
+plot_options <- function() {
+  list(theme_bw(base_size = 12))
+}

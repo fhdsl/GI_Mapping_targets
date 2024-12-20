@@ -27,7 +27,57 @@ devtools::load_all()
 ## Load the GI Mapping CRISPR Score results
 
 ```{r}
-old_crispr_results <- read_tsv("~/Downloads/results/calculate_LFC/tables/tsv/HeLa_lfc_annot_adj_pgRNA.txt")
+old_crispr_results <- read_tsv("HeLa_lfc_annot_adj_pgRNA.txt")
+```
+### Negative and positive control medians 
+
+We are expecting negative controls to be now set to a median of 0. 
+
+For the original data: 
+```{r}
+old_neg_controls <- old_lfc_results %>%
+  dplyr::filter(target_type == "ctrl_ctrl") %>%
+  dplyr::group_by(rep) %>%
+  dplyr::summarize(neg_ctrl_med = median(lfc_adj2)) %>%
+  dplyr::pull(neg_ctrl_med)
+
+old_neg_controls
+```
+
+For the new data: 
+```{r}
+new_neg_controls <- gimap_dataset$single_crispr_score %>%
+  dplyr::filter(target_type == "ctrl_ctrl", rep != "Day05_RepA_early") %>%
+  dplyr::group_by(rep) %>%
+  dplyr::summarize(neg_ctrl_med = median(lfc_adj)) %>%
+  dplyr::pull(neg_ctrl_med)
+
+new_neg_controls
+```
+
+We are expecting negative controls to be now set to a median of -1. 
+
+For the original data: 
+```{r}
+old_pos_controls <- old_lfc_results %>%
+  dplyr::filter(target_type == "gene_ctrl" & gene1_essential_flag == TRUE | 
+                  target_type =="ctrl_gene" & gene2_essential_flag == TRUE) %>%
+  dplyr::group_by(rep) %>%
+  dplyr::summarize(pos_ctrl_med = median(CRISPR_score)) %>%
+  dplyr::pull(pos_ctrl_med)
+
+old_pos_controls
+```
+
+For the new data: 
+```{r}
+new_pos_controls <- gimap_dataset$single_crispr_score %>%
+  dplyr::filter(rep != "Day05_RepA_early") %>%
+  dplyr::group_by(rep) %>%
+  dplyr::summarize(pos_ctrl_med = median(single_crispr)) %>%
+  dplyr::pull(pos_ctrl_med)
+
+new_pos_controls
 ```
 
 #### sync the reps values
