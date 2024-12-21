@@ -36,10 +36,6 @@ plot_crispr <- function(.data = NULL, gimap_dataset, output_file = "crispr_norm_
     source_data <- gimap_dataset$normalized_log_fc
   }
 
-  median_test <- gimap_dataset$normalized_log_fc %>%
-    dplyr::group_by(rep, norm_ctrl_flag) %>%
-    dplyr::summarize(median_crispr = median(crispr_score))
-
   gimap_dataset$normalized_log_fc %>%
     ggplot2::ggplot(ggplot2::aes(x = norm_ctrl_flag, y = crispr_score, fill = norm_ctrl_flag)) +
     ggplot2::geom_violin() +

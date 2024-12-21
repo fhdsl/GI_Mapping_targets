@@ -206,8 +206,14 @@ gimap_normalize <- function(.data = NULL,
   lfc_adj <- comparison_df %>%
     dplyr::left_join(medians_df, by = "rep") %>%
       dplyr::mutate(
-        crispr_score = (lfc - negative_control) / abs(positive_control)
+        crispr_score = (lfc - negative_control) / ( negative_control - positive_control)
       )
+
+  # These should equal 0 and -1
+  lfc_adj %>%
+    dplyr::group_by(rep, norm_ctrl_flag) %>%
+    dplyr::summarize(median_crispr = median(crispr_score)) %>%
+    dplyr::filter(norm_ctrl_flag %in% c("negative_control", "positive_control"))
 
   # Save this at the construct level
   gimap_dataset$normalized_log_fc <- lfc_adj
