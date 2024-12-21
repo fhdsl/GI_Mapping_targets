@@ -204,7 +204,6 @@ Now that you've performed QC and filtering, the rest of the pipeline can be run
 
 - First annotating the data set (expression levels, copy number, etc.) with DepMap data. For the annotation step, you *must* specify which `cell_line` your data uses so that the correct corresponding DepMap data is used for annotation. This function is `gimap_annotate()`
 - Then the data is normalized with the `gimap_normalize()` function. `timepoints` needs to be specified pointing to the correct column names from the `sample_data` passed to the `setup_data()` function earlier.
-- CRISPR scores are calculated with the `calc_crispr()` function.
 - Genetic interaction scores are computed with the `calc_gi()` function.
 
 ## Normalization and calculating scores
@@ -217,7 +216,6 @@ gimap_dataset <- gimap_filtered %>%
     treatments = "drug_treatment",
     control_name = "pretreatment"
   ) %>%
-  calc_crispr() %>%
   calc_gi()
 ```
 

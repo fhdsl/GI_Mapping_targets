@@ -98,7 +98,6 @@ gimap_dataset <- gimap_dataset %>%
   gimap_normalize(
     timepoints = "day"
   ) %>%
-  calc_crispr() %>%
   calc_gi()
 ```
 
