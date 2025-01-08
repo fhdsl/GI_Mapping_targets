@@ -17,7 +17,7 @@ Authors@R: c(
     )
     )
 Description: This package allows a pipeline to be built for analyzing genetic interactions of paired guide CRISPR screens. It is based off of original research from the Alice Berger lab at Fred Hutchinson Cancer Center.
-License: GPL-3
+License: GPL-3 + file LICENSE
 URL: https://github.com/FredHutch/gimap
 BugReports: https://github.com/FredHutch/gimap/issues
 Imports:
