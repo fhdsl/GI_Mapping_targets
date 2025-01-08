@@ -44,7 +44,7 @@
 #'   gimap_filter() %>%
 #'   gimap_annotate(cell_line = "HELA") %>%
 #'   gimap_normalize(
-#'     timepoints = "day",
+#'     timepoints = "day"
 #'   )
 #'
 #' # To see results

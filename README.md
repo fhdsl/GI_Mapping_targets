@@ -135,7 +135,7 @@ Now you can [go to our quick start tutorial to get started!](https://fredhutch.g
 We also have tutorial examples that show how to run timepoint or treatment experimental set ups with gimap:
 
 - [Timepoint example](https://fredhutch.github.io/gimap/articles/timepoint-example.html)
-- [Treatment example](https://fredhutch.github.io/gimap/articles/treatment-example.html)
+- [Treatment example](https://fredhutch.github.io/gimap/articles/treatment_example.html)
 
 Follow the steps there that will walk you through the example data. Then you can tailor that tutorial to use your own data.
 

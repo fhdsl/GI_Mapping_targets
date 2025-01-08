@@ -18,18 +18,19 @@ devtools::load_all()
 ```{r}
  gimap_dataset <- get_example_data("gimap") %>%
    gimap_filter() %>%
-   gimap_annotate() %>%
+   gimap_annotate(cell_line = "HELA") %>%
    gimap_normalize(
-     timepoints = "day",
-     replicates = "rep")
+     timepoints = "day")
 ```
 
 ## Load the GI Mapping Normalization/LFC results
 
-```{r}
-d.counts_flagged <- read.table("~/Downloads/results/pgRNA_counts_QC/tables/tsv/d.HeLa_counts_cpm_flag_long.txt", header=TRUE)
+Some data wrangling here. 
 
-d.annot <- readRDS("~/Downloads/results/pgRNA_annotations/tables/rds/d.HeLa_annot")
+```{r}
+d.counts_flagged <- read.table("d.HeLa_counts_cpm_flag_long.txt", header=TRUE)
+
+d.annot <- read_tsv("HeLa_lfc_annot_adj_pgRNA.txt")
 
 d.counts_flagged_timepoint <- d.counts_flagged %>%
   separate(sample, into = c("day", "rep"), sep = "_", remove = FALSE) %>%
@@ -62,17 +63,64 @@ d.lfc_annot <- d.lfc_annot %>%
   filter(rm_pgRNA == FALSE)
 
 d.lfc_annot_adj <- d.lfc_annot %>%
-  group_by(rep) %>%
+  group_by(rep.x) %>%
   mutate(lfc_adj1 = lfc_plasmid_vs_late - median(lfc_plasmid_vs_late[norm_ctrl_flag == "negative_control"]),
          lfc_adj2 = lfc_adj1 / (median(lfc_adj1[norm_ctrl_flag == "negative_control"]) -
                                   median(lfc_adj1[norm_ctrl_flag == "positive_control"]))) %>%
   ungroup()
 
-old_lfc_results <- d.lfc_annot_adj %>% select(pgRNA_id, rep, paralog_pair, lfc_adj2, target_type:gene2_essential_flag)
+old_lfc_results <- d.lfc_annot_adj %>% select(pgRNA_id, rep = rep.x, paralog_pair, lfc_adj2, target_type:gene2_essential_flag)
 ```
 
+### Negative and positive control medians 
+
+We are expecting negative controls to be now set to a median of 0. 
+
+For the original data: 
 ```{r}
-#old_lfc_results <- read_tsv("~/Downloads/results/calculate_LFC/tables/tsv/HeLa_lfc_annot_adj_pgRNA.txt")
+old_neg_controls <- old_lfc_results %>%
+  dplyr::filter(target_type == "ctrl_ctrl") %>%
+  dplyr::group_by(rep) %>%
+  dplyr::summarize(neg_ctrl_med = median(lfc_adj2)) %>%
+  dplyr::pull(neg_ctrl_med)
+
+old_neg_controls
+```
+
+For the new data: 
+```{r}
+new_neg_controls <- gimap_dataset$normalized_log_fc %>%
+  dplyr::filter(target_type == "ctrl_ctrl", rep != "Day05_RepA_early") %>%
+  dplyr::group_by(rep) %>%
+  dplyr::summarize(neg_ctrl_med = median(lfc_adj)) %>%
+  dplyr::pull(neg_ctrl_med)
+
+new_neg_controls
+```
+
+We are expecting negative controls to be now set to a median of -1. 
+
+For the original data: 
+```{r}
+old_pos_controls <- old_lfc_results %>%
+  dplyr::filter(target_type %in% c("gene_ctrl", "ctrl_gene")) %>%
+  dplyr::group_by(rep) %>%
+  dplyr::summarize(pos_ctrl_med = median(lfc_adj2)) %>%
+  dplyr::pull(pos_ctrl_med)
+
+old_pos_controls
+```
+
+For the new data: 
+```{r}
+new_pos_controls <- gimap_dataset$normalized_log_fc %>%
+  dplyr::filter(target_type %in% c("gene_ctrl", "ctrl_gene"), 
+                rep != "Day05_RepA_early") %>%
+  dplyr::group_by(rep) %>%
+  dplyr::summarize(pos_ctrl_med = median(lfc_adj)) %>%
+  dplyr::pull(pos_ctrl_med)
+
+new_pos_controls
 ```
 
 ## Compare them
@@ -92,7 +140,7 @@ The number of rows is more than 31817 which is the number of unique pgRNA IDs pr
 
 ```{r}
 old_lfc_results %<>% mutate(
-  rep = recode(rep, "A" = "late_RepA", "B" = "late_RepB", "C" = "late_RepC")
+  rep = recode(rep, "A" = "Day22_RepA_late", "B" = "Day22_RepB_late", "C" = "Day22_RepC_late")
 )
 ```
 
@@ -120,23 +168,20 @@ setdiff(colnames(old_lfc_results), colnames(gimap_dataset$normalized_log_fc))
 `gene1_entrez_id` and `gene2_entrez_id` seem to be columns unique to the old results, not in the new results. (NOTE: but there are ensembl IDs in both, so I don't think this is a concern.)
 
 ```{r}
-joindf <- dplyr::full_join(old_lfc_results, gimap_dataset$normalized_log_fc,
+joindf <- dplyr::left_join(old_lfc_results, gimap_dataset$normalized_log_fc,
                            by = c("pgRNA_id" = "pg_ids", "rep"),
                            suffix = c("_old", "_new")) %>%
-  select(lfc_adj, lfc_adj2, rep) %>%
-  drop_na()
+  select(pgRNA_id, new_calc = lfc_adj, org_calc = lfc_adj2, rep) %>% 
+  dplyr::distinct()
 
-nrow(joindf)
+joindf
 ```
 
-Resolved this Unexpected warning which was previously observed by adding in the joining by rep as well: 
-> Detected an unexpected many-to-many relationship between `x` and `y`.
-
 ```{r}
-joindf %>% ggplot(aes(x=lfc_adj, y = lfc_adj2)) +
+joindf %>% ggplot(aes(x=new_calc, y = org_calc)) +
   geom_point(alpha=0.1) +
-  xlab("gimap Normalization/LFC: lfc_adj") +
-  ylab("GI Mapping Normalization/LFC: lfc_adj2") +
+  xlab("gimap Normalization/LFC") +
+  ylab("GI Mapping Normalization/LFC") +
   theme_classic() +
   stat_regline_equation(label.y = 2.35) + stat_cor(label.y = 1.95) +
   facet_wrap(~rep)
@@ -144,7 +189,7 @@ joindf %>% ggplot(aes(x=lfc_adj, y = lfc_adj2)) +
 ```
 
 ```{r}
-joindf %>% ggplot(aes(x=lfc_adj, y = lfc_adj2)) +
+joindf %>% ggplot(aes(x=new_calc, y = org_calc)) +
   geom_point(alpha=0.1) +
   xlab("gimap Normalization/LFC: lfc_adj") +
   ylab("GI Mapping Normalization/LFC: lfc_adj2") +

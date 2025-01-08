@@ -26,7 +26,7 @@
 #' @param .data Data can be piped in with tidyverse pipes from function to function. But the data must still be a gimap_dataset
 #' @param gimap_dataset A special dataset structure that is setup using the `setup_data()` function.
 #' @export
-#' @examples {
+#' @examples \dontrun{
 #'   gimap_dataset <- get_example_data("gimap")
 #'
 #'   # Highly recommended but not required
@@ -171,7 +171,8 @@ calc_gi <- function(.data = NULL,
 #' Do tests for each replicate --an internal function used by calc_gi() function
 #' @description Create results table that has t test p values
 #' @param replicate a name of a replicate to filter out from gi_calc_adj
-#' @param gi_calc_adj a data.frame with adjusted gi scores
+#' @param gi_calc_single a data.frame with adjusted single gi scores
+#' @param gi_calc_double a data.frame with adjusted double gi scores
 #' @importFrom stats p.adjust t.test wilcox.test
 gimap_rep_stats <- function(replicate, gi_calc_double,  gi_calc_single) {
   ## get a vector of GI scores for all single-targeting ("control") pgRNAs for each rep

@@ -9,7 +9,9 @@ gimap_rep_stats(replicate, gi_calc_double, gi_calc_single)
 \arguments{
 \item{replicate}{a name of a replicate to filter out from gi_calc_adj}
 
-\item{gi_calc_adj}{a data.frame with adjusted gi scores}
+\item{gi_calc_double}{a data.frame with adjusted double gi scores}
+
+\item{gi_calc_single}{a data.frame with adjusted single gi scores}
 }
 \description{
 Create results table that has t test p values
