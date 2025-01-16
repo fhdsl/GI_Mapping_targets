@@ -116,13 +116,45 @@ Genetic interaction is calculated by:
 
 ```{r}
 gimap_dataset$gi_scores %>%
-  dplyr::arrange(fdr)
+  dplyr::arrange(fdr) %>% 
+  head()
 ```
 
-We can save all these data as an RDS.
+## Plot the results
+
+You can remove any samples from these plots by altering the `reps_to_drop` argument. 
+
+```{r}
+plot_exp_v_obs_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
+```
+
+```{r}
+plot_rank_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
+```
+
+```{r}
+plot_volcano(gimap_dataset, reps_to_drop = "Day05_RepA_early")
+```
+
+### Plot specific target pair 
+
+We can pick out a specific pair to plot. 
+
+```{r}
+# "NDEL1_NDE1" is top result so let's plot that
+plot_targets_bar(gimap_dataset, target1 = "NDEL1", target2 = "NDE1")
+```
+
+## Saving data to a file
+
+We can save all these data as an RDS or the genetic interaction scores themselves to a tsv file. 
 
 ```{r}
 saveRDS(gimap_dataset, "gimap_dataset_final.RDS")
+```
+
+```{r}
+readr::write_tsv(gimap_dataset$gi_scores, "gi_scores.tsv")
 ```
 
 ## Session Info

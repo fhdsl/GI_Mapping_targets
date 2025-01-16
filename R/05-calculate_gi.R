@@ -67,9 +67,12 @@ calc_gi <- function(.data = NULL,
 
   if (!is.null(.data)) gimap_dataset <- .data
 
-  if (!("gimap_dataset" %in% class(gimap_dataset))) stop("This function only works with gimap_dataset objects which can be made with the setup_data() function.")
+  if (!("gimap_dataset" %in% class(gimap_dataset))) stop("This function only works",
+   "with gimap_dataset objects which can be made with the setup_data() function.")
 
-  if (is.null(gimap_dataset$normalized_log_fc)) stop("This function only works with already normalized gimap_dataset objects which can be done with the gimap_normalize() function.")
+  if (is.null(gimap_dataset$normalized_log_fc)) stop("This function only works",
+  "with already normalized gimap_dataset objects which can be done with the",
+  "gimap_normalize() function.")
 
   # Get mean control target CRISPR scores -- they will be used for expected calculations
   control_target_df <- gimap_dataset$normalized_log_fc %>%
@@ -144,9 +147,11 @@ calc_gi <- function(.data = NULL,
                   norm_ctrl_flag
     ) %>%
     dplyr::distinct() %>%
-    dplyr::left_join(expected_single_crispr_df, by = c("rep" = "rep", "gRNA1_seq" = "targeting_gRNA_seq"),
+    dplyr::left_join(expected_single_crispr_df,
+      by = c("rep" = "rep", "gRNA1_seq" = "targeting_gRNA_seq"),
                      suffix = c("", "_1")) %>%
-    dplyr::left_join(expected_single_crispr_df, by = c("rep" = "rep", "gRNA2_seq" = "targeting_gRNA_seq"),
+    dplyr::left_join(expected_single_crispr_df,
+      by = c("rep" = "rep", "gRNA2_seq" = "targeting_gRNA_seq"),
                      suffix = c("", "_2")) %>%
     dplyr::select(pg_ids,
                   rep,
@@ -171,7 +176,8 @@ calc_gi <- function(.data = NULL,
     dplyr::filter(!is.na(single_crispr), !is.na(expected_single_crispr)) %>%
     dplyr::ungroup() %>%
     dplyr::group_by(rep) %>%
-    group_modify(~ broom::tidy(lm(single_crispr ~ expected_single_crispr, data = .x))) %>%
+    group_modify(~ broom::tidy(
+      lm(single_crispr ~ expected_single_crispr, data = .x))) %>%
     dplyr::select(term, estimate, rep) %>%
     pivot_wider(
       names_from = term,
@@ -287,8 +293,10 @@ gimap_rep_stats <- function(replicate, gi_calc_double,  gi_calc_single) {
 
   rep_gi_scores <- per_rep_stats_double %>%
     group_by(pgRNA_target) %>%
-    # TODO make this so its all single targets not just the oens that are a part of this double construct
-    mutate(p_val = t.test(x = per_rep_stats_single$single_gi_score, # 1000's of single constructs here
+    # TODO make this so its all single targets not just the oens that are a
+    # part of this double construct
+    # 1000's of single constructs here
+    mutate(p_val = t.test(x = per_rep_stats_single$single_gi_score,
                           y = double_gi_score, # all 16 construct guides here
                           paired = FALSE)$p.value)
 

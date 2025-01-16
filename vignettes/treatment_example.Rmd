@@ -225,6 +225,47 @@ Here's what's included in the GI Scores table:
 head(gimap_dataset$gi_scores)
 ```
 
+Let's check out the top results
+
+```{r}
+head(dplyr::arrange(gimap_dataset$gi_score, fdr))
+```
+
+
+## Plot the results
+
+You can remove any samples from these plots by altering the `reps_to_drop` argument. 
+
+```{r}
+plot_exp_v_obs_scatter(gimap_dataset)
+```
+
+```{r}
+plot_rank_scatter(gimap_dataset)
+```
+
+```{r}
+plot_volcano(gimap_dataset)
+```
+
+### Plot specific target pair 
+
+We can pick out a specific pair to plot. 
+
+```{r}
+# "MED12L_MED12" is top result so let's plot that
+plot_targets_bar(gimap_dataset, target1 = "MED12L", target2 = "MED12")
+```
+
+
+# To plot results, pick out two targets from the gi_score table
+head(dplyr::arrange(gimap_dataset$gi_score, fdr))
+#'
+#' # "NDEL1_NDE1" is top result so let's plot that
+#' plot_targets_bar(gimap_dataset, target1 = "NDEL1", target2 = "NDE1")
+
+
+
 ## Saving results to files
 
 We can save the genetic interactions scores like this:
@@ -238,6 +279,9 @@ We can save all these data as an RDS.
 ```{r}
 saveRDS(gimap_dataset, "gimap_dataset_final_treatment.RDS")
 ```
+
+
+
 
 ## Session Info
 
