@@ -34,8 +34,7 @@ Imports:
     broom,
     utils,
     stats,
-    stringr,
-    kableExtra
+    stringr
 Suggests:
     testthat (>= 3.0.0),
     roxygen2,

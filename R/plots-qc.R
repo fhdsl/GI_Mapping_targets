@@ -299,6 +299,11 @@ qc_plasmid_histogram <- function(gimap_dataset, cutoff = NULL, filter_plasmid_ta
   )
 }
 
+
+#' Standardized plot theme
+#' @description this is a ggplot2 standardized plot theme for this package
 #' @export
-plot_theme <- theme(axis.text = element_text(colour="black"),
-                    axis.ticks = element_line(color="black"))
+plot_theme <- function() {
+  theme(axis.text = element_text(colour="black"),
+  axis.ticks = element_line(color="black"))
+}
