@@ -213,11 +213,41 @@ gimap_dataset <- gimap_dataset %>%
 
 Take a look at the results.
 
-
 Here's what's included in the GI Scores table:
 
 ```{r}
 head(gimap_dataset$gi_scores)
+```
+
+Let's check out the top results
+
+```{r}
+head(dplyr::arrange(gimap_dataset$gi_score, fdr))
+```
+
+## Plot the results
+
+You can remove any samples from these plots by altering the `reps_to_drop` argument. 
+
+```{r}
+plot_exp_v_obs_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
+```
+
+```{r}
+plot_rank_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
+```
+
+```{r}
+plot_volcano(gimap_dataset, reps_to_drop = "Day05_RepA_early")
+```
+
+### Plot specific target pair 
+
+We can pick out a specific pair to plot. 
+
+```{r}
+# "NDEL1_NDE1" is top result so let's plot that
+plot_targets_bar(gimap_dataset, target1 = "NDEL1", target2 = "NDE1")
 ```
 
 ## Saving results to files
