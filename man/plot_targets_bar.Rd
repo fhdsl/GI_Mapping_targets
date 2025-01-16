@@ -12,6 +12,8 @@ plot_targets_bar(gimap_dataset, target1, target2, reps_to_drop = "")
 \item{target1}{Name of the first target to be plotted e.g.}
 
 \item{target2}{Name of the second target to be plotted e.g.}
+
+\item{reps_to_drop}{Names of replicates that should be not plotted (Optional)}
 }
 \description{
 This plot is for when you'd like to examine a target pair specifically.
