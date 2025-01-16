@@ -69,7 +69,7 @@ plot_exp_v_obs_scatter <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop
     return(gplot + facet_wrap(~rep))
   } else{ return(gplot) }
 }
-
+#' @export
 plot_rank_scatter <- function(gimap_dataset, reps_to_drop = ""){
   return(
     gimap_dataset$gi_scores %>%
@@ -88,7 +88,7 @@ plot_rank_scatter <- function(gimap_dataset, reps_to_drop = ""){
       geom_hline(yintercept = 0.25, linetype = "dashed")
   )
 }
-
+#' @export
 plot_volcano <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop = c("Day05_RepA_early")){
   gplot <- gimap_dataset$gi_scores %>%
     filter(target_type == "gene_gene") %>% #get only double targeting
