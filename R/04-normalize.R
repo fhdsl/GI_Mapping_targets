@@ -32,6 +32,7 @@
 #' ff there are more IDs without annotation data than this number, the output will be sent to a file rather than the console.
 #' @param rm_ids_wo_annot default is TRUE; whether or not to filter out pgRNA IDs from the input dataset that don't have corresponding annotation data available
 #' @param missing_ids_file If there are missing IDs and a file is saved, where do you want this file to be saved? Provide a file path.
+#' @import dplyr
 #' @export
 #' @examples \dontrun{
 #'
