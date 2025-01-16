@@ -15,7 +15,7 @@ plot_volcano(
 
 \item{facet_rep}{Should the replicates be wrapped with facet_wrap()?}
 
-\item{#'}{@param reps_to_drop Names of replicates that should be not plotted (Optional)}
+\item{reps_to_drop}{Names of replicates that should be not plotted (Optional)}
 }
 \description{
 This plot is meant to be functionally equivalent to Fig S5K (for HeLa, equivalent of Fig 3a for PC9).

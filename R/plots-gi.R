@@ -75,7 +75,6 @@ plot_exp_v_obs_scatter <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop
 #' The solid line is the linear regression line for the negative control (single KO) pgRNAs,
 #' while dashed lines indicate ± 2 residuals.
 #' @param gimap_dataset A special dataset structure that is setup using has had gi scores calculated.
-#' @param facet_rep Should the replicates be wrapped with facet_wrap()?
 #' @param reps_to_drop Names of replicates that should be not plotted (Optional)
 #' @import dplyr
 #' @import ggplot2
@@ -120,7 +119,7 @@ plot_rank_scatter <- function(gimap_dataset, reps_to_drop = ""){
 #' while dashed lines indicate ± 2 residuals.
 #' @param gimap_dataset A special dataset structure that is setup using has had gi scores calculated.
 #' @param facet_rep Should the replicates be wrapped with facet_wrap()?
-#' @param#' @param reps_to_drop Names of replicates that should be not plotted (Optional)
+#' @param reps_to_drop Names of replicates that should be not plotted (Optional)
 #' @import dplyr
 #' @import ggplot2
 #' @export
