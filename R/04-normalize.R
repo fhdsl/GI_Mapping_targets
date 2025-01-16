@@ -52,6 +52,7 @@
 #' from the input dataset that don't have corresponding annotation data available
 #' @param missing_ids_file If there are missing IDs and a file is saved, where
 #' do you want this file to be saved? Provide a file path.
+#' @param overwrite Should existing normalized_log_fc data in the gimap_dataset be overwritten?
 #' @import dplyr
 #' @export
 #' @examples \dontrun{
@@ -79,7 +80,8 @@ gimap_normalize <- function(.data = NULL,
                             control_name = NULL,
                             num_ids_wo_annot = 20,
                             rm_ids_wo_annot = TRUE,
-                            missing_ids_file = "missing_ids_file.csv") {
+                            missing_ids_file = "missing_ids_file.csv",
+                            overwrite = TRUE) {
   # Code adapted from
   # https://github.com/FredHutch/GI_mapping/blob/main/workflow/scripts/03-filter_and_calculate_LFC.Rmd
 
@@ -89,6 +91,16 @@ gimap_normalize <- function(.data = NULL,
 
   # Based on log fold change calculations and other handling will go based on the code in:
   # https://github.com/FredHutch/GI_mapping/blob/main/workflow/scripts/03-filter_and_calculate_LFC.Rmd
+
+
+  if (!is.null(gimap_dataset$normalized_log_fc) & overwrite) {
+    stop("Normalization has already been preformed on this dataset.",
+         "set overwrite = TRUE if you'd like the existing data to be overwritten.")
+  }
+
+  if (overwrite) {
+    gimap_dataset$normalized_log_fc <- NULL
+  }
 
   if (gimap_dataset$filtered_data$filter_step_run) {
     dataset <- gimap_dataset$filtered_data$transformed_log2_cpm
