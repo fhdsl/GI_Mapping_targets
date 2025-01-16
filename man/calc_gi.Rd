@@ -39,19 +39,19 @@ the construct level and are then summarized using a t-test to see if the the dis
 }
 \examples{
 \dontrun{
-  gimap_dataset <- get_example_data("gimap")
+gimap_dataset <- get_example_data("gimap")
 
-  # Highly recommended but not required
-  run_qc(gimap_dataset)
+# Highly recommended but not required
+run_qc(gimap_dataset)
 
-  gimap_dataset <- gimap_dataset \%>\%
-    gimap_filter() \%>\%
-    gimap_annotate(cell_line = "HELA") \%>\%
-    gimap_normalize(
-      timepoints = "day"
-    ) \%>\%
-    calc_gi()
+gimap_dataset <- gimap_dataset \%>\%
+  gimap_filter() \%>\%
+  gimap_annotate(cell_line = "HELA") \%>\%
+  gimap_normalize(
+    timepoints = "day"
+  ) \%>\%
+  calc_gi()
 
-  saveRDS(gimap_dataset, "gimap_dataset_final.RDS")
+saveRDS(gimap_dataset, "gimap_dataset_final.RDS")
 }
 }

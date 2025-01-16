@@ -9,25 +9,42 @@ gimap_annotate(
   gimap_dataset,
   annotation_file = NULL,
   control_genes = NULL,
-  depmap_annotate = TRUE,
+  cell_line_annotate = TRUE,
+  custom_tpm = NULL,
   cell_line = NULL
 )
 }
 \arguments{
-\item{.data}{Data can be piped in with tidyverse pipes from function to function. But the data must still be a gimap_dataset}
+\item{.data}{Data can be piped in with tidyverse pipes from function to function.
+But the data must still be a gimap_dataset}
 
 \item{gimap_dataset}{A special dataset structure that is setup using the `setup_data()` function.}
 
-\item{annotation_file}{If no file is given, will attempt to use the design file from https://media.addgene.org/cms/filer_public/a9/9a/a99a9328-324b-42ff-8ccc-30c544b899e4/pgrna_library.xlsx}
+\item{annotation_file}{If no file is given, will attempt to use the design file
+from
+https://media.addgene.org/cms/filer_public/a9/9a/a99a9328-324b-42ff-8ccc-30c544b899e4/pgrna_library.xlsx}
 
-\item{control_genes}{A vector of gene symbols (e.g. AAMP) that should be labeled as control genes. These will be used for log fold change calculations. If no list is given then DepMap Public 23Q4 Achilles_common_essentials.csv is used https://depmap.org/portal/download/all/}
+\item{control_genes}{A vector of gene symbols (e.g. AAMP) that should be labeled
+as control genes. These will be used for log fold change calculations. If no list is given
+then DepMap Public 23Q4 Achilles_common_essentials.csv is used https://depmap.org/portal/download/all/}
 
-\item{depmap_annotate}{TRUE or FALSE you'd also like to have DepMap annotation. These data are optional}
+\item{cell_line_annotate}{(Optional) TRUE or FALSE you'd also like to have cell_line_annotation
+from DepMap.}
 
-\item{cell_line}{which cell line are you using? (e.g., HELA, PC9, etc.). Required argument if demap_annotate is TRUE.}
+\item{custom_tpm}{(Optional) You may supply your own data frame of transcript
+per million expression to be used for this calculation if you can't or don't
+want to use DepMap data annotation for your cell_line. This data frame needs to have
+two columns: 'log2_tpm' that has the log2 tpm expression data for this cell line and
+and 'genes' which needs to be gene symbols that match those in the data. eg. "NDL1".
+Note that you can use custom_tpm with cell_line_annotate but your custom_tpm will be used
+instead of the tpm data from DepMap. However other data from DepMap like CN will be added.}
+
+\item{cell_line}{which cell line are you using? (e.g., HELA, PC9, etc.).
+Required argument if cell_line_annotate is TRUE.}
 }
 \description{
-In this function, a `gimap_dataset` is annotated as far as which genes should be used as controls.
+In this function, a `gimap_dataset` is annotated as far as which
+genes should be used as controls.
 }
 \examples{
 \dontrun{
@@ -37,11 +54,33 @@ gimap_dataset <- get_example_data("gimap")
 # Highly recommended but not required
 run_qc(gimap_dataset)
 
+# By default DepMap annotation will be used to determine genes which are
+# unexpressed. In the `gimap_normalize` this will by default be used to normalize to.
 gimap_dataset <- gimap_dataset \%>\%
   gimap_filter() \%>\%
   gimap_annotate(cell_line = "HELA")
 
-# To see anotations
+# To see anotations you can do this:
 gimap_dataset$annotation
+
+
+# You can also say cell_line_annotate = false if you don't want to use DepMap
+# annotation BUT if you don't also specify that you say you are
+# `normalize_by_unexpressed = FALSE` in the normalize step you will get a warning.
+gimap_dataset <- get_example_data("gimap") \%>\%
+ gimap_filter() \%>\%
+ gimap_annotate(cell_line_annotate = FALSE) \%>\%
+ gimap_normalize(timepoints = "day",
+                 normalize_by_unexpressed = FALSE)
+
+### CUSTOM TPM example
+# Lastly, this is also an option:
+where custom data is provided to `custom_tpm` is a data frame with
+`genes` and `log2_tpm` as the columns.
+gimap_dataset <- get_example_data("gimap") \%>\%
+ gimap_filter() \%>\%
+ gimap_annotate(custom_tpm = custom_tpm)) \%>\%
+ gimap_normalize(timepoints = "day")
+
 }
 }

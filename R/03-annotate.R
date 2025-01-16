@@ -31,12 +31,34 @@
 #' # Highly recommended but not required
 #' run_qc(gimap_dataset)
 #'
+#' # By default DepMap annotation will be used to determine genes which are
+#' # unexpressed. In the `gimap_normalize` this will by default be used to normalize to.
 #' gimap_dataset <- gimap_dataset %>%
 #'   gimap_filter() %>%
 #'   gimap_annotate(cell_line = "HELA")
 #'
-#' # To see anotations
+#' # To see anotations you can do this:
 #' gimap_dataset$annotation
+#'
+#'
+#' # You can also say cell_line_annotate = false if you don't want to use DepMap
+#' # annotation BUT if you don't also specify that you say you are
+#' # `normalize_by_unexpressed = FALSE` in the normalize step you will get a warning.
+#' gimap_dataset <- get_example_data("gimap") %>%
+#'  gimap_filter() %>%
+#'  gimap_annotate(cell_line_annotate = FALSE) %>%
+#'  gimap_normalize(timepoints = "day",
+#'                  normalize_by_unexpressed = FALSE)
+#'
+#' ### CUSTOM TPM example
+#' # Lastly, this is also an option:
+#' where custom data is provided to `custom_tpm` is a data frame with
+#' `genes` and `log2_tpm` as the columns.
+#' gimap_dataset <- get_example_data("gimap") %>%
+#'  gimap_filter() %>%
+#'  gimap_annotate(custom_tpm = custom_tpm)) %>%
+#'  gimap_normalize(timepoints = "day")
+#'
 #' }
 gimap_annotate <- function(.data = NULL,
                            gimap_dataset,
