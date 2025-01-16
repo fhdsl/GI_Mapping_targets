@@ -1,5 +1,5 @@
 utils::globalVariables(c(
-  "mean_observed_cs", "timepoints", "value", "timepoint_avg", "target_type",
+  "pg_ids", "plot_theme", "negative_control", "positive_control", "mean_observed_cs", "timepoints", "value", "timepoint_avg", "target_type",
   "unexpressed_ctrl_flag", "median", "lfc_adj", "median", "gRNA1_seq", "gRNA2_seq",
   "control_gRNA_seq", "crispr_score", "pgRNA_target", "mean_double_control_crispr",
   "pgRNA_target", "targeting_gRNA_seq", "mean_single_crispr", "double_crispr_score",
@@ -142,4 +142,8 @@ save_example_data <- function() {
   )
 
   saveRDS(gimap_dataset, file.path(dirname(example_folder), "gimap_dataset.RDS"))
+}
+
+plot_options <- function() {
+  list(theme_bw(base_size = 12))
 }

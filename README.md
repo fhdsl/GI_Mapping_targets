@@ -102,22 +102,16 @@ log2((counts / total counts for sample)) * 1 million) + 1)
 log2FC = log2CPM for each sample - pretreament log2CPM
 ```
 
-3. `Normalize by negative and positive controls` - Calculate a negative control median for each sample and a positive control median for each sample and divide each log2FC by this value. In this version then we are normalizing by the median difference of the negative and positive controls.
+Since the pgPEN library uses non-targeting controls, we adjust for the fact that single-targeting pgRNAs generate only two double-strand breaks (1 per allele), whereas the double-targeting pgRNAs generate four DSBs. To do this, we set the median LFC of each group to zero.
+
+Calculate medians of based on single and double targeting and subtract these medians from `log2FC adjusted`
+
+3. CRISPR scores: `Normalize by negative and positive controls` - Calculate a negative control median for each sample and a positive control median for each sample and divide each log2FC by this value. In this version then we are normalizing by the median difference of the negative and positive controls.
 ```
 # FOR EACH SAMPLE:
 log2FC adjusted =
 (log2FC - log2FC median negative control) /
 (log2FC median negative control - median log2FC positive control)
-```
-
-### CRISPR scores
-
-Since the pgPEN library uses non-targeting controls, we adjust for the fact that single-targeting pgRNAs generate only two double-strand breaks (1 per allele), whereas the double-targeting pgRNAs generate four DSBs. To do this, we set the median LFC of each group to zero.
-
-Calculate medians of based on single and double targeting and subtract these medians from `log2FC adjusted`
-
-```
-crispr score = log2FC adjusted - median for each target type
 ```
 
 ## Prerequisites

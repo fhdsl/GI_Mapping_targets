@@ -7,6 +7,7 @@
 #' @param depmap_annotate TRUE or FALSE you'd also like to have DepMap annotation. These data are optional
 #' @param cell_line which cell line are you using? (e.g., HELA, PC9, etc.). Required argument if demap_annotate is TRUE.
 #' @importFrom stringr word
+#' @import dplyr
 #' @export
 #' @examples \dontrun{
 #'
@@ -91,7 +92,7 @@ gimap_annotate <- function(.data = NULL,
       show_col_types = FALSE,
       col_select = c("genes", dplyr::all_of(my_depmap_id))
     ) %>%
-      dplyr::rename(log2_cn = my_depmap_id)
+      dplyr::rename(log2_cn = dplyr::all_of(my_depmap_id))
 
     annotation_df <- annotation_df %>%
       dplyr::left_join(depmap_cn, by = c("gene1_symbol" = "genes")) %>%
