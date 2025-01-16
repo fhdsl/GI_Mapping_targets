@@ -200,7 +200,6 @@ Now that you've performed QC and filtering, the rest of the pipeline can be run
 
 - First annotating the data set (expression levels, copy number, etc.) with DepMap data. For the annotation step, you *must* specify which `cell_line` your data uses so that the correct corresponding DepMap data is used for annotation. This function is `gimap_annotate()`
 - Then the data is normalized with the `gimap_normalize()` function. `timepoints` needs to be specified pointing to the correct column names from the `sample_data` passed to the `setup_data()` function earlier.
-- CRISPR scores are calculated with the `calc_crispr()` function.
 - Genetic interaction scores are computed with the `calc_gi()` function.
 
 ```{r}
@@ -209,7 +208,6 @@ gimap_dataset <- gimap_dataset %>%
   gimap_normalize(
     timepoints = "day"
   ) %>%
-  calc_crispr() %>%
   calc_gi()
 ```
 
@@ -222,26 +220,12 @@ Here's what's included in the GI Scores table:
 head(gimap_dataset$gi_scores)
 ```
 
-Take a look at a preview of the crispr scores:
-
-```{r}
-head(gimap_dataset$crispr_score)
-```
-
 ## Saving results to files
 
 We can save the genetic interactions scores like this:
 
 ```{r}
 readr::write_tsv(gimap_dataset$gi_scores, file.path(output_dir, "gi_scores.tsv"))
-```
-
-Similarly let's save the CRISPR scores.
-
-```{r}
-readr::write_tsv(gimap_dataset$single_crispr_score, file.path(output_dir, "single_crispr_scores.tsv"))
-
-readr::write_tsv(gimap_dataset$double_crispr_score, file.path(output_dir, "double_crispr_scores.tsv"))
 ```
 
 We can save all these data as an RDS.

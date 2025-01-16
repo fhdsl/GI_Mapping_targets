@@ -37,6 +37,7 @@
 #' all_reps_zerocount_ids is not actually filtered data necessarily.
 #' Instead it's just a record of which pgRNAs have a zero count in all final timepoint replicates
 #' @export
+#' @import dplyr
 #' @examples \dontrun{
 #'
 #' gimap_dataset <- get_example_data("gimap")
