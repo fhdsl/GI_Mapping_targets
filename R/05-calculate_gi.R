@@ -26,6 +26,7 @@
 #' @param .data Data can be piped in with tidyverse pipes from function to function. But the data must still be a gimap_dataset
 #' @param gimap_dataset A special dataset structure that is setup using the `setup_data()` function.
 #' @import dplyr
+#' @importFrom stats lm 
 #' @export
 #' @examples \dontrun{
 #' gimap_dataset <- get_example_data("gimap")

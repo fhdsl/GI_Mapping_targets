@@ -5,7 +5,7 @@
 #' while dashed lines indicate ± 2 residuals.
 #' @param gimap_dataset A special dataset structure that is setup using has had gi scores calculated.
 #' @param facet_rep Should the replicates be wrapped with facet_wrap()?
-#' @param
+#' @param reps_to_drop Names of replicates that should be not plotted (Optional)
 #' @import dplyr
 #' @import ggplot2
 #' @export
@@ -89,7 +89,7 @@ plot_exp_v_obs_scatter <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop
   }
 }
 
-plot_rank_scatter <- function(gimap_dataset, reps_to_drop = "") {
+plot_rank_scatter <- function(gimap_dataset, reps_to_drop = ""){
   return(
     gimap_dataset$gi_scores %>%
       filter(target_type == "gene_gene") %>% # get only double targeting
@@ -110,7 +110,7 @@ plot_rank_scatter <- function(gimap_dataset, reps_to_drop = "") {
   )
 }
 
-plot_volcano <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop = c("Day05_RepA_early")) {
+plot_volcano <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop = c("Day05_RepA_early")){
   gplot <- gimap_dataset$gi_scores %>%
     filter(target_type == "gene_gene") %>% # get only double targeting
     filter(!(rep %in% reps_to_drop)) %>%
@@ -149,12 +149,12 @@ plot_volcano <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop = c("Day0
   }
 }
 
-
 #' Plots for genetic interactions for specific targets
 #' @description This plot is for when you'd like to examine a target pair specifically.
 #' @param gimap_dataset A special dataset structure that is setup using has had gi scores calculated.
 #' @param target1 Name of the first target to be plotted e.g.
 #' @param target2 Name of the second target to be plotted e.g.
+#' @param reps_to_drop Names of replicates that should be not plotted (Optional)
 #' @import dplyr
 #' @import ggplot2
 #' @export
