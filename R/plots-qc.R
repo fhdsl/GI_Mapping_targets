@@ -30,7 +30,7 @@ qc_cdf <- function(gimap_dataset, wide_ar = 0.75) {
       color = "Sample"
     ) +
     plot_options() +
-    plot_theme +
+    plot_theme() +
     theme(aspect.ratio = wide_ar)
 
   return(counts_cdf)
@@ -62,7 +62,7 @@ qc_sample_hist <- function(gimap_dataset, wide_ar = 0.75) {
   sample_cpm_histogram <- ggplot(long_form, aes(x = log2_cpm, fill = sample)) +
     geom_histogram(color = "black", binwidth = 0.5) +
     plot_options() +
-    plot_theme +
+    plot_theme() +
     theme(
       aspect.ratio = wide_ar,
       legend.position = "none"
@@ -293,7 +293,7 @@ qc_plasmid_histogram <- function(gimap_dataset, cutoff = NULL, filter_plasmid_ta
     ggplot(to_plot, aes(x = plasmid_log2_cpm)) +
       geom_histogram(binwidth = 0.2, color = "black", fill = "gray60") +
       plot_options() +
-      plot_theme +
+      plot_theme() +
       theme(aspect.ratio = wide_ar) +
       geom_vline(xintercept = cutoff, linetype = "dashed")
   )
@@ -303,5 +303,5 @@ qc_plasmid_histogram <- function(gimap_dataset, cutoff = NULL, filter_plasmid_ta
 #' Standardized plot theme
 #' @description this is a ggplot2 standardized plot theme for this package
 #' @export
-plot_theme <- theme(axis.text = element_text(colour="black"),
+plot_theme() <- theme(axis.text = element_text(colour="black"),
                     axis.ticks = element_line(color="black"))
