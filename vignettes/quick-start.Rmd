@@ -119,7 +119,6 @@ gimap_dataset$gi_scores %>%
   dplyr::arrange(fdr)
 ```
 
-
 We can save all these data as an RDS.
 
 ```{r}

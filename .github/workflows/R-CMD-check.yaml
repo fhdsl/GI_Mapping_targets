@@ -39,13 +39,7 @@ jobs:
 
       - uses: r-lib/actions/setup-pandoc@v2
 
-      - name: Query dependencies
-        run: |
-          install.packages('remotes', repos='http://cran.us.r-project.org')
-          install.packages('rcmdcheck', repos='http://cran.us.r-project.org')
-          saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
-          writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
-        shell: Rscript {0}
+      - uses: r-lib/actions/setup-r-dependencies@v2
 
       - name: Restore R package cache
         if: runner.os != 'Windows'
@@ -72,11 +66,5 @@ jobs:
       - name: Check package
         uses: r-lib/actions/check-r-package@v2
         with:
-          args: 'c("--no-manual", "--no-build-vignettes")'
-          check-dir: '"check"'
-
-      - name: Upload check results
-        if: failure()
-        uses: actions/upload-artifact@main
-        with:
-          path: check
+          args: 'c("--as-cran", "--no-manual", "--no-build-vignettes")'
+          upload-results: true
