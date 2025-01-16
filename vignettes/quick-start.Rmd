@@ -117,7 +117,8 @@ Genetic interaction is calculated by:
 ```{r}
 gimap_dataset$gi_scores %>%
   dplyr::arrange(fdr) %>% 
-  head()
+  head() %>% 
+  knitr::kable(format = "html") 
 ```
 
 ## Plot the results
@@ -133,7 +134,13 @@ plot_rank_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
 ```
 
 ```{r}
-plot_volcano(gimap_dataset, reps_to_drop = "Day05_RepA_early")
+plot_volcano(gimap_dataset, reps_to_drop = "Day05_RepA_early", facet_rep = FALSE)
+```
+
+Here's how you can save plots like the above.
+
+```{r}
+ggplot2::ggsave("volcano_plot.png")
 ```
 
 ### Plot specific target pair 

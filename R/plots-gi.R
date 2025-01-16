@@ -111,7 +111,8 @@ plot_volcano <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop = c("Day0
                                   "dodgerblue3" = "dodgerblue3",
                                   "darkred" = "darkred",
                                   "black" = "black")) +
-    ylab("-log10(FDR)")
+    ylab("-log10(FDR)") +
+    xlab("Mean GI score")
 
   if (facet_rep){
     return(gplot + facet_wrap(~rep))
