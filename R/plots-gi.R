@@ -6,7 +6,7 @@
 #' while dashed lines indicate ± 2 residuals.
 #' @param gimap_dataset A special dataset structure that is setup using has had gi scores calculated.
 #' @param facet_rep Should the replicates be wrapped with facet_wrap()?
-#' @param
+#' @param reps_to_drop Names of replicates that should be not plotted (Optional)
 #' @import dplyr
 #' @import ggplot2
 #' @export
@@ -69,7 +69,32 @@ plot_exp_v_obs_scatter <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop
     return(gplot + facet_wrap(~rep))
   } else{ return(gplot) }
 }
+#' Plots for Genetic interactions
+#' @description This plot is meant to be functionally equivalent to Fig S5K (for HeLa, equivalent of Fig 3a for PC9).
+#' Scatter plot of target-level observed versus expected CRISPR scores in the HeLa screen.
+#' The solid line is the linear regression line for the negative control (single KO) pgRNAs,
+#' while dashed lines indicate ± 2 residuals.
+#' @param gimap_dataset A special dataset structure that is setup using has had gi scores calculated.
+#' @param facet_rep Should the replicates be wrapped with facet_wrap()?
+#' @param reps_to_drop Names of replicates that should be not plotted (Optional)
+#' @import dplyr
+#' @import ggplot2
 #' @export
+#' @examples \dontrun{
+#'
+#' gimap_dataset <- get_example_data("gimap") %>%
+#'   gimap_filter() %>%
+#'   gimap_annotate(cell_line = "HELA") %>%
+#'   gimap_normalize(
+#'     timepoints = "day"
+#'   ) %>%
+#'   calc_gi()
+#'
+#' # To plot results
+#' plot_exp_v_obs_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
+#' plot_rank_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
+#' plot_volcano(gimap_dataset, reps_to_drop = "Day05_RepA_early")
+#' }
 plot_rank_scatter <- function(gimap_dataset, reps_to_drop = ""){
   return(
     gimap_dataset$gi_scores %>%
@@ -88,7 +113,32 @@ plot_rank_scatter <- function(gimap_dataset, reps_to_drop = ""){
       geom_hline(yintercept = 0.25, linetype = "dashed")
   )
 }
+#' Plots for Genetic interactions
+#' @description This plot is meant to be functionally equivalent to Fig S5K (for HeLa, equivalent of Fig 3a for PC9).
+#' Scatter plot of target-level observed versus expected CRISPR scores in the HeLa screen.
+#' The solid line is the linear regression line for the negative control (single KO) pgRNAs,
+#' while dashed lines indicate ± 2 residuals.
+#' @param gimap_dataset A special dataset structure that is setup using has had gi scores calculated.
+#' @param facet_rep Should the replicates be wrapped with facet_wrap()?
+#' @param#' @param reps_to_drop Names of replicates that should be not plotted (Optional)
+#' @import dplyr
+#' @import ggplot2
 #' @export
+#' @examples \dontrun{
+#'
+#' gimap_dataset <- get_example_data("gimap") %>%
+#'   gimap_filter() %>%
+#'   gimap_annotate(cell_line = "HELA") %>%
+#'   gimap_normalize(
+#'     timepoints = "day"
+#'   ) %>%
+#'   calc_gi()
+#'
+#' # To plot results
+#' plot_exp_v_obs_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
+#' plot_rank_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
+#' plot_volcano(gimap_dataset, reps_to_drop = "Day05_RepA_early")
+#' }
 plot_volcano <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop = c("Day05_RepA_early")){
   gplot <- gimap_dataset$gi_scores %>%
     filter(target_type == "gene_gene") %>% #get only double targeting
@@ -119,12 +169,12 @@ plot_volcano <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop = c("Day0
   } else{ return(gplot) }
 }
 
-
 #' Plots for genetic interactions for specific targets
 #' @description This plot is for when you'd like to examine a target pair specifically.
 #' @param gimap_dataset A special dataset structure that is setup using has had gi scores calculated.
 #' @param target1 Name of the first target to be plotted e.g.
 #' @param target2 Name of the second target to be plotted e.g.
+#' @param reps_to_drop Names of replicates that should be not plotted (Optional)
 #' @import dplyr
 #' @import ggplot2
 #' @export
