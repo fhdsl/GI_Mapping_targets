@@ -25,6 +25,7 @@
 #' the construct level and are then summarized using a t-test to see if the the distribution of the set of double targeting constructs is significantly different than the overall distribution single targeting constructs. After multiple testing correction, FDR values are reported. Low FDR value for a double construct means high suspicion of paralogs.
 #' @param .data Data can be piped in with tidyverse pipes from function to function. But the data must still be a gimap_dataset
 #' @param gimap_dataset A special dataset structure that is setup using the `setup_data()` function.
+#' @import dplyr
 #' @export
 #' @examples \dontrun{
 #'   gimap_dataset <- get_example_data("gimap")
@@ -68,8 +69,10 @@ calc_gi <- function(.data = NULL,
 
   if (!("gimap_dataset" %in% class(gimap_dataset))) stop("This function only works with gimap_dataset objects which can be made with the setup_data() function.")
 
+  if (is.null(gimap_dataset$normalized_log_fc)) stop("This function only works with already normalized gimap_dataset objects which can be done with the gimap_normalize() function.")
+
   # Get mean control target CRISPR scores -- they will be used for expected calculations
-  control_target_df <- source_data %>%
+  control_target_df <- gimap_dataset$normalized_log_fc %>%
     dplyr::filter(target_type == "ctrl_ctrl") %>%
     tidyr::pivot_longer(
       cols = c(gRNA1_seq, gRNA2_seq),
@@ -84,7 +87,7 @@ calc_gi <- function(.data = NULL,
   # This means we have a mean double control crispr for each rep and control sequence
 
   # Calculate CRISPR scores for single targets
-  single_crispr_df <- lfc_df %>%
+  single_crispr_df <- gimap_dataset$normalized_log_fc %>%
     dplyr::filter(target_type %in% c("ctrl_gene", "gene_ctrl")) %>%
     # We will be joining things based on the gRNA sequences so we do some recoding here
     mutate(
@@ -130,7 +133,7 @@ calc_gi <- function(.data = NULL,
     dplyr::distinct()
 
   # Now put it all together into one df
-  double_crispr_df <- lfc_df %>%
+  double_crispr_df <- gimap_dataset$normalized_log_fc %>%
     dplyr::filter(target_type == "gene_gene") %>%
     dplyr::select(pg_ids,
                   rep,

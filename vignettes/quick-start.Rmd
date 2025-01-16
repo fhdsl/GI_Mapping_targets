@@ -111,8 +111,8 @@ Genetic interaction is calculated by:
 - `mean_expected_cs` - the average expected genetic interaction score
 - `mean_gi_score` - the average observer genetic interaction score
 - `target_type` - describes whether the CRISPR design is targeting two genes ("gene_gene"), or a gene and a non targeting control ("gene_ctrl") or a targeting control and a gene ("ctrl_gene").
-- `p_val` -
-- `fdr`
+- `p_val` - p values from the testing whether a double knockout construct is significantly different in its genetic interaction score from single targets.  
+- `fdr` - False discovery rate corrected p values
 
 ```{r}
 gimap_dataset$gi_scores %>%
