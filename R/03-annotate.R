@@ -1,11 +1,25 @@
 #' Annotate gimap data
-#' @description In this function, a `gimap_dataset` is annotated as far as which genes should be used as controls.
-#' @param .data Data can be piped in with tidyverse pipes from function to function. But the data must still be a gimap_dataset
+#' @description In this function, a `gimap_dataset` is annotated as far as which
+#' genes should be used as controls.
+#' @param .data Data can be piped in with tidyverse pipes from function to function.
+#'  But the data must still be a gimap_dataset
 #' @param gimap_dataset A special dataset structure that is setup using the `setup_data()` function.
-#' @param annotation_file If no file is given, will attempt to use the design file from https://media.addgene.org/cms/filer_public/a9/9a/a99a9328-324b-42ff-8ccc-30c544b899e4/pgrna_library.xlsx
-#' @param control_genes A vector of gene symbols (e.g. AAMP) that should be labeled as control genes. These will be used for log fold change calculations. If no list is given then DepMap Public 23Q4 Achilles_common_essentials.csv is used https://depmap.org/portal/download/all/
-#' @param depmap_annotate TRUE or FALSE you'd also like to have DepMap annotation. These data are optional
-#' @param cell_line which cell line are you using? (e.g., HELA, PC9, etc.). Required argument if demap_annotate is TRUE.
+#' @param annotation_file If no file is given, will attempt to use the design file
+#' from https://media.addgene.org/cms/filer_public/a9/9a/a99a9328-324b-42ff-8ccc-30c544b899e4/pgrna_library.xlsx
+#' @param control_genes A vector of gene symbols (e.g. AAMP) that should be labeled
+#' as control genes. These will be used for log fold change calculations. If no list is given
+#' then DepMap Public 23Q4 Achilles_common_essentials.csv is used https://depmap.org/portal/download/all/
+#' @param cell_line_annotate (Optional) TRUE or FALSE you'd also like to have cell_line_annotation
+#' from DepMap.
+#' @param cell_line which cell line are you using? (e.g., HELA, PC9, etc.).
+#' Required argument if cell_line_annotate is TRUE.
+#' @param custom_tpm (Optional) You may supply your own data frame of transcript
+#' per million expression to be used for this calculation if you can't or don't
+#' want to use DepMap data annotation for your cell_line. This data frame needs to have
+#' two columns: 'log2_tpm' that has the log2 tpm expression data for this cell line and
+#' and 'genes' which needs to be gene symbols that match those in the data. eg. "NDL1".
+#' Note that you can use custom_tpm with cell_line_annotate but your custom_tpm will be used
+#' instead of the tpm data from DepMap. However other data from DepMap like CN will be added.
 #' @importFrom stringr word
 #' @import dplyr
 #' @export
@@ -27,14 +41,18 @@ gimap_annotate <- function(.data = NULL,
                            gimap_dataset,
                            annotation_file = NULL,
                            control_genes = NULL,
-                           depmap_annotate = TRUE,
+                           cell_line_annotate = TRUE,
+                           custom_tpm = NULL,
                            cell_line = NULL) {
   if (!is.null(.data)) gimap_dataset <- .data
 
   if (!("gimap_dataset" %in% class(gimap_dataset))) stop("This function only works with gimap_dataset objects which can be made with the setup_data() function.")
 
-  if (depmap_annotate & is.null(cell_line)) stop("If you want DepMap annotation you must specify which cell line you are using")
+  if (cell_line_annotate & is.null(cell_line)) {
+    stop("If you want DepMap annotation you must specify which cell line you are using")
+  }
 
+  if (!is.null(gimap_dataset$annotation)) stop
   # Get the annotation data based on the pg construct design
   if (!is.null(annotation_file)) {
     if (!file.exists(annotation_file)) stop("The annotation_file specified cannot be found. Please double check the file path")
@@ -57,7 +75,7 @@ gimap_annotate <- function(.data = NULL,
   }
 
   ############################ Get TPM data ####################################
-  if (depmap_annotate) {
+  if (cell_line_annotate) {
     # This is used to flag things
     ## get TPM and CN information (w/ option for user to upload their own info)
     depmap_metadata <- readr::read_csv("https://figshare.com/ndownloader/files/35020903", show_col_types = FALSE)
@@ -72,16 +90,11 @@ gimap_annotate <- function(.data = NULL,
 
     if (!file.exists(tpm_file)) tpm_setup()
 
-    depmap_tpm <- readr::read_csv(tpm_file,
+    tpm <- readr::read_csv(tpm_file,
       show_col_types = FALSE,
       col_select = c("genes", dplyr::all_of(my_depmap_id))
     ) %>%
-      dplyr::rename(log2_tpm = my_depmap_id) %>%
-      dplyr::mutate(expressed_flag = dplyr::case_when(
-        log2_tpm < 1 ~ FALSE,
-        log2_tpm >= 1 ~ TRUE,
-        is.na(log2_tpm) ~ NA
-      ))
+      dplyr::rename(log2_tpm = my_depmap_id)
 
     ############################ COPY NUMBER ANNOTATION ##########################
     cn_file <- file.path(system.file("extdata", package = "gimap"), "CCLE_gene_cn.csv")
@@ -99,6 +112,30 @@ gimap_annotate <- function(.data = NULL,
       dplyr::left_join(depmap_cn, by = c("gene2_symbol" = "genes"), suffix = c("_gene1", "_gene2"))
   }
 
+  # If people supply their own tpm file we need to check it for stuff
+  if (!is.null(custom_tpm)) {
+    stopifnot("custom_tpm must be a data.frame or tibble" = is.data.frame(custom_tpm),
+              "custom_tpm must contain a column called 'log2_tpm'" = "log2_tpm" %in% colnames(custom_tpm),
+              "custom_tpm must contain a column called 'genes'" = "genes" %in% colnames(custom_tpm))
+
+    gene_matches <- sum(match(custom_tpm$genes, annotation_df$genes))
+    percent <- gene_matches/length(custom_tpm$genes)*100
+
+    message(gene_matches,
+            " :number of genes have matches in the custom_tpm data \n",
+            percent, "% :percent of genes with matches in the custom_tpm data")
+
+    stopifnot("less than half of the genes have custom_tpm matches" =
+                percent > 50)
+  }
+  if (!is.null(custom_tpm) | cell_line_annotate) {
+  tpm <- tpm %>%
+    dplyr::mutate(expressed_flag = dplyr::case_when(
+      log2_tpm < 1 ~ FALSE,
+      log2_tpm >= 1 ~ TRUE,
+      is.na(log2_tpm) ~ NA
+    ))
+  }
   ############################ ANNOTATION COMBINING ############################
   # This set up is more or less the same as the original
   # https://github.com/FredHutch/GI_mapping/blob/41ac7d5ed7025252343e2c823fba22f8a363e25c/workflow/scripts/02-get_pgRNA_annotations.Rmd#L435
@@ -112,29 +149,30 @@ gimap_annotate <- function(.data = NULL,
         target_type == "ctrl_gene" ~ paste("ctrl", gene2_symbol, sep = "_"),
         TRUE ~ target_type
       )
+    ) %>%
+    dplyr::mutate(norm_ctrl_flag = dplyr::case_when(
+      target_type == "gene_gene" ~ "double_targeting",
+      target_type == "gene_ctrl" & gene1_essential_flag == TRUE ~ "positive_control",
+      target_type == "ctrl_gene" & gene2_essential_flag == TRUE ~ "positive_control",
+      target_type == "gene_ctrl" & gene1_essential_flag != TRUE ~ "single_targeting",
+      target_type == "ctrl_gene" & gene2_essential_flag != TRUE ~ "single_targeting",
+      target_type == "ctrl_ctrl" ~ "negative_control"
+    )) %>%
+    dplyr::mutate(
+      norm_ctrl_flag = factor(norm_ctrl_flag, levels = c(
+        "negative_control",
+        "positive_control",
+        "single_targeting",
+        "double_targeting"
+      ))
     )
-
-  if (depmap_annotate) {
+  if (cell_line_annotate | !is.null(custom_tpm)) {
     annotation_df <- annotation_df %>%
-      dplyr::left_join(depmap_tpm, by = c("gene1_symbol" = "genes")) %>%
+      dplyr::left_join(tpm, by = c("gene1_symbol" = "genes")) %>%
       dplyr::rename(gene1_expressed_flag = expressed_flag) %>%
-      dplyr::left_join(depmap_tpm, by = c("gene2_symbol" = "genes"), suffix = c("_gene1", "_gene2")) %>%
+      dplyr::left_join(tpm, by = c("gene2_symbol" = "genes"), suffix = c("_gene1", "_gene2")) %>%
       dplyr::rename(gene2_expressed_flag = expressed_flag) %>%
-      dplyr::mutate(norm_ctrl_flag = dplyr::case_when(
-        target_type == "gene_gene" ~ "double_targeting",
-        target_type == "gene_ctrl" & gene1_essential_flag == TRUE ~ "positive_control",
-        target_type == "ctrl_gene" & gene2_essential_flag == TRUE ~ "positive_control",
-        target_type == "gene_ctrl" & gene1_essential_flag != TRUE ~ "single_targeting",
-        target_type == "ctrl_gene" & gene2_essential_flag != TRUE ~ "single_targeting",
-        target_type == "ctrl_ctrl" ~ "negative_control"
-      )) %>%
       dplyr::mutate(
-        norm_ctrl_flag = factor(norm_ctrl_flag, levels = c(
-          "negative_control",
-          "positive_control",
-          "single_targeting",
-          "double_targeting"
-        )),
         unexpressed_ctrl_flag = dplyr::case_when(
           norm_ctrl_flag == "double_targeting" & gene1_expressed_flag == FALSE & gene2_expressed_flag == FALSE ~ TRUE,
           norm_ctrl_flag == "single_targeting" & (gene1_expressed_flag == FALSE | gene2_expressed_flag == FALSE) ~ TRUE,

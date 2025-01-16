@@ -20,10 +20,8 @@
 #' # Plot:
 #'
 #' plot_crispr(gimap_dataset)
-#'
 #' }
 plot_crispr <- function(.data = NULL, gimap_dataset, output_file = "crispr_norm_plot.png") {
-
   if (!is.null(.data)) gimap_dataset <- .data
 
   if (!("gimap_dataset" %in% class(gimap_dataset))) stop("This function only works with gimap_dataset objects which can be made with the setup_data() function.")
@@ -44,5 +42,4 @@ plot_crispr <- function(.data = NULL, gimap_dataset, output_file = "crispr_norm_
     ggplot2::facet_wrap(~rep)
 
   ggsave(output_file)
-
 }
