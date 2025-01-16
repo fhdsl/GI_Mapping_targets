@@ -16,27 +16,41 @@ gimap_normalize(
 )
 }
 \arguments{
-\item{.data}{Data can be piped in with a tidyverse pipe from function to function. But the data must still be a gimap_dataset}
+\item{.data}{Data can be piped in with a tidyverse pipe from function to function.
+But the data must still be a gimap_dataset}
 
-\item{gimap_dataset}{A special dataset structure that is setup using the `setup_data()` function.}
+\item{gimap_dataset}{A special dataset structure that is setup using the
+`setup_data()` function.}
 
-\item{timepoints}{Specifies the column name of the metadata set up in `$metadata$sample_metadata`
-that has a factor that represents the timepoints. Timepoints will be made into three categories:
-plasmid for the earliest time point, early for all middle timepoints and late for the latest timepoints.
-The late timepoints will be the focus for the calculations. The column used for timepoints must be numeric or at least ordinal.}
+\item{timepoints}{Specifies the column name of the metadata set up in
+`$metadata$sample_metadata`
+that has a factor that represents the timepoints.
+Timepoints will be made into three categories:
+plasmid for the earliest time point, early for all middle timepoints and
+late for the latest timepoints.
+The late timepoints will be the focus for the calculations. The column used
+for timepoints must be numeric or at least ordinal.}
 
-\item{treatments}{Specifies the column name of the metadata set up in `$metadata$sample_metadata`
-that has a factor that represents column that specifies the treatment applied to each. The replicates will be kept collapsed to an average.}
+\item{treatments}{Specifies the column name of the metadata set up in
+`$metadata$sample_metadata`
+that has a factor that represents column that specifies the treatment applied to each.
+The replicates will be kept collapsed to an average.}
 
-\item{control_name}{A name that specifies the data either in the treatments column that should be used as the control. This could be the Day 0 of treatment or an untreated sample.
-For timepoints testing it will be assumed that the mininmum timepoint is the control.}
+\item{control_name}{A name that specifies the data either in the treatments
+column that should be used as the control. This could be the Day 0 of treatment
+or an untreated sample.
+ For timepoints testing it will be assumed that the mininmum timepoint is the control.}
 
-\item{num_ids_wo_annot}{default is 20; the number of pgRNA IDs to display to console if they don't have corresponding annotation data;
-ff there are more IDs without annotation data than this number, the output will be sent to a file rather than the console.}
+\item{num_ids_wo_annot}{default is 20; the number of pgRNA IDs to display to
+console if they don't have corresponding annotation data;
+ff there are more IDs without annotation data than this number, the output
+will be sent to a file rather than the console.}
 
-\item{rm_ids_wo_annot}{default is TRUE; whether or not to filter out pgRNA IDs from the input dataset that don't have corresponding annotation data available}
+\item{rm_ids_wo_annot}{default is TRUE; whether or not to filter out pgRNA IDs
+from the input dataset that don't have corresponding annotation data available}
 
-\item{missing_ids_file}{If there are missing IDs and a file is saved, where do you want this file to be saved? Provide a file path.}
+\item{missing_ids_file}{If there are missing IDs and a file is saved, where
+do you want this file to be saved? Provide a file path.}
 }
 \description{
 This calculates the log fold change for a gimap dataset based on
@@ -55,8 +69,10 @@ The pretreatment is the day 0 of CRISPR treatment, before CRISPR pgRNAs have tak
 `log2FC = log2CPM for each sample - pretreament log2CPM`
 
 3. `Normalize by negative and positive controls` - Calculate a negative control
-median for each sample and a positive control median for each sample and divide each log2FC by this value.
-`log2FC adjusted = log2FC / (median negative control for a sample - median positive control for a sample)`
+median for each sample and a positive control median for each sample and divide
+each log2FC by this value.
+`log2FC adjusted = log2FC /
+(median negative control for a sample - median positive control for a sample)`
 }
 \examples{
 \dontrun{
