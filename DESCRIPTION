@@ -25,6 +25,7 @@ Imports:
     dplyr,
     tidyr,
     rmarkdown,
+    vroom,
     ggplot2,
     magrittr,
     pheatmap,
