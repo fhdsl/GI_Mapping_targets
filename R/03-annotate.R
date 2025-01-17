@@ -241,7 +241,7 @@ gimap_annotate <- function(.data = NULL,
   return(gimap_dataset)
 }
 
-
+#' @importFrom utils download.file
 # This function sets up the tpm data from DepMap is called by the `gimap_annotate()` function
 tpm_setup <- function() {
   tpm_file <- file.path(
@@ -276,6 +276,7 @@ tpm_setup <- function() {
 
 # This function sets up the tpm data from DepMap is called by the `gimap_annotate()`
 # function if the cn_annotate = TRUE
+#' @importFrom utils download.file
 cn_setup <- function() {
   options(timeout = 1000)
 
@@ -310,6 +311,7 @@ cn_setup <- function() {
 }
 
 # This function sets up the control genes file from DepMap is called by the `gimap_annotate()`
+#' @importFrom utils download.file
 crtl_genes <- function() {
   crtl_genes_file <- file.path(
     system.file("extdata", package = "gimap"),
