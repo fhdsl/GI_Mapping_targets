@@ -20,3 +20,4 @@ gimap_QC_Report.html
 gimap_dataset_final.RDS’
 missing_ids_file.csv
 qc_plots/*
+R_X11.so

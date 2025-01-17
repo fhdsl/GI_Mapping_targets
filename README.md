@@ -162,3 +162,6 @@ And then putting "rstudio" for both the username and password.
 - https://www.nature.com/articles/s43586-021-00093-4
 
 ![See metrics about this repository here](https://cauldron.io/project/8779/stats.svg)
+
+
+This work is funded by NCI grant R01CA262556 as well as funding from the Translational Data Science IRC of Fred Hutchinson Cancer Center. 
