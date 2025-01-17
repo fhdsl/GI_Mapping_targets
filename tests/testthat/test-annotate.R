@@ -14,7 +14,7 @@ test_that("Annotation options", {
 
    # It should warn you if you try to say FALSE for cell line_annotate but
    # don't provide a custom_tpm or use normalize_by_unexpressed = FALSE
-   testthat::expect_warning(
+   testthat::expect_error(
      gimap_dataset <- get_example_data("gimap") %>%
        gimap_filter() %>%
        gimap_annotate(cell_line_annotate = FALSE) %>%
