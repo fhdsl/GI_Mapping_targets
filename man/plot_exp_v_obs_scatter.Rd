@@ -7,7 +7,7 @@
 plot_exp_v_obs_scatter(gimap_dataset, facet_rep = TRUE, reps_to_drop = "")
 }
 \arguments{
-\item{gimap_dataset}{A special dataset structure that is setup using has had gi scores calculated.}
+\item{gimap_dataset}{A special dataset structure that is originally setup using `setup_data()` and has had gi scores calculated with `calc_gi()`.}
 
 \item{facet_rep}{Should the replicates be wrapped with facet_wrap()?}
 
@@ -15,9 +15,9 @@ plot_exp_v_obs_scatter(gimap_dataset, facet_rep = TRUE, reps_to_drop = "")
 }
 \description{
 This plot is meant to be functionally equivalent to Fig S5K (for HeLa, equivalent of Fig 3a for PC9).
-Scatter plot of target-level observed versus expected CRISPR scores in the HeLa screen.
+Scatter plot of target-level observed versus expected CRISPR scores in the screen.
 The solid line is the linear regression line for the negative control (single KO) pgRNAs,
-while dashed lines indicate ± 2 residuals.
+while dashed lines indicate the lower and upper quartile residuals.
 }
 \examples{
 \dontrun{

@@ -240,7 +240,16 @@ gimap_normalize <- function(.data = NULL,
     )
 
   ########################### Perform adjustments #############################
+  if (normalize_by_unexpressed) {
 
+    stopifnot("For normalize_by_unexpressed to be TRUE you need to have added TPM
+              data in the annotation step using cell_line_annotation or custom_tpm" =
+                "unexpressed_ctrl_flag" %in% colnames(comparison_df))
+
+    comparison_df <- comparison_df %>%
+      dplyr::mutate(
+        lfc = lfc - median(lfc[unexpressed_ctrl_flag == TRUE]))
+  }
   medians_df <- comparison_df %>%
     dplyr::group_by(norm_ctrl_flag, rep) %>%
     dplyr::summarize(median = median(lfc, na.rm = TRUE)) %>%
@@ -256,17 +265,6 @@ gimap_normalize <- function(.data = NULL,
     dplyr::mutate(
       crispr_score = (lfc - negative_control) / (negative_control - positive_control)
     )
-
-  if (normalize_by_unexpressed) {
-
-    stopifnot("For normalize_by_unexpressed to be TRUE you need to have added TPM
-              data in the annotation step using cell_line_annotation or custom_tpm" =
-                "unexpressed_ctrl_flag" %in% colnames(lfc_adj))
-
-    lfc_adj <- lfc_adj %>%
-      dplyr::mutate(
-        crispr_score = crispr_score - median(crispr_score[unexpressed_ctrl_flag == TRUE]))
-  }
 
   # These should equal 0 and -1
   lfc_adj %>%
