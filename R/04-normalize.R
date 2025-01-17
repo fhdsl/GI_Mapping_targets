@@ -93,7 +93,7 @@ gimap_normalize <- function(.data = NULL,
   # https://github.com/FredHutch/GI_mapping/blob/main/workflow/scripts/03-filter_and_calculate_LFC.Rmd
 
 
-  if (!is.null(gimap_dataset$normalized_log_fc) & overwrite) {
+  if (!is.null(gimap_dataset$normalized_log_fc) & !overwrite) {
     stop("Normalization has already been preformed on this dataset.",
          "set overwrite = TRUE if you'd like the existing data to be overwritten.")
   }

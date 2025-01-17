@@ -20,7 +20,7 @@ test_that("Annotation options", {
        gimap_annotate(cell_line_annotate = FALSE) %>%
        gimap_normalize(timepoints = "day"))
 
-   gimap_dataset <- gimap_dataset %>%
+   gimap_dataset <- get_example_data("gimap") %>%
      gimap_filter() %>%
      gimap_annotate(cell_line_annotate = FALSE) %>%
      gimap_normalize(timepoints = "day",
@@ -31,12 +31,18 @@ test_that("Annotation options", {
                                colnames(gimap_dataset$normalized_log_fc)))
 
    ## Try out using custom TPM data
-   custom_tpm <- tpm_setup()
+   custom_tpm <- vroom::vroom(file.path(
+     system.file("extdata", package = "gimap"),
+     "CCLE_expression.csv"),
+                       show_col_types = FALSE,
+                       col_select = c("genes", "ACH-001086")
+   ) %>%
+     dplyr::rename(log2_tpm = `ACH-001086`)
 
-   testthat::expect_error(
-     gimap_dataset <- gimap_dataset %>%
+   gimap_dataset <- get_example_data("gimap") %>%
      gimap_filter() %>%
-     gimap_annotate(custom_tpm = custom_tpm))
+     gimap_annotate(custom_tpm = custom_tpm,
+                    cell_line = "HELA")
 
    gimap_dataset <- gimap_dataset %>%
      gimap_normalize(timepoints = "day",

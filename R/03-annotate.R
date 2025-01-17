@@ -74,7 +74,7 @@ gimap_annotate <- function(.data = NULL,
     "with the setup_data() function.")
   }
 
-  if (cell_line_annotate & is.null(cell_line)) {
+  if (all(cell_line_annotate,  is.null(cell_line))) {
     stop("By default `cell_line_annotate` = TRUE which means if you want DepMap annotation",
          " you must specify which cell line you are using with the `cell_line` argument",
          " OR set `cell_line_annotate` = FALSE.",
@@ -163,8 +163,9 @@ gimap_annotate <- function(.data = NULL,
               "custom_tpm must contain a column called 'genes'" = "genes" %in%
                 colnames(custom_tpm))
 
-    gene_matches <- sum(match(custom_tpm$genes, annotation_df$genes))
-    percent <- gene_matches/length(custom_tpm$genes)*100
+    annotation_genes <- unique(c(annotation_df$gene1_symbol, annotation_df$gene2_symbol))
+    gene_matches <- sum(!is.na(match(annotation_genes, custom_tpm$genes)))
+    percent <- round(gene_matches/length(annotation_genes)*100)
 
     message(gene_matches,
             " :number of genes have matches in the custom_tpm data \n",
