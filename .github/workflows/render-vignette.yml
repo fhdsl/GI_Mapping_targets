@@ -34,7 +34,7 @@ jobs:
           git config --global user.name "jhudsl-robot"
 
       - name: Run vignette
-        run: Rscript -e "rmarkdown::render('vignettes/getting-started.Rmd')"
+        run: Rscript -e "rmarkdown::render('vignettes/quick-start.Rmd')"
 
       # Commit the rendered bookdown files
       - name: Commit rendered files
