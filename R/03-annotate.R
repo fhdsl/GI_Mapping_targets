@@ -23,6 +23,7 @@
 #' instead of the tpm data from DepMap. However other data from DepMap like CN will be added.
 #' @importFrom stringr word
 #' @import dplyr
+#' @importFrom utils download.file
 #' @export
 #' @examples \dontrun{
 #'
