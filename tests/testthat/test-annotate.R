@@ -40,7 +40,8 @@ test_that("Annotation options", {
 
    gimap_dataset <- gimap_dataset %>%
      gimap_normalize(timepoints = "day",
-                     normalize_by_unexpressed = FALSE)
+                     normalize_by_unexpressed = FALSE,
+                     overwrite = TRUE)
 
    # We should see these columns
    testthat::expect_true(all(c("lfc", "crispr_score", "norm_ctrl_flag") %in%
