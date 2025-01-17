@@ -33,7 +33,7 @@ test_that("Annotation options", {
    ## Try out using custom TPM data
    custom_tpm <- tpm_setup()
 
-   testthat::expect_warning(
+   testthat::expect_error(
      gimap_dataset <- gimap_dataset %>%
      gimap_filter() %>%
      gimap_annotate(custom_tpm = custom_tpm))

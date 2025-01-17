@@ -88,7 +88,7 @@ plot_exp_v_obs_scatter <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop
     return(gplot)
   }
 }
-
+#' Rank plot for target-level GI scores
 #' @description This plot is meant to be functionally equivalent to Fig 5a (for HeLa, equivalent of Fig 3c for PC9).
 #' Rank plot of target-level GI scores.
 #' Dashed horizontal lines are for GI scores of 0.25 and -0.5
@@ -138,6 +138,7 @@ plot_rank_scatter <- function(gimap_dataset, reps_to_drop = ""){
   )
 }
 
+#' Volcano plot for GI scores
 #' @description This plot is meant to be functionally equivalent to Fig 5b (for HeLa, equivalent of Fig 3d for PC9).
 #' Volcano plot of target-level GI scores
 #' Blue points are synthetic lethal paralog GIs with GI < 0.5 and FDR < 0.1; red points are buffering paralog GIs with GI > 0.25 and FDR < 0.1.
@@ -162,7 +163,7 @@ plot_rank_scatter <- function(gimap_dataset, reps_to_drop = ""){
 #' plot_rank_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
 #' plot_volcano(gimap_dataset, reps_to_drop = "Day05_RepA_early")
 #' }
-plot_volcano <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop = c("Day05_RepA_early")){
+plot_volcano <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop = ""){
 
   if (!("gimap_dataset" %in% class(gimap_dataset))) stop("This function only works",
     "with gimap_dataset objects which can be made with the setup_data() function.")
@@ -207,11 +208,14 @@ plot_volcano <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop = c("Day0
     return(gplot)
   }
 }
-
-#' @description This plot is for when you'd like to examine a target pair specifically -- meant to be functionally equivalent to Fig 3b
+#' Target bar plot for CRISPR scores
+#' @description This plot is for when you'd like to examine a target pair
+#' specifically -- meant to be functionally equivalent to Fig 3b
 #' CRISPR scores for representative synthetic lethal paralog pairs.
-#' Data shown are the mean CRISPR score for each single KO or DKO target across three biological replicates with replicate data shown in overlaid points.
-#' @param gimap_dataset A special dataset structure that is originally setup using `setup_data()` and has had gi scores calculated with `calc_gi()`.
+#' Data shown are the mean CRISPR score for each single KO or DKO target across
+#'  three biological replicates with replicate data shown in overlaid points.
+#' @param gimap_dataset A special dataset structure that is originally setup using
+#'  `setup_data()` and has had gi scores calculated with `calc_gi()`.
 #' @param target1 Name of the first target to be plotted e.g.
 #' @param target2 Name of the second target to be plotted e.g.
 #' @param reps_to_drop Names of replicates that should be not plotted (Optional)
