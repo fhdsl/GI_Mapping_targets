@@ -1,9 +1,9 @@
 #' Plots for Genetic interactions
 #' @description This plot is meant to be functionally equivalent to Fig S5K (for HeLa, equivalent of Fig 3a for PC9).
-#' Scatter plot of target-level observed versus expected CRISPR scores in the HeLa screen.
+#' Scatter plot of target-level observed versus expected CRISPR scores in the screen.
 #' The solid line is the linear regression line for the negative control (single KO) pgRNAs,
-#' while dashed lines indicate ± 2 residuals.
-#' @param gimap_dataset A special dataset structure that is setup using has had gi scores calculated.
+#' while dashed lines indicate the lower and upper quartile residuals.
+#' @param gimap_dataset A special dataset structure that is originally setup using `setup_data()` and has had gi scores calculated with `calc_gi()`.
 #' @param facet_rep Should the replicates be wrapped with facet_wrap()?
 #' @param reps_to_drop Names of replicates that should be not plotted (Optional)
 #' @import dplyr
@@ -88,12 +88,11 @@ plot_exp_v_obs_scatter <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop
     return(gplot)
   }
 }
-#' Plots for Genetic interactions
-#' @description This plot is meant to be functionally equivalent to Fig S5K (for HeLa, equivalent of Fig 3a for PC9).
-#' Scatter plot of target-level observed versus expected CRISPR scores in the HeLa screen.
-#' The solid line is the linear regression line for the negative control (single KO) pgRNAs,
-#' while dashed lines indicate ± 2 residuals.
-#' @param gimap_dataset A special dataset structure that is setup using has had gi scores calculated.
+
+#' @description This plot is meant to be functionally equivalent to Fig 5a (for HeLa, equivalent of Fig 3c for PC9).
+#' Rank plot of target-level GI scores.
+#' Dashed horizontal lines are for GI scores of 0.25 and -0.5
+#' @param gimap_dataset A special dataset structure that is originally setup using `setup_data()` and has had gi scores calculated with `calc_gi()`.
 #' @param reps_to_drop Names of replicates that should be not plotted (Optional)
 #' @import dplyr
 #' @import ggplot2
@@ -114,6 +113,13 @@ plot_exp_v_obs_scatter <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop
 #' plot_volcano(gimap_dataset, reps_to_drop = "Day05_RepA_early")
 #' }
 plot_rank_scatter <- function(gimap_dataset, reps_to_drop = ""){
+
+  if (!("gimap_dataset" %in% class(gimap_dataset))) stop("This function only works",
+     "with gimap_dataset objects which can be made with the setup_data() function.")
+
+  if (is.null(gimap_dataset$overall_results)) stop("This function only works with",
+     "gimap_dataset objects which have had gi calculated with calc_gi()")
+
   return(
     gimap_dataset$gi_scores %>%
       filter(target_type == "gene_gene") %>% #get only double targeting
@@ -132,12 +138,11 @@ plot_rank_scatter <- function(gimap_dataset, reps_to_drop = ""){
   )
 }
 
-#' Plots for Genetic interactions
-#' @description This plot is meant to be functionally equivalent to Fig S5K (for HeLa, equivalent of Fig 3a for PC9).
-#' Scatter plot of target-level observed versus expected CRISPR scores in the HeLa screen.
-#' The solid line is the linear regression line for the negative control (single KO) pgRNAs,
-#' while dashed lines indicate ± 2 residuals.
-#' @param gimap_dataset A special dataset structure that is setup using has had gi scores calculated.
+#' @description This plot is meant to be functionally equivalent to Fig 5b (for HeLa, equivalent of Fig 3d for PC9).
+#' Volcano plot of target-level GI scores
+#' Blue points are synthetic lethal paralog GIs with GI < 0.5 and FDR < 0.1; red points are buffering paralog GIs with GI > 0.25 and FDR < 0.1.
+#' @param gimap_dataset A special dataset structure that is originally setup using `setup_data()` and has had gi scores calculated with `calc_gi()`.
+#' @param facet_rep Should the replicates be wrapped with facet_wrap()?
 #' @param reps_to_drop Names of replicates that should be not plotted (Optional)
 #' @import dplyr
 #' @import ggplot2
@@ -158,6 +163,13 @@ plot_rank_scatter <- function(gimap_dataset, reps_to_drop = ""){
 #' plot_volcano(gimap_dataset, reps_to_drop = "Day05_RepA_early")
 #' }
 plot_volcano <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop = c("Day05_RepA_early")){
+
+  if (!("gimap_dataset" %in% class(gimap_dataset))) stop("This function only works",
+    "with gimap_dataset objects which can be made with the setup_data() function.")
+
+  if (is.null(gimap_dataset$overall_results)) stop("This function only works with",
+    "gimap_dataset objects which have had gi calculated with calc_gi()")
+
   gplot <- gimap_dataset$gi_scores %>%
     filter(target_type == "gene_gene") %>% # get only double targeting
     filter(!(rep %in% reps_to_drop)) %>%
@@ -196,9 +208,10 @@ plot_volcano <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop = c("Day0
   }
 }
 
-#' Plots for genetic interactions for specific targets
-#' @description This plot is for when you'd like to examine a target pair specifically.
-#' @param gimap_dataset A special dataset structure that is setup using has had gi scores calculated.
+#' @description This plot is for when you'd like to examine a target pair specifically -- meant to be functionally equivalent to Fig 3b
+#' CRISPR scores for representative synthetic lethal paralog pairs.
+#' Data shown are the mean CRISPR score for each single KO or DKO target across three biological replicates with replicate data shown in overlaid points.
+#' @param gimap_dataset A special dataset structure that is originally setup using `setup_data()` and has had gi scores calculated with `calc_gi()`.
 #' @param target1 Name of the first target to be plotted e.g.
 #' @param target2 Name of the second target to be plotted e.g.
 #' @param reps_to_drop Names of replicates that should be not plotted (Optional)
@@ -221,33 +234,36 @@ plot_volcano <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop = c("Day0
 #' # "NDEL1_NDE1" is top result so let's plot that
 #' plot_targets_bar(gimap_dataset, target1 = "NDEL1", target2 = "NDE1")
 #' }
-plot_targets_bar <- function(gimap_dataset, target1, target2, reps_to_drop = "") {
-  gimap_dataset$gi_scores %>%
-    filter(!(rep %in% reps_to_drop)) %>%
-    filter((grepl(target1, pgRNA_target)) | (grepl(target2, pgRNA_target))) %>%
-    ggplot(aes(
-      y = mean_observed_cs, # This is not the right column
-      x = target_type,
-      fill = target_type
-    )) +
-    geom_bar(stat = "identity") +
-    geom_point(pch = 21, size = 3) +
-    theme_bw() +
-    ylab("CRISPR score") +
-    xlab("") +
-    ggtitle(paste0(target1, "/", target2)) +
-    geom_hline(yintercept = 0) +
-    scale_x_discrete(labels = c(
-      "ctrl_gene" = paste0(target2, " KO"),
-      # this assumes that target2 is the ctrl_{target2} gene
-      "gene_ctrl" = paste0(target1, " KO"),
-      # this assumes that target1 is the {target1}_ctrl gene
-      "gene_gene" = "DKO"
-    )) +
-    theme(
-      legend.position = "none",
-      panel.background = element_blank(),
-      panel.grid = element_blank(),
-      axis.text.x = element_text(angle = 45, hjust = 1)
-    )
+plot_targets_bar <- function(gimap_dataset, target1, target2, reps_to_drop = ""){
+
+  if (!("gimap_dataset" %in% class(gimap_dataset))) stop("This function only works",
+    "with gimap_dataset objects which can be made with the setup_data() function.")
+
+  if (is.null(gimap_dataset$overall_results)) stop("This function only works with",
+    "gimap_dataset objects which have had gi calculated with calc_gi()")
+
+  return(
+    gimap_dataset$gi_scores %>%
+      filter(!(rep %in% reps_to_drop)) %>%
+      filter((grepl(target1, pgRNA_target)) | (grepl(target2, pgRNA_target))) %>%
+      ggplot(aes(y = mean_observed_cs, #This is not the right column
+                 x = target_type,
+                 fill = target_type)) +
+      geom_bar(stat = "identity") +
+      geom_point(pch = 21, size=3) +
+      theme_bw() +
+      ylab("CRISPR score") +
+      xlab("") +
+      ggtitle(paste0(target1, "/", target2)) +
+      geom_hline(yintercept = 0) +
+      scale_x_discrete(labels = c("ctrl_gene" = paste0(target2, " KO"),
+                                  #this assumes that target2 is the ctrl_{target2} gene
+                                  "gene_ctrl" = paste0(target1, " KO"),
+                                  #this assumes that target1 is the {target1}_ctrl gene
+                                  "gene_gene" = "DKO")) +
+      theme(legend.position = "none",
+            panel.background = element_blank(),
+            panel.grid = element_blank(),
+            axis.text.x = element_text(angle = 45, hjust=1))
+  )
 }
