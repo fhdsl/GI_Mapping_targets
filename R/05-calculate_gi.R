@@ -1,3 +1,5 @@
+Sys.setenv(VROOM_CONNECTION_SIZE = 500072)
+
 #' Calculate Genetic Interaction scores
 #' @description Create results table that has CRISPR scores, Wilcoxon rank-sum test and t tests.
 #' The output of the `gimap` package is genetic interaction scores which _is the
@@ -26,7 +28,7 @@
 #' @param .data Data can be piped in with tidyverse pipes from function to function. But the data must still be a gimap_dataset
 #' @param gimap_dataset A special dataset structure that is setup using the `setup_data()` function.
 #' @import dplyr
-#' @importFrom stats lm 
+#' @importFrom stats lm
 #' @export
 #' @examples \dontrun{
 #' gimap_dataset <- get_example_data("gimap")

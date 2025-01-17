@@ -131,11 +131,11 @@ gimap_annotate <- function(.data = NULL,
 
     if (!file.exists(tpm_file)) tpm_setup()
 
-    tpm <- readr::read_csv(tpm_file,
+    tpm <- vroom::vroom(tpm_file,
       show_col_types = FALSE,
-      col_select = c("genes", dplyr::all_of(my_depmap_id))
+      col_select = c("genes", my_depmap_id)
     ) %>%
-      dplyr::rename(log2_tpm = my_depmap_id)
+      dplyr::rename(log2_tpm = dplyr::all_of(my_depmap_id))
 
     ############################ COPY NUMBER ANNOTATION ##########################
     cn_file <- file.path(system.file("extdata", package = "gimap"), "CCLE_gene_cn.csv")
