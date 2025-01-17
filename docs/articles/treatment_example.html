@@ -105,8 +105,8 @@ review (<a href="https://www.nature.com/articles/s43586-021-00093-4" class="exte
 of pgPEN and GI-mapping in a paired gRNA format can be found here (<a href="https://pubmed.ncbi.nlm.nih.gov/34469736/" class="external-link uri">https://pubmed.ncbi.nlm.nih.gov/34469736/</a>).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/FredHutch/gimap" class="external-link">gimap</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error in get(paste0(generic, ".", class), envir = get_method_env()) : </span></span>
-<span><span class="co">#&gt;   object 'type_sum.accel' not found</span></span>
+<span><span class="co">#&gt; Warning: replacing previous import 'dplyr::group_rows' by</span></span>
+<span><span class="co">#&gt; 'kableExtra::group_rows' when loading 'gimap'</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Attaching package: 'dplyr'</span></span>
@@ -271,41 +271,43 @@ experimental setup.</li>
 </ul>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">gimap_dataset</span><span class="op">)</span></span>
-<span><span class="co">#&gt; List of 12</span></span>
-<span><span class="co">#&gt;  $ raw_counts         : num [1:33170, 1:5] 240 244 24 175 50 128 24 65 311 66 ...</span></span>
+<span><span class="co">#&gt; List of 10</span></span>
+<span><span class="co">#&gt;  $ raw_counts       : num [1:33170, 1:5] 240 244 24 175 50 128 24 65 311 66 ...</span></span>
 <span><span class="co">#&gt;   ..- attr(*, "dimnames")=List of 2</span></span>
 <span><span class="co">#&gt;   .. ..$ : NULL</span></span>
 <span><span class="co">#&gt;   .. ..$ : chr [1:5] "pretreatment" "dmsoA" "dmsoB" "drug1A" ...</span></span>
-<span><span class="co">#&gt;  $ counts_per_sample  : Named num [1:5] 6214019 6662533 6640876 7115331 6894220</span></span>
+<span><span class="co">#&gt;  $ counts_per_sample: Named num [1:5] 6214019 6662533 6640876 7115331 6894220</span></span>
 <span><span class="co">#&gt;   ..- attr(*, "names")= chr [1:5] "pretreatment" "dmsoA" "dmsoB" "drug1A" ...</span></span>
-<span><span class="co">#&gt;  $ transformed_data   :List of 2</span></span>
-<span><span class="co">#&gt;   ..$ cpm     : num [1:33170, 1:5] 38.62 39.27 3.86 28.16 8.05 ...</span></span>
+<span><span class="co">#&gt;  $ transformed_data :List of 3</span></span>
+<span><span class="co">#&gt;   ..$ count_norm: num [1:33170, 1:5] 4.41 4.4 5.4 4.55 5.09 ...</span></span>
 <span><span class="co">#&gt;   .. ..- attr(*, "dimnames")=List of 2</span></span>
 <span><span class="co">#&gt;   .. .. ..$ : NULL</span></span>
 <span><span class="co">#&gt;   .. .. ..$ : chr [1:5] "pretreatment" "dmsoA" "dmsoB" "drug1A" ...</span></span>
-<span><span class="co">#&gt;   ..$ log2_cpm: num [1:33170, 1:5] 5.31 5.33 2.28 4.87 3.18 ...</span></span>
+<span><span class="co">#&gt;   ..$ cpm       : num [1:33170, 1:5] 38.62 39.27 3.86 28.16 8.05 ...</span></span>
 <span><span class="co">#&gt;   .. ..- attr(*, "dimnames")=List of 2</span></span>
 <span><span class="co">#&gt;   .. .. ..$ : NULL</span></span>
 <span><span class="co">#&gt;   .. .. ..$ : chr [1:5] "pretreatment" "dmsoA" "dmsoB" "drug1A" ...</span></span>
-<span><span class="co">#&gt;  $ metadata           :List of 2</span></span>
+<span><span class="co">#&gt;   ..$ log2_cpm  : num [1:33170, 1:5] 5.31 5.33 2.28 4.87 3.18 ...</span></span>
+<span><span class="co">#&gt;   .. ..- attr(*, "dimnames")=List of 2</span></span>
+<span><span class="co">#&gt;   .. .. ..$ : NULL</span></span>
+<span><span class="co">#&gt;   .. .. ..$ : chr [1:5] "pretreatment" "dmsoA" "dmsoB" "drug1A" ...</span></span>
+<span><span class="co">#&gt;  $ metadata         :List of 2</span></span>
 <span><span class="co">#&gt;   ..$ pg_ids         : tibble [33,170 × 1] (S3: tbl_df/tbl/data.frame)</span></span>
 <span><span class="co">#&gt;   .. ..$ id: chr [1:33170] "AADAC_AADACL2_pg1" "AADAC_AADACL2_pg10" "AADAC_AADACL2_pg11" "AADAC_AADACL2_pg12" ...</span></span>
 <span><span class="co">#&gt;   ..$ sample_metadata:'data.frame':  5 obs. of  2 variables:</span></span>
 <span><span class="co">#&gt;   .. ..$ col_names     : chr [1:5] "pretreatment" "dmsoA" "dmsoB" "drug1A" ...</span></span>
 <span><span class="co">#&gt;   .. ..$ drug_treatment: Factor w/ 3 levels "dmso","drug",..: 3 1 1 2 2</span></span>
-<span><span class="co">#&gt;  $ filtered_data      :List of 5</span></span>
+<span><span class="co">#&gt;  $ filtered_data    :List of 5</span></span>
 <span><span class="co">#&gt;   ..$ filter_step_run       : logi FALSE</span></span>
 <span><span class="co">#&gt;   ..$ metadata_pg_ids       : NULL</span></span>
 <span><span class="co">#&gt;   ..$ transformed_log2_cpm  : NULL</span></span>
 <span><span class="co">#&gt;   ..$ removed_pg_ids        : NULL</span></span>
 <span><span class="co">#&gt;   ..$ all_reps_zerocount_ids: NULL</span></span>
-<span><span class="co">#&gt;  $ comparisons        : NULL</span></span>
-<span><span class="co">#&gt;  $ annotation         : NULL</span></span>
-<span><span class="co">#&gt;  $ normalized_log_fc  : NULL</span></span>
-<span><span class="co">#&gt;  $ single_crispr_score: NULL</span></span>
-<span><span class="co">#&gt;  $ double_crispr_score: NULL</span></span>
-<span><span class="co">#&gt;  $ gi_scores          : NULL</span></span>
-<span><span class="co">#&gt;  $ overall_results    : NULL</span></span>
+<span><span class="co">#&gt;  $ comparisons      : NULL</span></span>
+<span><span class="co">#&gt;  $ annotation       : NULL</span></span>
+<span><span class="co">#&gt;  $ normalized_log_fc: NULL</span></span>
+<span><span class="co">#&gt;  $ crispr_score     : NULL</span></span>
+<span><span class="co">#&gt;  $ results          : NULL</span></span>
 <span><span class="co">#&gt;  - attr(*, "class")= chr [1:2] "list" "gimap_dataset"</span></span></code></pre></div>
 <p>Let’s see how many rows of data we have.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
@@ -429,6 +431,8 @@ corresponding DepMap data is used for annotation. This function is
 function. <code>timepoints</code> needs to be specified pointing to the
 correct column names from the <code>sample_data</code> passed to the
 <code><a href="../reference/setup_data.html">setup_data()</a></code> function earlier.</li>
+<li>CRISPR scores are calculated with the <code><a href="../reference/calc_crispr.html">calc_crispr()</a></code>
+function.</li>
 <li>Genetic interaction scores are computed with the
 <code><a href="../reference/calc_gi.html">calc_gi()</a></code> function.</li>
 </ul>
@@ -444,6 +448,7 @@ correct column names from the <code>sample_data</code> passed to the
 <span>    treatments <span class="op">=</span> <span class="st">"drug_treatment"</span>,</span>
 <span>    control_name <span class="op">=</span> <span class="st">"pretreatment"</span></span>
 <span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="../reference/calc_crispr.html">calc_crispr</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/calc_gi.html">calc_gi</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Annotating Data</span></span>
 <span><span class="co">#&gt; <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">1884</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">3</span></span></span>
@@ -458,75 +463,102 @@ correct column names from the <code>sample_data</code> passed to the
 <span><span class="co">#&gt; The following 2 IDs were not found in the annotation data: </span></span>
 <span><span class="co">#&gt; c("DHFR2_nt1_g1", "DHFR2_nt1_g2")</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; The input data for the IDs which were not found in the annotationdata has been filtered out and will not be included in the analysis output.</span></span>
+<span><span class="co">#&gt; The input data for the IDs which were not found in the annotation data has been filtered out and will not be included in the analysis output.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Calculating CRISPR score</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Calculating Genetic Interaction scores</span></span></code></pre></div>
 <p>Here’s what’s included in the GI Scores table:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">gimap_dataset</span><span class="op">$</span><span class="va">gi_scores</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 8</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># Groups:   rep [1]</span></span></span>
-<span><span class="co">#&gt;   rep   pgRNA_target mean_expected_cs mean_observed_cs mean_gi_score target_type</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> dmso… A2M_PZP              -<span style="color: #BB0000;">0.005</span><span style="color: #BB0000; text-decoration: underline;">50</span>           0.091<span style="text-decoration: underline;">2</span>        0.259  gene_gene  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> dmso… AADACL3_AAD…         -<span style="color: #BB0000;">0.563</span>            -<span style="color: #BB0000;">1.13</span>         -<span style="color: #BB0000;">0.670</span>  gene_gene  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> dmso… AADAC_AADAC…         -<span style="color: #BB0000;">0.400</span>            -<span style="color: #BB0000;">0.535</span>        -<span style="color: #BB0000;">0.159</span>  gene_gene  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> dmso… ABCC1_ABCC3          -<span style="color: #BB0000;">2.31</span>             -<span style="color: #BB0000;">1.36</span>          0.026<span style="text-decoration: underline;">7</span> gene_gene  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> dmso… ABCC8_ABCC9          -<span style="color: #BB0000;">0.169</span>            -<span style="color: #BB0000;">0.492</span>        -<span style="color: #BB0000;">0.238</span>  gene_gene  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> dmso… ABCD1_ABCD2          -<span style="color: #BB0000;">0.902</span>            -<span style="color: #BB0000;">1.05</span>         -<span style="color: #BB0000;">0.410</span>  gene_gene  </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: p_val &lt;dbl&gt;, fdr &lt;dbl&gt;</span></span></span></code></pre></div>
-<p>Let’s check out the top results</p>
+<span><span class="co">#&gt;   pgRNA_target_double rep        double_target_gi_score single_target_gi_score_1</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> AADAC_AADACL2       dmsoA_dmso                  1.24                     0.428</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> AADAC_AADACL2       dmsoA_dmso                  1.24                     0.428</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> AADAC_AADACL2       dmsoA_dmso                  1.24                    -<span style="color: #BB0000;">0.109</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> AADAC_AADACL2       dmsoA_dmso                  1.24                    -<span style="color: #BB0000;">0.109</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> AADAC_AADACL2       dmsoB_dmso                  0.638                    0.112</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> AADAC_AADACL2       dmsoB_dmso                  0.638                    0.112</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: single_target_gi_score_2 &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   expected_crispr_single_1 &lt;dbl&gt;, expected_crispr_single_2 &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   expected_crispr_double &lt;dbl&gt;</span></span></span></code></pre></div>
+<p>Take a look at a preview of the CRISPR scores:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">gimap_dataset</span><span class="op">$</span><span class="va">gi_score</span>, <span class="va">fdr</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 8</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># Groups:   rep [1]</span></span></span>
-<span><span class="co">#&gt;   rep   pgRNA_target mean_expected_cs mean_observed_cs mean_gi_score target_type</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> drug… MED12L_MED12             3.63             5.48          3.77 gene_gene  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> drug… GRK3_GRK2                3.95             5.74          3.86 gene_gene  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> drug… SYNGR3_SYNG…             1.68            -<span style="color: #BB0000;">1.50</span>         -<span style="color: #BB0000;">2.18</span> gene_gene  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> drug… L3MBTL2_MBT…             2.86            -<span style="color: #BB0000;">1.87</span>         -<span style="color: #BB0000;">3.17</span> gene_gene  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> drug… SPRED2_SPRE…             6.24             7.80          4.71 gene_gene  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> drug… KCTD2_KCTD5              7.44             7.36          3.65 gene_gene  </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: p_val &lt;dbl&gt;, fdr &lt;dbl&gt;</span></span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="plot-the-results">Plot the results<a class="anchor" aria-label="anchor" href="#plot-the-results"></a>
-</h3>
-<p>You can remove any samples from these plots by altering the
-<code>reps_to_drop</code> argument.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">gimap_dataset</span><span class="op">$</span><span class="va">crispr_score</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 13</span></span></span>
+<span><span class="co">#&gt;   pg_ids   rep   double_crispr_score single_crispr_score_1 single_crispr_score_2</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> AADAC_A… dmso…               1.63                0.399                  1.19  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> AADAC_A… dmso…               1.63                0.399                  0.051<span style="text-decoration: underline;">9</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> AADAC_A… dmso…               1.63                0.004<span style="text-decoration: underline;">07</span>                1.19  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> AADAC_A… dmso…               1.63                0.004<span style="text-decoration: underline;">07</span>                0.051<span style="text-decoration: underline;">9</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> AADAC_A… dmso…               0.716              -<span style="color: #BB0000;">0.223</span>                  1.15  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> AADAC_A… dmso…               0.716              -<span style="color: #BB0000;">0.223</span>                 -<span style="color: #BB0000;">0.353</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 8 more variables: pgRNA_target_double &lt;chr&gt;, gene_symbol_1 &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   gene_symbol_2 &lt;chr&gt;, mean_single_target_crispr_1 &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   mean_single_target_crispr_2 &lt;dbl&gt;, pgRNA1_seq &lt;chr&gt;, pgRNA2_seq &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   mean_double_control_crispr &lt;dbl&gt;</span></span></span></code></pre></div>
+<p>Take a look at the overall stats:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_exp_v_obs_scatter.html">plot_exp_v_obs_scatter</a></span><span class="op">(</span><span class="va">gimap_dataset</span><span class="op">)</span></span></code></pre></div>
-<p><img src="treatment_example_files/figure-html/unnamed-chunk-19-1.png" width="700"></p>
+<code class="sourceCode R"><span><span class="va">gimap_dataset</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">overall</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 8 × 6</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># Groups:   rep [4]</span></span></span>
+<span><span class="co">#&gt;   rep         term                        estimate std.error statistic   p.value</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> dmsoA_dmso  (Intercept)                   0.025<span style="text-decoration: underline;">7</span>   0.001<span style="text-decoration: underline;">60</span>     16.0  6.07<span style="color: #949494;">e</span><span style="color: #BB0000;">- 58</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> dmsoA_dmso  mean_expected_single_crispr   0.441    0.002<span style="text-decoration: underline;">28</span>    194.   0   <span style="color: #949494;"> </span>    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> dmsoB_dmso  (Intercept)                  -<span style="color: #BB0000;">0.043</span><span style="color: #BB0000; text-decoration: underline;">5</span>   0.001<span style="text-decoration: underline;">76</span>    -<span style="color: #BB0000;">24.7</span>  5.59<span style="color: #949494;">e</span><span style="color: #BB0000;">-135</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> dmsoB_dmso  mean_expected_single_crispr   0.451    0.002<span style="text-decoration: underline;">32</span>    195.   0   <span style="color: #949494;"> </span>    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> drug1A_drug (Intercept)                   0.122    0.003<span style="text-decoration: underline;">00</span>     40.7  0   <span style="color: #949494;"> </span>    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> drug1A_drug mean_expected_single_crispr   0.424    0.002<span style="text-decoration: underline;">21</span>    192.   0   <span style="color: #949494;"> </span>    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> drug1B_drug (Intercept)                  -<span style="color: #BB0000;">0.016</span><span style="color: #BB0000; text-decoration: underline;">5</span>   0.002<span style="text-decoration: underline;">58</span>     -<span style="color: #BB0000;">6.40</span> 1.56<span style="color: #949494;">e</span><span style="color: #BB0000;">- 10</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> drug1B_drug mean_expected_single_crispr   0.429    0.002<span style="text-decoration: underline;">27</span>    189.   0   <span style="color: #949494;"> </span></span></span></code></pre></div>
+<p>Lastly, let’s take a look at the by target results. We can arrange by
+results using <code><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">dplyr::arrange()</a></code></p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_rank_scatter.html">plot_rank_scatter</a></span><span class="op">(</span><span class="va">gimap_dataset</span><span class="op">)</span></span></code></pre></div>
-<p><img src="treatment_example_files/figure-html/unnamed-chunk-20-1.png" width="700"></p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_volcano.html">plot_volcano</a></span><span class="op">(</span><span class="va">gimap_dataset</span><span class="op">)</span></span></code></pre></div>
-<p><img src="treatment_example_files/figure-html/unnamed-chunk-21-1.png" width="700"></p>
-<div class="section level4">
-<h4 id="plot-specific-target-pair">Plot specific target pair<a class="anchor" aria-label="anchor" href="#plot-specific-target-pair"></a>
-</h4>
-<p>We can pick out a specific pair to plot.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># "MED12L_MED12" is top result so let's plot that</span></span>
-<span><span class="fu"><a href="../reference/plot_targets_bar.html">plot_targets_bar</a></span><span class="op">(</span><span class="va">gimap_dataset</span>, target1 <span class="op">=</span> <span class="st">"MED12L"</span>, target2 <span class="op">=</span> <span class="st">"MED12"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="treatment_example_files/figure-html/unnamed-chunk-22-1.png" width="700"></p>
+<code class="sourceCode R"><span><span class="va">gimap_dataset</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">by_target</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">fdr_vals_wil_dmsoA_dmso</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,030 × 17</span></span></span>
+<span><span class="co">#&gt;    targets  p_val_ttest_dmsoA_dmso p_val_ttest_dmsoB_dmso p_val_ttest_drug1A_d…¹</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> RBBP7_R…             0.000<span style="text-decoration: underline;">005</span>47               0.002<span style="text-decoration: underline;">33</span>                  0.235 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> AP2A1_A…             0.000<span style="text-decoration: underline;">174</span>                 0.000<span style="text-decoration: underline;">298</span>                 0.051<span style="text-decoration: underline;">5</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> ATP6V1E…             0.000<span style="text-decoration: underline;">025</span>1                0.038<span style="text-decoration: underline;">4</span>                   0.319 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> KCTD2_K…             0.000<span style="text-decoration: underline;">006</span>96               0.012<span style="text-decoration: underline;">1</span>                   0.010<span style="text-decoration: underline;">3</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> GRIP2_G…             0.000<span style="text-decoration: underline;">007</span>20               0.187                    0.122 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> MPPED2_…             0.000<span style="text-decoration: underline;">025</span>0                0.328                    0.426 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> CSTF2T_…             0.000<span style="text-decoration: underline;">132</span>                 0.195                    0.880 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> LHFPL6_…             0.000<span style="text-decoration: underline;">013</span>0                0.985                    0.356 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> HRASLS2…             0.000<span style="text-decoration: underline;">015</span>4                0.966                    0.120 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> PSMB6_P…             0.000<span style="text-decoration: underline;">031</span>0                0.621                    0.012<span style="text-decoration: underline;">7</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1,020 more rows</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ abbreviated name: ¹​p_val_ttest_drug1A_drug</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 13 more variables: p_val_ttest_drug1B_drug &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   p_val_wil_dmsoA_dmso &lt;dbl&gt;, p_val_wil_dmsoB_dmso &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   p_val_wil_drug1A_drug &lt;dbl&gt;, p_val_wil_drug1B_drug &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   fdr_vals_ttest_dmsoA_dmso &lt;dbl&gt;, fdr_vals_ttest_dmsoB_dmso &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   fdr_vals_ttest_drug1A_drug &lt;dbl&gt;, fdr_vals_ttest_drug1B_drug &lt;dbl&gt;, …</span></span></span></code></pre></div>
 </div>
-</div>
-</div>
-<div class="section level2">
-<h2 id="to-plot-results-pick-out-two-targets-from-the-gi_score-table">To plot results, pick out two targets from the gi_score table<a class="anchor" aria-label="anchor" href="#to-plot-results-pick-out-two-targets-from-the-gi_score-table"></a>
-</h2>
-<p>head(dplyr::arrange(gimap_dataset$gi_score, fdr)) #’ #’ #
-“NDEL1_NDE1” is top result so let’s plot that #’
-plot_targets_bar(gimap_dataset, target1 = “NDEL1”, target2 = “NDE1”)</p>
 <div class="section level3">
 <h3 id="saving-results-to-files">Saving results to files<a class="anchor" aria-label="anchor" href="#saving-results-to-files"></a>
 </h3>
 <p>We can save the genetic interactions scores like this:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/write_delim.html" class="external-link">write_tsv</a></span><span class="op">(</span><span class="va">gimap_dataset</span><span class="op">$</span><span class="va">gi_scores</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">output_dir</span>, <span class="st">"gi_scores.tsv"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>Similarly let’s save the CRISPR scores.</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/write_delim.html" class="external-link">write_tsv</a></span><span class="op">(</span><span class="va">gimap_dataset</span><span class="op">$</span><span class="va">crispr_score</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">output_dir</span>, <span class="st">"crispr_scores.tsv"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>We can extract and save the stats results to the TSV</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/write_delim.html" class="external-link">write_tsv</a></span><span class="op">(</span></span>
+<span>  <span class="va">gimap_dataset</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">overall</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">output_dir</span>, <span class="st">"overall_stats.tsv"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/write_delim.html" class="external-link">write_tsv</a></span><span class="op">(</span></span>
+<span>  <span class="va">gimap_dataset</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">by_target</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">output_dir</span>, <span class="st">"by_target_stats.tsv"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p>We can save all these data as an RDS.</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">gimap_dataset</span>, <span class="st">"gimap_dataset_final_treatment.RDS"</span><span class="op">)</span></span></code></pre></div>
@@ -539,7 +571,7 @@ plot_targets_bar(gimap_dataset, target1 = “NDEL1”, target2 = “NDE1”)</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; R version 4.4.0 (2024-04-24)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-apple-darwin20</span></span>
-<span><span class="co">#&gt; Running under: macOS 15.1.1</span></span>
+<span><span class="co">#&gt; Running under: macOS 15.0.1</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Matrix products: default</span></span>
 <span><span class="co">#&gt; BLAS:   /Library/Frameworks/R.framework/Versions/4.4-x86_64/Resources/lib/libRblas.0.dylib </span></span>
@@ -558,23 +590,24 @@ plot_targets_bar(gimap_dataset, target1 = “NDEL1”, target2 = “NDE1”)</p>
 <span><span class="co">#&gt; [1] dplyr_1.1.4 gimap_0.1.0</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
-<span><span class="co">#&gt;  [1] utf8_1.2.4         sass_0.4.9         generics_0.1.3     tidyr_1.3.1       </span></span>
-<span><span class="co">#&gt;  [5] stringi_1.8.4      hms_1.1.3          digest_0.6.37      magrittr_2.0.3    </span></span>
-<span><span class="co">#&gt;  [9] evaluate_1.0.1     grid_4.4.0         timechange_0.3.0   RColorBrewer_1.1-3</span></span>
-<span><span class="co">#&gt; [13] fastmap_1.2.0      jsonlite_1.8.9     backports_1.5.0    purrr_1.0.2       </span></span>
-<span><span class="co">#&gt; [17] scales_1.3.0       textshaping_0.4.1  jquerylib_0.1.4    cli_3.6.3         </span></span>
-<span><span class="co">#&gt; [21] crayon_1.5.3       rlang_1.1.4        bit64_4.5.2        munsell_0.5.1     </span></span>
-<span><span class="co">#&gt; [25] withr_3.0.2        cachem_1.1.0       yaml_2.3.10        parallel_4.4.0    </span></span>
-<span><span class="co">#&gt; [29] tools_4.4.0        tzdb_0.4.0         colorspace_2.1-1   ggplot2_3.5.1     </span></span>
-<span><span class="co">#&gt; [33] broom_1.0.7        curl_6.0.1         vctrs_0.6.5        R6_2.5.1          </span></span>
-<span><span class="co">#&gt; [37] lifecycle_1.0.4    lubridate_1.9.4    snakecase_0.11.1   stringr_1.5.1     </span></span>
-<span><span class="co">#&gt; [41] bit_4.5.0.1        fs_1.6.5           htmlwidgets_1.6.4  vroom_1.6.5       </span></span>
-<span><span class="co">#&gt; [45] ragg_1.3.3         janitor_2.2.0      pkgconfig_2.0.3    desc_1.4.3        </span></span>
-<span><span class="co">#&gt; [49] pkgdown_2.1.1      pillar_1.10.0      bslib_0.8.0.9000   gtable_0.3.6      </span></span>
-<span><span class="co">#&gt; [53] glue_1.8.0         systemfonts_1.1.0  xfun_0.49          tibble_3.2.1      </span></span>
-<span><span class="co">#&gt; [57] tidyselect_1.2.1   rstudioapi_0.17.1  knitr_1.49         farver_2.1.2      </span></span>
-<span><span class="co">#&gt; [61] htmltools_0.5.8.1  labeling_0.4.3     rmarkdown_2.29     readr_2.1.5       </span></span>
-<span><span class="co">#&gt; [65] pheatmap_1.0.12    compiler_4.4.0</span></span></code></pre></div>
+<span><span class="co">#&gt;  [1] tidyr_1.3.1        sass_0.4.9         utf8_1.2.4         generics_0.1.3    </span></span>
+<span><span class="co">#&gt;  [5] xml2_1.3.6         stringi_1.8.4      hms_1.1.3          digest_0.6.37     </span></span>
+<span><span class="co">#&gt;  [9] magrittr_2.0.3     RColorBrewer_1.1-3 evaluate_1.0.1     grid_4.4.0        </span></span>
+<span><span class="co">#&gt; [13] timechange_0.3.0   fastmap_1.2.0      jsonlite_1.8.9     backports_1.5.0   </span></span>
+<span><span class="co">#&gt; [17] purrr_1.0.2        fansi_1.0.6        viridisLite_0.4.2  scales_1.3.0      </span></span>
+<span><span class="co">#&gt; [21] textshaping_0.4.0  jquerylib_0.1.4    cli_3.6.3          crayon_1.5.3      </span></span>
+<span><span class="co">#&gt; [25] rlang_1.1.4        bit64_4.5.2        munsell_0.5.1      withr_3.0.1       </span></span>
+<span><span class="co">#&gt; [29] cachem_1.1.0       yaml_2.3.10        parallel_4.4.0     tools_4.4.0       </span></span>
+<span><span class="co">#&gt; [33] tzdb_0.4.0         colorspace_2.1-1   ggplot2_3.5.1      kableExtra_1.4.0  </span></span>
+<span><span class="co">#&gt; [37] broom_1.0.7        curl_5.2.3         vctrs_0.6.5        R6_2.5.1          </span></span>
+<span><span class="co">#&gt; [41] lifecycle_1.0.4    lubridate_1.9.3    snakecase_0.11.1   stringr_1.5.1     </span></span>
+<span><span class="co">#&gt; [45] bit_4.5.0          fs_1.6.4           htmlwidgets_1.6.4  vroom_1.6.5       </span></span>
+<span><span class="co">#&gt; [49] ragg_1.3.3         janitor_2.2.0      pkgconfig_2.0.3    desc_1.4.3        </span></span>
+<span><span class="co">#&gt; [53] pkgdown_2.1.1      pillar_1.9.0       bslib_0.8.0.9000   gtable_0.3.6      </span></span>
+<span><span class="co">#&gt; [57] glue_1.8.0         systemfonts_1.1.0  xfun_0.48          tibble_3.2.1      </span></span>
+<span><span class="co">#&gt; [61] tidyselect_1.2.1   rstudioapi_0.17.1  knitr_1.48         htmltools_0.5.8.1 </span></span>
+<span><span class="co">#&gt; [65] rmarkdown_2.28     svglite_2.1.3      readr_2.1.5        pheatmap_1.0.12   </span></span>
+<span><span class="co">#&gt; [69] compiler_4.4.0</span></span></code></pre></div>
 </div>
 </div>
   </div>
