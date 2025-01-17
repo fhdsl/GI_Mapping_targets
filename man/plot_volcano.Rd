@@ -2,26 +2,21 @@
 % Please edit documentation in R/plots-gi.R
 \name{plot_volcano}
 \alias{plot_volcano}
-\title{Plots for Genetic interactions}
+\title{Volcano plot for GI scores}
 \usage{
-plot_volcano(
-  gimap_dataset,
-  facet_rep = TRUE,
-  reps_to_drop = c("Day05_RepA_early")
-)
+plot_volcano(gimap_dataset, facet_rep = TRUE, reps_to_drop = "")
 }
 \arguments{
-\item{gimap_dataset}{A special dataset structure that is setup using has had gi scores calculated.}
+\item{gimap_dataset}{A special dataset structure that is originally setup using `setup_data()` and has had gi scores calculated with `calc_gi()`.}
 
 \item{facet_rep}{Should the replicates be wrapped with facet_wrap()?}
 
 \item{reps_to_drop}{Names of replicates that should be not plotted (Optional)}
 }
 \description{
-This plot is meant to be functionally equivalent to Fig S5K (for HeLa, equivalent of Fig 3a for PC9).
-Scatter plot of target-level observed versus expected CRISPR scores in the HeLa screen.
-The solid line is the linear regression line for the negative control (single KO) pgRNAs,
-while dashed lines indicate ± 2 residuals.
+This plot is meant to be functionally equivalent to Fig 5b (for HeLa, equivalent of Fig 3d for PC9).
+Volcano plot of target-level GI scores
+Blue points are synthetic lethal paralog GIs with GI < 0.5 and FDR < 0.1; red points are buffering paralog GIs with GI > 0.25 and FDR < 0.1.
 }
 \examples{
 \dontrun{

@@ -2,20 +2,19 @@
 % Please edit documentation in R/plots-gi.R
 \name{plot_rank_scatter}
 \alias{plot_rank_scatter}
-\title{Plots for Genetic interactions}
+\title{Rank plot for target-level GI scores}
 \usage{
 plot_rank_scatter(gimap_dataset, reps_to_drop = "")
 }
 \arguments{
-\item{gimap_dataset}{A special dataset structure that is setup using has had gi scores calculated.}
+\item{gimap_dataset}{A special dataset structure that is originally setup using `setup_data()` and has had gi scores calculated with `calc_gi()`.}
 
 \item{reps_to_drop}{Names of replicates that should be not plotted (Optional)}
 }
 \description{
-This plot is meant to be functionally equivalent to Fig S5K (for HeLa, equivalent of Fig 3a for PC9).
-Scatter plot of target-level observed versus expected CRISPR scores in the HeLa screen.
-The solid line is the linear regression line for the negative control (single KO) pgRNAs,
-while dashed lines indicate ± 2 residuals.
+This plot is meant to be functionally equivalent to Fig 5a (for HeLa, equivalent of Fig 3c for PC9).
+Rank plot of target-level GI scores.
+Dashed horizontal lines are for GI scores of 0.25 and -0.5
 }
 \examples{
 \dontrun{

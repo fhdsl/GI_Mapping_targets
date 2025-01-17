@@ -7,12 +7,14 @@
 gimap_normalize(
   .data = NULL,
   gimap_dataset,
+  normalize_by_unexpressed = TRUE,
   timepoints = NULL,
   treatments = NULL,
   control_name = NULL,
   num_ids_wo_annot = 20,
   rm_ids_wo_annot = TRUE,
-  missing_ids_file = "missing_ids_file.csv"
+  missing_ids_file = "missing_ids_file.csv",
+  overwrite = TRUE
 )
 }
 \arguments{
@@ -21,6 +23,11 @@ But the data must still be a gimap_dataset}
 
 \item{gimap_dataset}{A special dataset structure that is setup using the
 `setup_data()` function.}
+
+\item{normalize_by_unexpressed}{TRUE/FALSE crispr data should be normalized so
+that the median of unexpressed controls is 0. For this to happen set this to
+TRUE but you need to have added TPM data in the gimap_annotate step using
+cell_line_annotation or custom_tpm.}
 
 \item{timepoints}{Specifies the column name of the metadata set up in
 `$metadata$sample_metadata`
@@ -51,6 +58,8 @@ from the input dataset that don't have corresponding annotation data available}
 
 \item{missing_ids_file}{If there are missing IDs and a file is saved, where
 do you want this file to be saved? Provide a file path.}
+
+\item{overwrite}{Should existing normalized_log_fc data in the gimap_dataset be overwritten?}
 }
 \description{
 This calculates the log fold change for a gimap dataset based on

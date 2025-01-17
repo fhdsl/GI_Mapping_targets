@@ -29,6 +29,5 @@ gimap_dataset <- get_example_data("gimap") \%>\%
 # Plot:
 
 plot_crispr(gimap_dataset)
-
 }
 }

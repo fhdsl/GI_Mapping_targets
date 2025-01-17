@@ -1,5 +1,5 @@
 utils::globalVariables(c(
-  "pg_ids", "plot_theme", "negative_control", "positive_control", "mean_observed_cs", "timepoints", "value", "timepoint_avg", "target_type",
+  "pg_ids", "plot_theme()", "negative_control", "positive_control", "mean_observed_cs", "timepoints", "value", "timepoint_avg", "target_type",
   "unexpressed_ctrl_flag", "median", "lfc_adj", "median", "gRNA1_seq", "gRNA2_seq",
   "control_gRNA_seq", "crispr_score", "pgRNA_target", "mean_double_control_crispr",
   "pgRNA_target", "targeting_gRNA_seq", "mean_single_crispr", "double_crispr_score",
@@ -10,16 +10,15 @@ utils::globalVariables(c(
   "single_gi_score_1", "single_gi_score_2", "gene", "DepMap_ID",
   "gene1_symbol", "gene2_symbol", "expressed_flag", "norm_ctrl_flag", "bool_vals",
   "filter_name", "counts", "numzero", "name", "value", "lfc_plasmid_vs_late", "lfc_adj",
-   "double_gi_score", "count_normalized", "construct",
+  "double_gi_score", "count_normalized", "construct",
   "filterFlag", "plasmid_log2_cpm", "log2_cpm", "gene_symbol", "gene_symbol_1", "gene_symbol_2",
   "mean_double_control_crispr_1", "expected_crispr_double", "expected_crispr_single_1",
   "expected_crispr_single_2", "fdr_vals_ttest", "read_table", "stripped_cell_line_name",
   "comparison", ".", "col_names", "lfc_adj1", "t.test", "wilcox.test", "p.adjust",
-  "cor", "quantile", "var", "browseURL", 'single_crispr', "mean_single_crispr_2",
+  "cor", "quantile", "var", "browseURL", "single_crispr", "mean_single_crispr_2",
   "mean_single_crispr_1", "expected_single_crispr", "double_crispr", "double_gi_score",
   "fdr", "lfc",  "mean_expected_cs", "mean_gi_score", "mean_single_crispr",
-  "expected_double_crispr", "p_val", "single_gi_score", "broad_target_type",
-   "logfdr", "pointColor", "Rank"
+  "expected_double_crispr", "p_val", "single_gi_score"
 ))
 
 

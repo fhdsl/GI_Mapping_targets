@@ -24,6 +24,10 @@
 #' But the data must still be a gimap_dataset
 #' @param gimap_dataset A special dataset structure that is setup using the
 #' `setup_data()` function.
+#' @param normalize_by_unexpressed TRUE/FALSE crispr data should be normalized so
+#' that the median of unexpressed controls is 0. For this to happen set this to
+#' TRUE but you need to have added TPM data in the gimap_annotate step using
+#' cell_line_annotation or custom_tpm.
 #' @param timepoints Specifies the column name of the metadata set up in
 #' `$metadata$sample_metadata`
 #' that has a factor that represents the timepoints.
@@ -48,6 +52,7 @@
 #' from the input dataset that don't have corresponding annotation data available
 #' @param missing_ids_file If there are missing IDs and a file is saved, where
 #' do you want this file to be saved? Provide a file path.
+#' @param overwrite Should existing normalized_log_fc data in the gimap_dataset be overwritten?
 #' @import dplyr
 #' @export
 #' @examples \dontrun{
@@ -69,12 +74,14 @@
 #' }
 gimap_normalize <- function(.data = NULL,
                             gimap_dataset,
+                            normalize_by_unexpressed = TRUE,
                             timepoints = NULL,
                             treatments = NULL,
                             control_name = NULL,
                             num_ids_wo_annot = 20,
                             rm_ids_wo_annot = TRUE,
-                            missing_ids_file = "missing_ids_file.csv") {
+                            missing_ids_file = "missing_ids_file.csv",
+                            overwrite = TRUE) {
   # Code adapted from
   # https://github.com/FredHutch/GI_mapping/blob/main/workflow/scripts/03-filter_and_calculate_LFC.Rmd
 
@@ -85,6 +92,16 @@ gimap_normalize <- function(.data = NULL,
   # Based on log fold change calculations and other handling will go based on the code in:
   # https://github.com/FredHutch/GI_mapping/blob/main/workflow/scripts/03-filter_and_calculate_LFC.Rmd
 
+
+  if (!is.null(gimap_dataset$normalized_log_fc) & !overwrite) {
+    stop("Normalization has already been preformed on this dataset.",
+         "set overwrite = TRUE if you'd like the existing data to be overwritten.")
+  }
+
+  if (overwrite) {
+    gimap_dataset$normalized_log_fc <- NULL
+  }
+
   if (gimap_dataset$filtered_data$filter_step_run) {
     dataset <- gimap_dataset$filtered_data$transformed_log2_cpm
     pg_ids <- gimap_dataset$filtered_data$metadata_pg_ids$id
@@ -93,6 +110,10 @@ gimap_normalize <- function(.data = NULL,
     pg_ids <- gimap_dataset$metadata$pg_ids
   }
 
+  if (is.null(timepoints) & is.null(treatments)) {
+    stop("Either timepoints or treatments must be specified so comparisons can
+         be made and stats calculated.")
+  }
 
   ### IF WE HAVE TREATMENTS
   if (!is.null(treatments)) {
@@ -128,7 +149,8 @@ gimap_normalize <- function(.data = NULL,
   ### IF WE HAVE TIMEPOINTS
   if (!is.null(timepoints)) {
     if (!(timepoints %in% colnames(gimap_dataset$metadata$sample_metadata))) {
-      stop("The column name specified for 'timepoints' does not exist in gimap_dataset$metadata$sample_metadata")
+      stop("The column name specified for 'timepoints' does not exist in",
+           "gimap_dataset$metadata$sample_metadata")
     }
 
     # Rename and recode the timepoints variable
@@ -151,7 +173,8 @@ gimap_normalize <- function(.data = NULL,
   ### Stop if no annotations
   if (is.null(gimap_dataset$annotation)) {
     stop(
-      "No annotations are stored in this gimap_dataset, annotations are needed so we know what genes should be used as controls.",
+      "No annotations are stored in this gimap_dataset, annotations are needed",
+      "so we know what genes should be used as controls.",
       "Please run gimap_annotate() function on your gimap_dataset and then retry this function."
     )
   }
@@ -180,14 +203,19 @@ gimap_normalize <- function(.data = NULL,
   )
 
   if ((nrow(missing_ids) > 0) & (nrow(missing_ids) < num_ids_wo_annot)) {
-    message("The following ", nrow(missing_ids), " IDs were not found in the annotation data: \n", paste0(missing_ids, collapse = ", "))
+    message("The following ", nrow(missing_ids),
+            " IDs were not found in the annotation data: \n",
+            paste0(missing_ids, collapse = ", "))
 
     if (rm_ids_wo_annot) {
       lfc_df <- lfc_df %>%
         filter(!pg_ids %in% missing_ids$missing_ids)
-      message("The input data for the IDs which were not found in the annotation data has been filtered out and will not be included in the analysis output.")
+      message("The input data for the IDs which were not found in the annotation",
+              "data has been filtered out and will not be included in the analysis output.")
     } else {
-      message("The input data for the IDs which were not found in the annotation data will be kept throughout the analysis, but any data from the annotation won't be available for them.")
+      message("The input data for the IDs which were not found in the annotation data",
+              "will be kept throughout the analysis, but any data from the annotation",
+              "won't be available for them.")
     }
   } else {
     missing_ids_file <- file.path(missing_ids_file)
@@ -202,29 +230,41 @@ gimap_normalize <- function(.data = NULL,
     apply(., 1., mean, na.rm = TRUE)
 
   comparison_df <- lfc_df %>%
-    dplyr::mutate_at(dplyr::vars(!c(pg_ids, dplyr::ends_with("_control"))), ~ .x - ctrl_mean) %>%
+    dplyr::mutate_at(
+      dplyr::vars(!c(pg_ids, dplyr::ends_with("_control"))), ~ .x - ctrl_mean) %>%
     dplyr::select(!dplyr::matches(pg_ids) & !dplyr::ends_with("_control")) %>%
     dplyr::left_join(gimap_dataset$annotation, by = c("pg_ids" = "pgRNA_id")) %>%
     tidyr::pivot_longer(dplyr::ends_with(treatment_group_names),
-                        names_to = "rep",
-                        values_to = "lfc"
+      names_to = "rep",
+      values_to = "lfc"
     )
 
   ########################### Perform adjustments #############################
+  if (normalize_by_unexpressed) {
 
+    stopifnot("For normalize_by_unexpressed to be TRUE you need to have added TPM
+              data in the annotation step using cell_line_annotation or custom_tpm" =
+                "unexpressed_ctrl_flag" %in% colnames(comparison_df))
+
+    comparison_df <- comparison_df %>%
+      dplyr::mutate(
+        lfc = lfc - median(lfc[unexpressed_ctrl_flag == TRUE]))
+  }
   medians_df <- comparison_df %>%
     dplyr::group_by(norm_ctrl_flag, rep) %>%
     dplyr::summarize(median = median(lfc, na.rm = TRUE)) %>%
-    tidyr::pivot_wider(values_from = median,
-                       names_from = norm_ctrl_flag) %>%
+    tidyr::pivot_wider(
+      values_from = median,
+      names_from = norm_ctrl_flag
+    ) %>%
     dplyr::select(rep, negative_control, positive_control)
 
   # logFC adjusted = (log2FC - log2FC_negctls) / |log2FC_posctls|
   lfc_adj <- comparison_df %>%
     dplyr::left_join(medians_df, by = "rep") %>%
-      dplyr::mutate(
-        crispr_score = (lfc - negative_control) / ( negative_control - positive_control)
-      )
+    dplyr::mutate(
+      crispr_score = (lfc - negative_control) / (negative_control - positive_control)
+    )
 
   # These should equal 0 and -1
   lfc_adj %>%

@@ -2,12 +2,13 @@
 % Please edit documentation in R/plots-gi.R
 \name{plot_targets_bar}
 \alias{plot_targets_bar}
-\title{Plots for genetic interactions for specific targets}
+\title{Target bar plot for CRISPR scores}
 \usage{
 plot_targets_bar(gimap_dataset, target1, target2, reps_to_drop = "")
 }
 \arguments{
-\item{gimap_dataset}{A special dataset structure that is setup using has had gi scores calculated.}
+\item{gimap_dataset}{A special dataset structure that is originally setup using
+`setup_data()` and has had gi scores calculated with `calc_gi()`.}
 
 \item{target1}{Name of the first target to be plotted e.g.}
 
@@ -16,7 +17,11 @@ plot_targets_bar(gimap_dataset, target1, target2, reps_to_drop = "")
 \item{reps_to_drop}{Names of replicates that should be not plotted (Optional)}
 }
 \description{
-This plot is for when you'd like to examine a target pair specifically.
+This plot is for when you'd like to examine a target pair
+specifically -- meant to be functionally equivalent to Fig 3b
+CRISPR scores for representative synthetic lethal paralog pairs.
+Data shown are the mean CRISPR score for each single KO or DKO target across
+ three biological replicates with replicate data shown in overlaid points.
 }
 \examples{
 \dontrun{

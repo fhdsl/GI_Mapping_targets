@@ -1,3 +1,5 @@
+Sys.setenv(VROOM_CONNECTION_SIZE = 500072)
+
 #' Calculate Genetic Interaction scores
 #' @description Create results table that has CRISPR scores, Wilcoxon rank-sum test and t tests.
 #' The output of the `gimap` package is genetic interaction scores which _is the
@@ -26,27 +28,26 @@
 #' @param .data Data can be piped in with tidyverse pipes from function to function. But the data must still be a gimap_dataset
 #' @param gimap_dataset A special dataset structure that is setup using the `setup_data()` function.
 #' @import dplyr
-#' @importFrom stats lm 
+#' @importFrom stats lm
 #' @export
 #' @examples \dontrun{
-#'   gimap_dataset <- get_example_data("gimap")
+#' gimap_dataset <- get_example_data("gimap")
 #'
-#'   # Highly recommended but not required
-#'   run_qc(gimap_dataset)
+#' # Highly recommended but not required
+#' run_qc(gimap_dataset)
 #'
-#'   gimap_dataset <- gimap_dataset %>%
-#'     gimap_filter() %>%
-#'     gimap_annotate(cell_line = "HELA") %>%
-#'     gimap_normalize(
-#'       timepoints = "day"
-#'     ) %>%
-#'     calc_gi()
+#' gimap_dataset <- gimap_dataset %>%
+#'   gimap_filter() %>%
+#'   gimap_annotate(cell_line = "HELA") %>%
+#'   gimap_normalize(
+#'     timepoints = "day"
+#'   ) %>%
+#'   calc_gi()
 #'
-#'   saveRDS(gimap_dataset, "gimap_dataset_final.RDS")
+#' saveRDS(gimap_dataset, "gimap_dataset_final.RDS")
 #' }
 calc_gi <- function(.data = NULL,
                     gimap_dataset) {
-
   # Summary the calculation
   # single_target_crispr_1 = geneA_nt1, geneA_nt2...
   # single_target_crispr_2 = nt1_geneB, nt2_geneB...
@@ -68,12 +69,20 @@ calc_gi <- function(.data = NULL,
 
   if (!is.null(.data)) gimap_dataset <- .data
 
-  if (!("gimap_dataset" %in% class(gimap_dataset))) stop("This function only works",
-   "with gimap_dataset objects which can be made with the setup_data() function.")
+  if (!("gimap_dataset" %in% class(gimap_dataset))) {
+    stop(
+      "This function only works",
+      "with gimap_dataset objects which can be made with the setup_data() function."
+    )
+  }
 
-  if (is.null(gimap_dataset$normalized_log_fc)) stop("This function only works",
-  "with already normalized gimap_dataset objects which can be done with the",
-  "gimap_normalize() function.")
+  if (is.null(gimap_dataset$normalized_log_fc)) {
+    stop(
+      "This function only works",
+      "with already normalized gimap_dataset objects which can be done with the",
+      "gimap_normalize() function."
+    )
+  }
 
   # Get mean control target CRISPR scores -- they will be used for expected calculations
   control_target_df <- gimap_dataset$normalized_log_fc %>%
@@ -109,20 +118,20 @@ calc_gi <- function(.data = NULL,
       ),
     ) %>%
     dplyr::left_join(control_target_df,
-                     by = c("rep" = "rep", "control_gRNA_seq" = "control_gRNA_seq"),
-                     suffix = c("", "_control")
+      by = c("rep" = "rep", "control_gRNA_seq" = "control_gRNA_seq"),
+      suffix = c("", "_control")
     ) %>%
     group_by(rep, pgRNA_target, targeting_gRNA_seq) %>%
     # Taking the mean of the single target crisprs that have the same targeting sequence
     mutate(mean_single_crispr = mean(crispr_score, na.rm = TRUE)) %>%
     dplyr::select(rep,
-                  pgRNA_target,
-                  targeting_gRNA_seq,
-                  control_gRNA_seq,
-                  single_crispr = crispr_score,
-                  mean_single_crispr,
-                  mean_double_control_crispr,
-                  norm_ctrl_flag
+      pgRNA_target,
+      targeting_gRNA_seq,
+      control_gRNA_seq,
+      single_crispr = crispr_score,
+      mean_single_crispr,
+      mean_double_control_crispr,
+      norm_ctrl_flag
     ) %>%
     dplyr::distinct() %>%
     ## calculate expected double-targeting GI score by summing the two mean single-targeting
@@ -139,29 +148,32 @@ calc_gi <- function(.data = NULL,
   # Now put it all together into one df
   double_crispr_df <- gimap_dataset$normalized_log_fc %>%
     dplyr::filter(target_type == "gene_gene") %>%
-    dplyr::select(pg_ids,
-                  rep,
-                  crispr_score,
-                  gRNA1_seq,
-                  gRNA2_seq,
-                  pgRNA_target,
-                  norm_ctrl_flag
+    dplyr::select(
+      pg_ids,
+      rep,
+      crispr_score,
+      gRNA1_seq,
+      gRNA2_seq,
+      pgRNA_target,
+      norm_ctrl_flag
     ) %>%
     dplyr::distinct() %>%
     dplyr::left_join(expected_single_crispr_df,
       by = c("rep" = "rep", "gRNA1_seq" = "targeting_gRNA_seq"),
-                     suffix = c("", "_1")) %>%
+      suffix = c("", "_1")
+    ) %>%
     dplyr::left_join(expected_single_crispr_df,
       by = c("rep" = "rep", "gRNA2_seq" = "targeting_gRNA_seq"),
-                     suffix = c("", "_2")) %>%
+      suffix = c("", "_2")
+    ) %>%
     dplyr::select(pg_ids,
-                  rep,
-                  double_crispr = crispr_score,
-                  gRNA1_seq,
-                  gRNA2_seq,
-                  pgRNA_target,
-                  mean_single_crispr_1 = mean_single_crispr,
-                  mean_single_crispr_2
+      rep,
+      double_crispr = crispr_score,
+      gRNA1_seq,
+      gRNA2_seq,
+      pgRNA_target,
+      mean_single_crispr_1 = mean_single_crispr,
+      mean_single_crispr_2
     ) %>%
     dplyr::mutate(
       expected_double_crispr = mean_single_crispr_1 + mean_single_crispr_2
@@ -178,7 +190,8 @@ calc_gi <- function(.data = NULL,
     dplyr::ungroup() %>%
     dplyr::group_by(rep) %>%
     group_modify(~ broom::tidy(
-      lm(single_crispr ~ expected_single_crispr, data = .x))) %>%
+      lm(single_crispr ~ expected_single_crispr, data = .x)
+    )) %>%
     dplyr::select(term, estimate, rep) %>%
     pivot_wider(
       names_from = term,
@@ -209,10 +222,10 @@ calc_gi <- function(.data = NULL,
   # TODO: this is an lapply inside an lapply at the end of the day. Not ideal
   target_results <- lapply(replicates, function(replicate) {
     gimap_rep_stats(replicate,
-                    gi_calc_single = gi_calc_single,
-                    gi_calc_double = gi_calc_double)
-  }
-  )
+      gi_calc_single = gi_calc_single,
+      gi_calc_double = gi_calc_double
+    )
+  })
 
   # Bring over the replicate names
   names(target_results) <- replicates
@@ -222,37 +235,49 @@ calc_gi <- function(.data = NULL,
 
   ## Clean up the data and get some means
   gi_calc_double <- gi_calc_double %>%
-    dplyr::group_by(rep,
-                    pgRNA_target) %>%
-    dplyr::summarize(mean_expected_cs = mean(expected_double_crispr, na.rm = TRUE),
-                     mean_observed_cs = mean(double_crispr, na.rm = TRUE),
-                     mean_gi_score = mean(double_gi_score, na.rm = TRUE)) %>%
+    dplyr::group_by(
+      rep,
+      pgRNA_target
+    ) %>%
+    dplyr::summarize(
+      mean_expected_cs = mean(expected_double_crispr, na.rm = TRUE),
+      mean_observed_cs = mean(double_crispr, na.rm = TRUE),
+      mean_gi_score = mean(double_gi_score, na.rm = TRUE)
+    ) %>%
     # Collapse to just stats and don't care about pg_ids anymore
-    dplyr::select(rep,
-                  pgRNA_target,
-                  mean_expected_cs,
-                  mean_observed_cs,
-                  mean_gi_score) %>%
+    dplyr::select(
+      rep,
+      pgRNA_target,
+      mean_expected_cs,
+      mean_observed_cs,
+      mean_gi_score
+    ) %>%
     dplyr::mutate(target_type = "gene_gene") %>%
     dplyr::distinct()
 
   # Same kind of reformatting for single
   gi_calc_single <- gi_calc_single %>%
-    dplyr::group_by(rep,
-                    pgRNA_target) %>%
-    dplyr::summarize(mean_expected_cs = mean(expected_single_crispr, na.rm = TRUE),
-                     mean_observed_cs = mean(single_crispr, na.rm = TRUE),
-                     mean_gi_score = mean(single_gi_score, na.rm = TRUE)) %>%
+    dplyr::group_by(
+      rep,
+      pgRNA_target
+    ) %>%
+    dplyr::summarize(
+      mean_expected_cs = mean(expected_single_crispr, na.rm = TRUE),
+      mean_observed_cs = mean(single_crispr, na.rm = TRUE),
+      mean_gi_score = mean(single_gi_score, na.rm = TRUE)
+    ) %>%
     dplyr::mutate(target_type = dplyr::case_when(
-      grepl("^ctrl_*", pgRNA_target) ~"ctrl_gene",
-      grepl("*_ctrl$", pgRNA_target) ~"gene_ctrl"
-      )) %>%
-    dplyr::select(rep,
-                  target_type,
-                  pgRNA_target,
-                  mean_expected_cs,
-                  mean_observed_cs,
-                  mean_gi_score) %>%
+      grepl("^ctrl_*", pgRNA_target) ~ "ctrl_gene",
+      grepl("*_ctrl$", pgRNA_target) ~ "gene_ctrl"
+    )) %>%
+    dplyr::select(
+      rep,
+      target_type,
+      pgRNA_target,
+      mean_expected_cs,
+      mean_observed_cs,
+      mean_gi_score
+    ) %>%
     dplyr::distinct()
 
   all_gi_scores <- dplyr::bind_rows(gi_calc_double, gi_calc_single)
@@ -260,7 +285,8 @@ calc_gi <- function(.data = NULL,
   # Add on test results
   all_gi_scores <- all_gi_scores %>%
     dplyr::left_join(target_results_df,
-                     by = c("pgRNA_target", "rep"))
+      by = c("pgRNA_target", "rep")
+    )
 
   # Store the useful bits
   gimap_dataset$gi_scores <- all_gi_scores
@@ -278,7 +304,7 @@ calc_gi <- function(.data = NULL,
 #' @param gi_calc_single a data.frame with adjusted single gi scores
 #' @param gi_calc_double a data.frame with adjusted double gi scores
 #' @importFrom stats p.adjust t.test wilcox.test
-gimap_rep_stats <- function(replicate, gi_calc_double,  gi_calc_single) {
+gimap_rep_stats <- function(replicate, gi_calc_double, gi_calc_single) {
   ## get a vector of GI scores for all single-targeting ("control") pgRNAs for each rep
   ## get double-targeting pgRNAs for this rep, do a t-test to compare the double-
 
@@ -297,9 +323,11 @@ gimap_rep_stats <- function(replicate, gi_calc_double,  gi_calc_single) {
     # TODO make this so its all single targets not just the oens that are a
     # part of this double construct
     # 1000's of single constructs here
-    mutate(p_val = t.test(x = per_rep_stats_single$single_gi_score,
-                          y = double_gi_score, # all 16 construct guides here
-                          paired = FALSE)$p.value)
+    mutate(p_val = t.test(
+      x = per_rep_stats_single$single_gi_score,
+      y = double_gi_score, # all 16 construct guides here
+      paired = FALSE
+    )$p.value)
 
 
   ## adjust for multiple testing using the Benjamini-Hochberg method
@@ -311,7 +339,7 @@ gimap_rep_stats <- function(replicate, gi_calc_double,  gi_calc_single) {
   fdr_vals <- p.adjust(d_p_val$p_val, method = "BH")
 
   d_fdr <- tibble("fdr" = fdr_vals) %>%
-     bind_cols(d_p_val) %>%
+    bind_cols(d_p_val) %>%
     dplyr::select(pgRNA_target, p_val, fdr)
 
   return(d_fdr)
