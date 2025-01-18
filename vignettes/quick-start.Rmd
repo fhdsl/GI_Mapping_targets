@@ -18,11 +18,11 @@ knitr::opts_chunk$set(
 
 For more background on gimap and the calculations done here, [read here](https://github.com/FredHutch/gimap/blob/main/README.md)
 
-```{r results = 'hide'}
+```{r echo = FALSE, results = 'hide'}
 library(gimap)
 ```
 
-```{r results = 'hide'}
+```{r echo = FALSE, results = 'hide'}
 library(dplyr)
 ```
 

@@ -12,6 +12,7 @@ run_qc(
   filter_zerocount_target_col = NULL,
   filter_plasmid_target_col = NULL,
   filter_replicates_target_col = NULL,
+  open_results = TRUE,
   ...
 )
 }
@@ -34,6 +35,8 @@ will select the first sample column only}
 
 \item{filter_replicates_target_col}{default is NULL; Which sample columns are replicates
 whose variation you'd like to analyze; If NULL, the last 3 sample columns are used}
+
+\item{open_results}{default is TRUE but if you don't want the report automatically opened, choose FALSE.}
 
 \item{...}{additional parameters are sent to `rmarkdown::render()`}
 }
