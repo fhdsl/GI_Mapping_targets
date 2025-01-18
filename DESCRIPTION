@@ -3,33 +3,18 @@ Package: gimap
 Title: Calculate Genetic Interactions for paired CRISPR Targets
 Version: 1.0.0
 Authors@R: c(
-    person("Candace", "Savonen", ,
-    c("cansav09@gmail.com","csavonen@fredhutch.org"),
-    role = c("aut", "cre")
-    ),
-    person("Phoebe", "Parrish", ,
-    c("pcrparrish@gmail.com"),
-    role = c("aut")
-    ),
-    person("Kate", "Isaac", ,
-    c("kisaac@fredhutch.org"),
-    role = c("aut")
-    ),
-    person("Howard", "Baek", ,
-    c("howardbaek@fredhutch.org","howardbaek.fh@gmail.com"),
-    role = c("aut")
-    ),
-    person("Daniel", "Grosso", , ,
-    role = c("aut")
-    ),
-    person("Siobhan", "O'Brien", , ,
-    role = c("aut")
-    )
-    person("Alice", "Berger", , ,
-    role = c("aut")
-    )
-    )
-Description: This package allows a pipeline to be built for analyzing genetic interactions of paired guide CRISPR screens. It is based off of original research from the Alice Berger lab at Fred Hutchinson Cancer Center.
+  person("Candace", "Savonen",
+         email = c("cansav09@gmail.com","csavonen@fredhutch.org"), role = c("aut", "cre")),
+  person("Phoebe", "Parrish",
+         email = "pcrparrish@gmail.com", role = c("aut")),
+  person("Kate", "Isaac",
+         email = "kisaac@fredhutch.org", role = c("aut")),
+  person("Howard", "Baek",
+         email = "howardbaek.fh@gmail.com", role = c("aut")),
+  person("Daniel", "Grosso", role = c("aut")),
+  person("Siobhan", "O'Brien", role = c("aut")),
+  person("Alice", "Berger", role = c("aut")))
+Description: Allows a pipeline to be built for analyzing genetic interactions of paired guide CRISPR screens. It is based off of original research from the Alice Berger lab at Fred Hutchinson Cancer Center.
 License: GPL-3 + file LICENSE
 URL: https://github.com/FredHutch/gimap
 BugReports: https://github.com/FredHutch/gimap/issues

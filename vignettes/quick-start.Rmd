@@ -18,11 +18,11 @@ knitr::opts_chunk$set(
 
 For more background on gimap and the calculations done here, [read here](https://github.com/FredHutch/gimap/blob/main/README.md)
 
-```{r}
+```{r results = 'hide'}
 library(gimap)
 ```
 
-```{r}
+```{r results = 'hide'}
 library(dplyr)
 ```
 
@@ -116,14 +116,14 @@ Genetic interaction is calculated by:
 
 ```{r}
 gimap_dataset$gi_scores %>%
-  dplyr::arrange(fdr) %>% 
-  head() %>% 
-  knitr::kable(format = "html") 
+  dplyr::arrange(fdr) %>%
+  head() %>%
+  knitr::kable(format = "html")
 ```
 
 ## Plot the results
 
-You can remove any samples from these plots by altering the `reps_to_drop` argument. 
+You can remove any samples from these plots by altering the `reps_to_drop` argument.
 
 ```{r}
 plot_exp_v_obs_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
@@ -143,9 +143,9 @@ Here's how you can save plots like the above.
 ggplot2::ggsave("volcano_plot.png")
 ```
 
-### Plot specific target pair 
+### Plot specific target pair
 
-We can pick out a specific pair to plot. 
+We can pick out a specific pair to plot.
 
 ```{r}
 # "NDEL1_NDE1" is top result so let's plot that
@@ -154,7 +154,7 @@ plot_targets_bar(gimap_dataset, target1 = "NDEL1", target2 = "NDE1")
 
 ## Saving data to a file
 
-We can save all these data as an RDS or the genetic interaction scores themselves to a tsv file. 
+We can save all these data as an RDS or the genetic interaction scores themselves to a tsv file.
 
 ```{r}
 saveRDS(gimap_dataset, "gimap_dataset_final.RDS")

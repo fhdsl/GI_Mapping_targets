@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">gimap</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.0</span>
       </span>
     </div>
 
@@ -58,6 +58,9 @@
       <a href="../articles/treatment_example.html">gimap for Treatment Experiment</a>
     </li>
   </ul>
+</li>
+<li>
+  <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
@@ -104,9 +107,7 @@ be used for this analysis, with helpful descriptions found in this
 review (<a href="https://www.nature.com/articles/s43586-021-00093-4" class="external-link uri">https://www.nature.com/articles/s43586-021-00093-4</a>). Use
 of pgPEN and GI-mapping in a paired gRNA format can be found here (<a href="https://pubmed.ncbi.nlm.nih.gov/34469736/" class="external-link uri">https://pubmed.ncbi.nlm.nih.gov/34469736/</a>).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/FredHutch/gimap" class="external-link">gimap</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'dplyr::group_rows' by</span></span>
-<span><span class="co">#&gt; 'kableExtra::group_rows' when loading 'gimap'</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/FredHutch/gimap" class="external-link">gimap</a></span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -282,44 +283,42 @@ experimental setup.</li>
 </ul>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">gimap_dataset</span><span class="op">)</span></span>
-<span><span class="co">#&gt; List of 10</span></span>
-<span><span class="co">#&gt;  $ raw_counts       : num [1:33170, 1:5] 951 1511 191 588 289 ...</span></span>
+<span><span class="co">#&gt; List of 12</span></span>
+<span><span class="co">#&gt;  $ raw_counts         : num [1:33170, 1:5] 951 1511 191 588 289 ...</span></span>
 <span><span class="co">#&gt;   ..- attr(*, "dimnames")=List of 2</span></span>
 <span><span class="co">#&gt;   .. ..$ : NULL</span></span>
 <span><span class="co">#&gt;   .. ..$ : chr [1:5] "Day00_RepA" "Day05_RepA" "Day22_RepA" "Day22_RepB" ...</span></span>
-<span><span class="co">#&gt;  $ counts_per_sample: Named num [1:5] 38471205 32028290 29144511 36628141 36448291</span></span>
+<span><span class="co">#&gt;  $ counts_per_sample  : Named num [1:5] 38471205 32028290 29144511 36628141 36448291</span></span>
 <span><span class="co">#&gt;   ..- attr(*, "names")= chr [1:5] "Day00_RepA" "Day05_RepA" "Day22_RepA" "Day22_RepB" ...</span></span>
-<span><span class="co">#&gt;  $ transformed_data :List of 3</span></span>
-<span><span class="co">#&gt;   ..$ count_norm: num [1:33170, 1:5] 4.61 4.41 5.3 4.82 5.12 ...</span></span>
+<span><span class="co">#&gt;  $ transformed_data   :List of 2</span></span>
+<span><span class="co">#&gt;   ..$ cpm     : num [1:33170, 1:5] 24.72 39.28 4.96 15.28 7.51 ...</span></span>
 <span><span class="co">#&gt;   .. ..- attr(*, "dimnames")=List of 2</span></span>
 <span><span class="co">#&gt;   .. .. ..$ : NULL</span></span>
 <span><span class="co">#&gt;   .. .. ..$ : chr [1:5] "Day00_RepA" "Day05_RepA" "Day22_RepA" "Day22_RepB" ...</span></span>
-<span><span class="co">#&gt;   ..$ cpm       : num [1:33170, 1:5] 24.72 39.28 4.96 15.28 7.51 ...</span></span>
+<span><span class="co">#&gt;   ..$ log2_cpm: num [1:33170, 1:5] 4.68 5.33 2.58 4.03 3.09 ...</span></span>
 <span><span class="co">#&gt;   .. ..- attr(*, "dimnames")=List of 2</span></span>
 <span><span class="co">#&gt;   .. .. ..$ : NULL</span></span>
 <span><span class="co">#&gt;   .. .. ..$ : chr [1:5] "Day00_RepA" "Day05_RepA" "Day22_RepA" "Day22_RepB" ...</span></span>
-<span><span class="co">#&gt;   ..$ log2_cpm  : num [1:33170, 1:5] 4.68 5.33 2.58 4.03 3.09 ...</span></span>
-<span><span class="co">#&gt;   .. ..- attr(*, "dimnames")=List of 2</span></span>
-<span><span class="co">#&gt;   .. .. ..$ : NULL</span></span>
-<span><span class="co">#&gt;   .. .. ..$ : chr [1:5] "Day00_RepA" "Day05_RepA" "Day22_RepA" "Day22_RepB" ...</span></span>
-<span><span class="co">#&gt;  $ metadata         :List of 2</span></span>
+<span><span class="co">#&gt;  $ metadata           :List of 2</span></span>
 <span><span class="co">#&gt;   ..$ pg_ids         : tibble [33,170 × 1] (S3: tbl_df/tbl/data.frame)</span></span>
 <span><span class="co">#&gt;   .. ..$ id: chr [1:33170] "AADAC_AADACL2_pg1" "AADAC_AADACL2_pg10" "AADAC_AADACL2_pg11" "AADAC_AADACL2_pg12" ...</span></span>
 <span><span class="co">#&gt;   ..$ sample_metadata:'data.frame':  5 obs. of  3 variables:</span></span>
 <span><span class="co">#&gt;   .. ..$ col_names: chr [1:5] "Day00_RepA" "Day05_RepA" "Day22_RepA" "Day22_RepB" ...</span></span>
 <span><span class="co">#&gt;   .. ..$ day      : num [1:5] 0 5 22 22 22</span></span>
 <span><span class="co">#&gt;   .. ..$ rep      : Factor w/ 3 levels "RepA","RepB",..: 1 1 1 2 3</span></span>
-<span><span class="co">#&gt;  $ filtered_data    :List of 5</span></span>
+<span><span class="co">#&gt;  $ filtered_data      :List of 5</span></span>
 <span><span class="co">#&gt;   ..$ filter_step_run       : logi FALSE</span></span>
 <span><span class="co">#&gt;   ..$ metadata_pg_ids       : NULL</span></span>
 <span><span class="co">#&gt;   ..$ transformed_log2_cpm  : NULL</span></span>
 <span><span class="co">#&gt;   ..$ removed_pg_ids        : NULL</span></span>
 <span><span class="co">#&gt;   ..$ all_reps_zerocount_ids: NULL</span></span>
-<span><span class="co">#&gt;  $ comparisons      : NULL</span></span>
-<span><span class="co">#&gt;  $ annotation       : NULL</span></span>
-<span><span class="co">#&gt;  $ normalized_log_fc: NULL</span></span>
-<span><span class="co">#&gt;  $ crispr_score     : NULL</span></span>
-<span><span class="co">#&gt;  $ results          : NULL</span></span>
+<span><span class="co">#&gt;  $ comparisons        : NULL</span></span>
+<span><span class="co">#&gt;  $ annotation         : NULL</span></span>
+<span><span class="co">#&gt;  $ normalized_log_fc  : NULL</span></span>
+<span><span class="co">#&gt;  $ single_crispr_score: NULL</span></span>
+<span><span class="co">#&gt;  $ double_crispr_score: NULL</span></span>
+<span><span class="co">#&gt;  $ gi_scores          : NULL</span></span>
+<span><span class="co">#&gt;  $ overall_results    : NULL</span></span>
 <span><span class="co">#&gt;  - attr(*, "class")= chr [1:2] "list" "gimap_dataset"</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -444,8 +443,6 @@ corresponding DepMap data is used for annotation. This function is
 function. <code>timepoints</code> needs to be specified pointing to the
 correct column names from the <code>sample_data</code> passed to the
 <code><a href="../reference/setup_data.html">setup_data()</a></code> function earlier.</li>
-<li>CRISPR scores are calculated with the <code><a href="../reference/calc_crispr.html">calc_crispr()</a></code>
-function.</li>
 <li>Genetic interaction scores are computed with the
 <code><a href="../reference/calc_gi.html">calc_gi()</a></code> function.</li>
 </ul>
@@ -455,7 +452,6 @@ function.</li>
 <span>  <span class="fu"><a href="../reference/gimap_normalize.html">gimap_normalize</a></span><span class="op">(</span></span>
 <span>    timepoints <span class="op">=</span> <span class="st">"day"</span></span>
 <span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/calc_crispr.html">calc_crispr</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/calc_gi.html">calc_gi</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Annotating Data</span></span>
 <span><span class="co">#&gt; <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">1884</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">3</span></span></span>
@@ -467,96 +463,67 @@ function.</li>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span></span>
 <span><span class="co">#&gt; Normalizing Log Fold Change</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Calculating CRISPR score</span></span>
-<span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Calculating Genetic Interaction scores</span></span></code></pre></div>
 <p>Take a look at the results.</p>
 <p>Here’s what’s included in the GI Scores table:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">gimap_dataset</span><span class="op">$</span><span class="va">gi_scores</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 8</span></span></span>
-<span><span class="co">#&gt;   pgRNA_target_double rep          double_target_gi_score single_target_gi_sco…¹</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> AADAC_AADACL2       Day05_RepA_…                 -<span style="color: #BB0000;">9.44</span>                  -<span style="color: #BB0000;">0.387</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> AADAC_AADACL2       Day05_RepA_…                 -<span style="color: #BB0000;">9.44</span>                  -<span style="color: #BB0000;">0.387</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> AADAC_AADACL2       Day05_RepA_…                 -<span style="color: #BB0000;">9.44</span>                  -<span style="color: #BB0000;">1.54</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> AADAC_AADACL2       Day05_RepA_…                 -<span style="color: #BB0000;">9.44</span>                  -<span style="color: #BB0000;">1.54</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> AADAC_AADACL2       Day22_RepA_…                  0.496                  0.228</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> AADAC_AADACL2       Day22_RepA_…                  0.496                  0.228</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ abbreviated name: ¹​single_target_gi_score_1</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: single_target_gi_score_2 &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   expected_crispr_single_1 &lt;dbl&gt;, expected_crispr_single_2 &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   expected_crispr_double &lt;dbl&gt;</span></span></span></code></pre></div>
-<p>Take a look at a preview of the crispr scores:</p>
+<span><span class="co">#&gt; <span style="color: #949494;"># Groups:   rep [1]</span></span></span>
+<span><span class="co">#&gt;   rep   pgRNA_target mean_expected_cs mean_observed_cs mean_gi_score target_type</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Day0… A2M_PZP                 0.360           -<span style="color: #BB0000;">4.41</span>         -<span style="color: #BB0000;">4.07</span>  gene_gene  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Day0… AADACL3_AAD…           -<span style="color: #BB0000;">3.12</span>            -<span style="color: #BB0000;">2.32</span>         -<span style="color: #BB0000;">0.298</span> gene_gene  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Day0… AADAC_AADAC…           -<span style="color: #BB0000;">0.456</span>           -<span style="color: #BB0000;">2.63</span>         -<span style="color: #BB0000;">1.90</span>  gene_gene  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Day0… ABCC1_ABCC3            -<span style="color: #BB0000;">0.843</span>           -<span style="color: #BB0000;">0.500</span>         0.418 gene_gene  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Day0… ABCC8_ABCC9            -<span style="color: #BB0000;">0.476</span>           -<span style="color: #BB0000;">1.05</span>         -<span style="color: #BB0000;">0.311</span> gene_gene  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Day0… ABCD1_ABCD2            -<span style="color: #BB0000;">0.965</span>           -<span style="color: #BB0000;">2.40</span>         -<span style="color: #BB0000;">1.42</span>  gene_gene  </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: p_val &lt;dbl&gt;, fdr &lt;dbl&gt;</span></span></span></code></pre></div>
+<p>Let’s check out the top results</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">gimap_dataset</span><span class="op">$</span><span class="va">crispr_score</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 13</span></span></span>
-<span><span class="co">#&gt;   pg_ids   rep   double_crispr_score single_crispr_score_1 single_crispr_score_2</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> AADAC_A… Day0…              -<span style="color: #BB0000;">8.22</span>                  1.36                  4.70 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> AADAC_A… Day0…              -<span style="color: #BB0000;">8.22</span>                  1.36                  1.46 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> AADAC_A… Day0…              -<span style="color: #BB0000;">8.22</span>                 -<span style="color: #BB0000;">0.971</span>                 4.70 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> AADAC_A… Day0…              -<span style="color: #BB0000;">8.22</span>                 -<span style="color: #BB0000;">0.971</span>                 1.46 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> AADAC_A… Day2…               0.890                 0.396                 0.167</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> AADAC_A… Day2…               0.890                 0.396                 0.641</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 8 more variables: pgRNA_target_double &lt;chr&gt;, gene_symbol_1 &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   gene_symbol_2 &lt;chr&gt;, mean_single_target_crispr_1 &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   mean_single_target_crispr_2 &lt;dbl&gt;, pgRNA1_seq &lt;chr&gt;, pgRNA2_seq &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   mean_double_control_crispr &lt;dbl&gt;</span></span></span></code></pre></div>
-<p>Take a look at the overall stats:</p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">gimap_dataset</span><span class="op">$</span><span class="va">gi_score</span>, <span class="va">fdr</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 8</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># Groups:   rep [2]</span></span></span>
+<span><span class="co">#&gt;   rep   pgRNA_target mean_expected_cs mean_observed_cs mean_gi_score target_type</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Day2… NDEL1_NDE1             -<span style="color: #BB0000;">1.87</span>             -<span style="color: #BB0000;">2.67</span>        -<span style="color: #BB0000;">1.29</span>  gene_gene  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Day2… PFN2_PFN1              -<span style="color: #BB0000;">1.58</span>             -<span style="color: #BB0000;">2.36</span>        -<span style="color: #BB0000;">1.17</span>  gene_gene  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Day2… CNOT8_CNOT7            -<span style="color: #BB0000;">0.253</span>            -<span style="color: #BB0000;">2.30</span>        -<span style="color: #BB0000;">1.99</span>  gene_gene  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Day2… CNOT8_CNOT7            -<span style="color: #BB0000;">0.603</span>            -<span style="color: #BB0000;">2.22</span>        -<span style="color: #BB0000;">1.68</span>  gene_gene  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Day2… SHMT2_SHMT1            -<span style="color: #BB0000;">1.02</span>             -<span style="color: #BB0000;">1.74</span>        -<span style="color: #BB0000;">0.927</span> gene_gene  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Day2… AKIRIN1_AKI…           -<span style="color: #BB0000;">1.71</span>             -<span style="color: #BB0000;">2.38</span>        -<span style="color: #BB0000;">1.12</span>  gene_gene  </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: p_val &lt;dbl&gt;, fdr &lt;dbl&gt;</span></span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="plot-the-results">Plot the results<a class="anchor" aria-label="anchor" href="#plot-the-results"></a>
+</h3>
+<p>You can remove any samples from these plots by altering the
+<code>reps_to_drop</code> argument.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">gimap_dataset</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">overall</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 8 × 6</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># Groups:   rep [4]</span></span></span>
-<span><span class="co">#&gt;   rep              term                   estimate std.error statistic   p.value</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Day05_RepA_early (Intercept)              0.017<span style="text-decoration: underline;">0</span>  0.006<span style="text-decoration: underline;">89</span>       2.47 1.35<span style="color: #949494;">e</span><span style="color: #BB0000;">-  2</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Day05_RepA_early mean_expected_single_…   0.367   0.002<span style="text-decoration: underline;">26</span>     162.   0   <span style="color: #949494;"> </span>    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Day22_RepA_late  (Intercept)              0.012<span style="text-decoration: underline;">8</span>  0.000<span style="text-decoration: underline;">879</span>     14.6  5.33<span style="color: #949494;">e</span><span style="color: #BB0000;">- 48</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Day22_RepA_late  mean_expected_single_…   0.681   0.002<span style="text-decoration: underline;">27</span>     300.   0   <span style="color: #949494;"> </span>    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Day22_RepB_late  (Intercept)              0.020<span style="text-decoration: underline;">6</span>  0.000<span style="text-decoration: underline;">829</span>     24.9  6.78<span style="color: #949494;">e</span><span style="color: #BB0000;">-137</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Day22_RepB_late  mean_expected_single_…   0.661   0.002<span style="text-decoration: underline;">24</span>     295.   0   <span style="color: #949494;"> </span>    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> Day22_RepC_late  (Intercept)              0.020<span style="text-decoration: underline;">5</span>  0.000<span style="text-decoration: underline;">774</span>     26.5  6.88<span style="color: #949494;">e</span><span style="color: #BB0000;">-155</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> Day22_RepC_late  mean_expected_single_…   0.695   0.002<span style="text-decoration: underline;">27</span>     306.   0   <span style="color: #949494;"> </span></span></span></code></pre></div>
-<p>Lastly, let’s take a look at the by target results. We can arrange by
-results using <code><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">dplyr::arrange()</a></code></p>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_exp_v_obs_scatter.html">plot_exp_v_obs_scatter</a></span><span class="op">(</span><span class="va">gimap_dataset</span>, reps_to_drop <span class="op">=</span> <span class="st">"Day05_RepA_early"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="timepoint-example_files/figure-html/unnamed-chunk-18-1.png" width="700"></p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">gimap_dataset</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">by_target</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">fdr_vals_wil_Day22_RepA_late</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,030 × 17</span></span></span>
-<span><span class="co">#&gt;    targets  p_val_ttest_Day05_Re…¹ p_val_ttest_Day22_Re…² p_val_ttest_Day22_Re…³</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> CNOT8_C…                0.981             0.000<span style="text-decoration: underline;">000</span>742              0.000<span style="text-decoration: underline;">006</span>15</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> AP2A1_A…                0.001<span style="text-decoration: underline;">84</span>           0.000<span style="text-decoration: underline;">005</span>15               0.000<span style="text-decoration: underline;">003</span>96</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> CABP7_C…                0.021<span style="text-decoration: underline;">4</span>            0.000<span style="text-decoration: underline;">240</span>                 0.003<span style="text-decoration: underline;">82</span>   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> PFN2_PF…                0.074<span style="text-decoration: underline;">9</span>            0.000<span style="text-decoration: underline;">000</span>077<span style="text-decoration: underline;">0</span>             0.357     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> TRAPPC6…                0.085<span style="text-decoration: underline;">4</span>            0.000<span style="text-decoration: underline;">002</span>06               0.000<span style="text-decoration: underline;">435</span>  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> FES_FER                 0.296             0.000<span style="text-decoration: underline;">000</span>613              0.068<span style="text-decoration: underline;">8</span>    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> TIAL1_T…                0.202             0.000<span style="text-decoration: underline;">022</span>0                0.000<span style="text-decoration: underline;">756</span>  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> CD209_C…                0.588             0.000<span style="text-decoration: underline;">037</span>4                0.232     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> UCK2_UC…                0.903             0.000<span style="text-decoration: underline;">025</span>7                0.007<span style="text-decoration: underline;">95</span>   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> SEC23B_…                0.075<span style="text-decoration: underline;">9</span>            0.000<span style="text-decoration: underline;">102</span>                 0.000<span style="text-decoration: underline;">039</span>6 </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1,020 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ abbreviated names: ¹​p_val_ttest_Day05_RepA_early,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   ²​p_val_ttest_Day22_RepA_late, ³​p_val_ttest_Day22_RepB_late</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 13 more variables: p_val_ttest_Day22_RepC_late &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   p_val_wil_Day05_RepA_early &lt;dbl&gt;, p_val_wil_Day22_RepA_late &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   p_val_wil_Day22_RepB_late &lt;dbl&gt;, p_val_wil_Day22_RepC_late &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   fdr_vals_ttest_Day05_RepA_early &lt;dbl&gt;, …</span></span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_rank_scatter.html">plot_rank_scatter</a></span><span class="op">(</span><span class="va">gimap_dataset</span>, reps_to_drop <span class="op">=</span> <span class="st">"Day05_RepA_early"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="timepoint-example_files/figure-html/unnamed-chunk-19-1.png" width="700"></p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_volcano.html">plot_volcano</a></span><span class="op">(</span><span class="va">gimap_dataset</span>, reps_to_drop <span class="op">=</span> <span class="st">"Day05_RepA_early"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="timepoint-example_files/figure-html/unnamed-chunk-20-1.png" width="700"></p>
+<div class="section level4">
+<h4 id="plot-specific-target-pair">Plot specific target pair<a class="anchor" aria-label="anchor" href="#plot-specific-target-pair"></a>
+</h4>
+<p>We can pick out a specific pair to plot.</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># "NDEL1_NDE1" is top result so let's plot that</span></span>
+<span><span class="fu"><a href="../reference/plot_targets_bar.html">plot_targets_bar</a></span><span class="op">(</span><span class="va">gimap_dataset</span>, target1 <span class="op">=</span> <span class="st">"NDEL1"</span>, target2 <span class="op">=</span> <span class="st">"NDE1"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="timepoint-example_files/figure-html/unnamed-chunk-21-1.png" width="700"></p>
+</div>
 </div>
 <div class="section level3">
 <h3 id="saving-results-to-files">Saving results to files<a class="anchor" aria-label="anchor" href="#saving-results-to-files"></a>
 </h3>
 <p>We can save the genetic interactions scores like this:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/write_delim.html" class="external-link">write_tsv</a></span><span class="op">(</span><span class="va">gimap_dataset</span><span class="op">$</span><span class="va">gi_scores</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">output_dir</span>, <span class="st">"gi_scores.tsv"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>Similarly let’s save the CRISPR scores.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/write_delim.html" class="external-link">write_tsv</a></span><span class="op">(</span><span class="va">gimap_dataset</span><span class="op">$</span><span class="va">crispr_score</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">output_dir</span>, <span class="st">"crispr_scores.tsv"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>We can extract and save the stats results to the TSV</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/write_delim.html" class="external-link">write_tsv</a></span><span class="op">(</span><span class="va">gimap_dataset</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">overall</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">output_dir</span>, <span class="st">"overall_stats.tsv"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/write_delim.html" class="external-link">write_tsv</a></span><span class="op">(</span><span class="va">gimap_dataset</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">by_target</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">output_dir</span>, <span class="st">"by_target_stats.tsv"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/write_delim.html" class="external-link">write_tsv</a></span><span class="op">(</span><span class="va">gimap_dataset</span><span class="op">$</span><span class="va">gi_scores</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">output_dir</span>, <span class="st">"gi_scores.tsv"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>We can save all these data as an RDS.</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">gimap_dataset</span>, <span class="st">"gimap_dataset_final_timepoint.RDS"</span><span class="op">)</span></span></code></pre></div>
@@ -569,7 +536,7 @@ results using <code><a href="https://dplyr.tidyverse.org/reference/arrange.html"
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; R version 4.4.0 (2024-04-24)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-apple-darwin20</span></span>
-<span><span class="co">#&gt; Running under: macOS 15.0.1</span></span>
+<span><span class="co">#&gt; Running under: macOS 15.1.1</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Matrix products: default</span></span>
 <span><span class="co">#&gt; BLAS:   /Library/Frameworks/R.framework/Versions/4.4-x86_64/Resources/lib/libRblas.0.dylib </span></span>
@@ -585,27 +552,26 @@ results using <code><a href="https://dplyr.tidyverse.org/reference/arrange.html"
 <span><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt; [1] dplyr_1.1.4 gimap_0.1.0</span></span>
+<span><span class="co">#&gt; [1] dplyr_1.1.4 gimap_1.0.0</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
-<span><span class="co">#&gt;  [1] tidyr_1.3.1        sass_0.4.9         utf8_1.2.4         generics_0.1.3    </span></span>
-<span><span class="co">#&gt;  [5] xml2_1.3.6         stringi_1.8.4      hms_1.1.3          digest_0.6.37     </span></span>
-<span><span class="co">#&gt;  [9] magrittr_2.0.3     RColorBrewer_1.1-3 evaluate_1.0.1     grid_4.4.0        </span></span>
-<span><span class="co">#&gt; [13] timechange_0.3.0   fastmap_1.2.0      jsonlite_1.8.9     backports_1.5.0   </span></span>
-<span><span class="co">#&gt; [17] purrr_1.0.2        fansi_1.0.6        viridisLite_0.4.2  scales_1.3.0      </span></span>
-<span><span class="co">#&gt; [21] textshaping_0.4.0  jquerylib_0.1.4    cli_3.6.3          crayon_1.5.3      </span></span>
-<span><span class="co">#&gt; [25] rlang_1.1.4        bit64_4.5.2        munsell_0.5.1      withr_3.0.1       </span></span>
-<span><span class="co">#&gt; [29] cachem_1.1.0       yaml_2.3.10        parallel_4.4.0     tools_4.4.0       </span></span>
-<span><span class="co">#&gt; [33] tzdb_0.4.0         colorspace_2.1-1   ggplot2_3.5.1      kableExtra_1.4.0  </span></span>
-<span><span class="co">#&gt; [37] broom_1.0.7        curl_5.2.3         vctrs_0.6.5        R6_2.5.1          </span></span>
-<span><span class="co">#&gt; [41] lifecycle_1.0.4    lubridate_1.9.3    snakecase_0.11.1   stringr_1.5.1     </span></span>
-<span><span class="co">#&gt; [45] bit_4.5.0          fs_1.6.4           htmlwidgets_1.6.4  vroom_1.6.5       </span></span>
-<span><span class="co">#&gt; [49] ragg_1.3.3         janitor_2.2.0      pkgconfig_2.0.3    desc_1.4.3        </span></span>
-<span><span class="co">#&gt; [53] pkgdown_2.1.1      pillar_1.9.0       bslib_0.8.0.9000   gtable_0.3.6      </span></span>
-<span><span class="co">#&gt; [57] glue_1.8.0         systemfonts_1.1.0  xfun_0.48          tibble_3.2.1      </span></span>
-<span><span class="co">#&gt; [61] tidyselect_1.2.1   rstudioapi_0.17.1  knitr_1.48         htmltools_0.5.8.1 </span></span>
-<span><span class="co">#&gt; [65] rmarkdown_2.28     svglite_2.1.3      readr_2.1.5        pheatmap_1.0.12   </span></span>
-<span><span class="co">#&gt; [69] compiler_4.4.0</span></span></code></pre></div>
+<span><span class="co">#&gt;  [1] utf8_1.2.4         sass_0.4.9         generics_0.1.3     tidyr_1.3.1       </span></span>
+<span><span class="co">#&gt;  [5] stringi_1.8.4      hms_1.1.3          digest_0.6.37      magrittr_2.0.3    </span></span>
+<span><span class="co">#&gt;  [9] evaluate_1.0.1     grid_4.4.0         timechange_0.3.0   RColorBrewer_1.1-3</span></span>
+<span><span class="co">#&gt; [13] fastmap_1.2.0      jsonlite_1.8.9     backports_1.5.0    purrr_1.0.2       </span></span>
+<span><span class="co">#&gt; [17] scales_1.3.0       textshaping_0.4.1  jquerylib_0.1.4    cli_3.6.3         </span></span>
+<span><span class="co">#&gt; [21] crayon_1.5.3       rlang_1.1.4        bit64_4.5.2        munsell_0.5.1     </span></span>
+<span><span class="co">#&gt; [25] withr_3.0.2        cachem_1.1.0       yaml_2.3.10        parallel_4.4.0    </span></span>
+<span><span class="co">#&gt; [29] tools_4.4.0        tzdb_0.4.0         colorspace_2.1-1   ggplot2_3.5.1     </span></span>
+<span><span class="co">#&gt; [33] broom_1.0.7        curl_6.0.1         vctrs_0.6.5        R6_2.5.1          </span></span>
+<span><span class="co">#&gt; [37] lifecycle_1.0.4    lubridate_1.9.4    snakecase_0.11.1   stringr_1.5.1     </span></span>
+<span><span class="co">#&gt; [41] bit_4.5.0.1        fs_1.6.5           htmlwidgets_1.6.4  vroom_1.6.5       </span></span>
+<span><span class="co">#&gt; [45] ragg_1.3.3         janitor_2.2.0      pkgconfig_2.0.3    desc_1.4.3        </span></span>
+<span><span class="co">#&gt; [49] pkgdown_2.1.1      pillar_1.10.0      bslib_0.8.0.9000   gtable_0.3.6      </span></span>
+<span><span class="co">#&gt; [53] glue_1.8.0         systemfonts_1.1.0  xfun_0.49          tibble_3.2.1      </span></span>
+<span><span class="co">#&gt; [57] tidyselect_1.2.1   rstudioapi_0.17.1  knitr_1.49         farver_2.1.2      </span></span>
+<span><span class="co">#&gt; [61] htmltools_0.5.8.1  labeling_0.4.3     rmarkdown_2.29     readr_2.1.5       </span></span>
+<span><span class="co">#&gt; [65] pheatmap_1.0.12    compiler_4.4.0</span></span></code></pre></div>
 </div>
 </div>
   </div>
@@ -620,7 +586,7 @@ results using <code><a href="https://dplyr.tidyverse.org/reference/arrange.html"
 
       <footer><div class="copyright">
   <p></p>
-<p>Developed by Candace Savonen, Howard Baek, Kate Isaac.</p>
+<p>Developed by Candace Savonen, Phoebe Parrish, Kate Isaac, Howard Baek, Daniel Grosso, Siobhan O’Brien, Alice Berger.</p>
 </div>
 
 <div class="pkgdown">

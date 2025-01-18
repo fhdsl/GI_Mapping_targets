@@ -21,3 +21,4 @@ gimap_dataset_final.RDS’
 missing_ids_file.csv
 qc_plots/*
 ^CRAN-SUBMISSION$
+^cran-comments.md$

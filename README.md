@@ -138,7 +138,7 @@ Now you can [go to our quick start tutorial to get started!](https://fredhutch.g
 
 We also have tutorial examples that show how to run timepoint or treatment experimental set ups with gimap:
 
-- [Timepoint example](https://fredhutch.github.io/gimap/articles/timepoint-example.html)
+- [Timepoint example](https://fredhutch.github.io/gimap/articles/timepoint-example.html
 - [Treatment example](https://fredhutch.github.io/gimap/articles/treatment_example.html)
 
 Follow the steps there that will walk you through the example data. Then you can tailor that tutorial to use your own data.
@@ -164,4 +164,4 @@ And then putting "rstudio" for both the username and password.
 ![See metrics about this repository here](https://cauldron.io/project/8779/stats.svg)
 
 
-This work is funded by NCI grant R01CA262556 as well as funding from the Translational Data Science IRC of Fred Hutchinson Cancer Center. 
+This work is funded by NCI grant R01CA262556 as well as funding from the Translational Data Science IRC of Fred Hutchinson Cancer Center.

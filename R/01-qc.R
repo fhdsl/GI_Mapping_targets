@@ -12,6 +12,7 @@
 #' will select the first sample column only
 #' @param filter_replicates_target_col default is NULL; Which sample columns are replicates
 #'  whose variation you'd like to analyze; If NULL, the last 3 sample columns are used
+#' @param open_results default is TRUE but if you don't want the report automatically opened, choose FALSE.
 #' @param ... additional parameters are sent to `rmarkdown::render()`
 #' @returns a QC report saved locally
 #' @export
@@ -31,6 +32,7 @@ run_qc <- function(gimap_dataset,
                    filter_zerocount_target_col = NULL,
                    filter_plasmid_target_col = NULL,
                    filter_replicates_target_col = NULL,
+                   open_results = TRUE,
                    ...) {
   if (!("gimap_dataset" %in% class(gimap_dataset))) {
     stop("This function only works with gimap_dataset objects
@@ -83,7 +85,8 @@ run_qc <- function(gimap_dataset,
   results_file <- gsub("\\.Rmd$", "\\.html", output_file)
   message("Results in: ", results_file)
 
-  if (results_file != "") browseURL(results_file)
-
+  if (open_results) {
+    if (results_file != "") browseURL(results_file)
+  }
   results_file
 }
