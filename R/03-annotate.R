@@ -268,7 +268,7 @@ tpm_setup <- function(overwrite = TRUE) {
   tpm_file <- file.path(data_dir, "CCLE_expression.csv")
 
   if (!file.exists(tpm_file) | overwrite) {
-    if (!file.exists(file.path(data_dir, "CCLE_gene_cn.csv.zip"))) {
+    if (!file.exists(file.path(data_dir, "CCLE_expression.csv.zip"))) {
       download.file("https://figshare.com/ndownloader/files/34989919",
         destfile = tpm_file
       )
