@@ -142,6 +142,8 @@ gimap_annotate <- function(.data = NULL,
 
     if (!file.exists(tpm_file)) tpm_setup()
 
+    Sys.setenv("VROOM_CONNECTION_SIZE" = 500072)
+
     tpm <- vroom::vroom(tpm_file,
       show_col_types = FALSE,
       col_select = c("genes", my_depmap_id)
