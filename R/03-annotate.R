@@ -46,20 +46,21 @@
 #' # annotation BUT if you don't also specify that you say you are
 #' # `normalize_by_unexpressed = FALSE` in the normalize step you will get a warning.
 #' gimap_dataset <- get_example_data("gimap") %>%
-#'  gimap_filter() %>%
-#'  gimap_annotate(cell_line_annotate = FALSE) %>%
-#'  gimap_normalize(timepoints = "day",
-#'                  normalize_by_unexpressed = FALSE)
+#'   gimap_filter() %>%
+#'   gimap_annotate(cell_line_annotate = FALSE) %>%
+#'   gimap_normalize(
+#'     timepoints = "day",
+#'     normalize_by_unexpressed = FALSE
+#'   )
 #'
 #' ### CUSTOM TPM example
 #' # Lastly, this is also an option:
-#' where custom data is provided to `custom_tpm` is a data frame with
-#' `genes` and `log2_tpm` as the columns.
+#' # where custom data is provided to `custom_tpm` is a data frame with
+#' # `genes` and `log2_tpm` as the columns.
 #' gimap_dataset <- get_example_data("gimap") %>%
-#'  gimap_filter() %>%
-#'  gimap_annotate(custom_tpm = custom_tpm)) %>%
-#'  gimap_normalize(timepoints = "day")
-#'
+#'   gimap_filter() %>%
+#'   gimap_annotate(custom_tpm = custom_tpm) %>%
+#'   gimap_normalize(timepoints = "day")
 #' }
 gimap_annotate <- function(.data = NULL,
                            gimap_dataset,
@@ -71,17 +72,21 @@ gimap_annotate <- function(.data = NULL,
   if (!is.null(.data)) gimap_dataset <- .data
 
   if (!("gimap_dataset" %in% class(gimap_dataset))) {
-    stop("This function only works with gimap_dataset objects which can be made",
-    "with the setup_data() function.")
+    stop(
+      "This function only works with gimap_dataset objects which can be made",
+      "with the setup_data() function."
+    )
   }
 
-  if (all(cell_line_annotate,  is.null(cell_line))) {
-    stop("By default `cell_line_annotate` = TRUE which means if you want DepMap annotation",
-         " you must specify which cell line you are using with the `cell_line` argument",
-         " OR set `cell_line_annotate` = FALSE.",
-         " However this means you cannot use expression data for normalization",
-         " Aka in gimap_normalize(): `normalize_by_unexpressed` must be set to FALSE",
-         " unless you supply your own expression data using the `custom_tpm` argument")
+  if (all(cell_line_annotate, is.null(cell_line))) {
+    stop(
+      "By default `cell_line_annotate` = TRUE which means if you want DepMap annotation",
+      " you must specify which cell line you are using with the `cell_line` argument",
+      " OR set `cell_line_annotate` = FALSE.",
+      " However this means you cannot use expression data for normalization",
+      " Aka in gimap_normalize(): `normalize_by_unexpressed` must be set to FALSE",
+      " unless you supply your own expression data using the `custom_tpm` argument"
+    )
   }
 
   # Get the annotation data based on the pg construct design
@@ -114,21 +119,26 @@ gimap_annotate <- function(.data = NULL,
     # This is used to flag things
     ## get TPM and CN information (w/ option for user to upload their own info)
     depmap_metadata <- readr::read_csv(
-      "https://figshare.com/ndownloader/files/35020903", show_col_types = FALSE)
+      "https://figshare.com/ndownloader/files/35020903",
+      show_col_types = FALSE
+    )
 
     my_depmap_id <- depmap_metadata %>%
       dplyr::filter(stripped_cell_line_name == toupper(cell_line)) %>%
       dplyr::pull(DepMap_ID)
 
     if (length(my_depmap_id) == 0) {
-      stop("The cell line specified, ",
-           cell_line,
-           "was not found in the DepMap data. Run supported_cell_lines() to see the full list")
+      stop(
+        "The cell line specified, ",
+        cell_line,
+        "was not found in the DepMap data. Run supported_cell_lines() to see the full list"
+      )
     }
 
     tpm_file <- file.path(
       system.file("extdata", package = "gimap"),
-      "CCLE_expression.csv")
+      "CCLE_expression.csv"
+    )
 
     if (!file.exists(tpm_file)) tpm_setup()
 
@@ -151,37 +161,45 @@ gimap_annotate <- function(.data = NULL,
 
     annotation_df <- annotation_df %>%
       dplyr::left_join(depmap_cn, by = c("gene1_symbol" = "genes")) %>%
-      dplyr::left_join(depmap_cn, by = c("gene2_symbol" = "genes"),
-                       suffix = c("_gene1", "_gene2"))
+      dplyr::left_join(depmap_cn,
+        by = c("gene2_symbol" = "genes"),
+        suffix = c("_gene1", "_gene2")
+      )
   }
 
   # If people supply their own tpm file we need to check it for stuff
   if (!is.null(custom_tpm)) {
-    stopifnot("custom_tpm must be a data.frame or tibble" =
-                is.data.frame(custom_tpm),
-              "custom_tpm must contain a column called 'log2_tpm'" = "log2_tpm" %in%
-                colnames(custom_tpm),
-              "custom_tpm must contain a column called 'genes'" = "genes" %in%
-                colnames(custom_tpm))
+    stopifnot(
+      "custom_tpm must be a data.frame or tibble" =
+        is.data.frame(custom_tpm),
+      "custom_tpm must contain a column called 'log2_tpm'" = "log2_tpm" %in%
+        colnames(custom_tpm),
+      "custom_tpm must contain a column called 'genes'" = "genes" %in%
+        colnames(custom_tpm)
+    )
 
     annotation_genes <- unique(c(annotation_df$gene1_symbol, annotation_df$gene2_symbol))
     gene_matches <- sum(!is.na(match(annotation_genes, custom_tpm$genes)))
-    percent <- round(gene_matches/length(annotation_genes)*100)
+    percent <- round(gene_matches / length(annotation_genes) * 100)
 
-    message(gene_matches,
-            " :number of genes have matches in the custom_tpm data \n",
-            percent, "% :percent of genes with matches in the custom_tpm data")
+    message(
+      gene_matches,
+      " :number of genes have matches in the custom_tpm data \n",
+      percent, "% :percent of genes with matches in the custom_tpm data"
+    )
 
-    stopifnot("less than half of the genes have custom_tpm matches" =
-                percent > 50)
+    stopifnot(
+      "less than half of the genes have custom_tpm matches" =
+        percent > 50
+    )
   }
   if (!is.null(custom_tpm) | cell_line_annotate) {
-  tpm <- tpm %>%
-    dplyr::mutate(expressed_flag = dplyr::case_when(
-      log2_tpm < 1 ~ FALSE,
-      log2_tpm >= 1 ~ TRUE,
-      is.na(log2_tpm) ~ NA
-    ))
+    tpm <- tpm %>%
+      dplyr::mutate(expressed_flag = dplyr::case_when(
+        log2_tpm < 1 ~ FALSE,
+        log2_tpm >= 1 ~ TRUE,
+        is.na(log2_tpm) ~ NA
+      ))
   }
   ############################ ANNOTATION COMBINING ############################
   # This set up is more or less the same as the original
@@ -223,7 +241,7 @@ gimap_annotate <- function(.data = NULL,
           norm_ctrl_flag == "double_targeting" & gene1_expressed_flag == FALSE &
             gene2_expressed_flag == FALSE ~ TRUE,
           norm_ctrl_flag == "single_targeting" & (gene1_expressed_flag == FALSE |
-                                                    gene2_expressed_flag == FALSE) ~ TRUE,
+            gene2_expressed_flag == FALSE) ~ TRUE,
           TRUE ~ FALSE
         )
       )
@@ -241,94 +259,132 @@ gimap_annotate <- function(.data = NULL,
   return(gimap_dataset)
 }
 
+#' @param overwrite should the files be re downloaded
 #' @importFrom utils download.file
 # This function sets up the tpm data from DepMap is called by the `gimap_annotate()` function
-tpm_setup <- function() {
-  tpm_file <- file.path(
-    system.file("extdata", package = "gimap"),
-    "CCLE_expression.csv"
-  )
+tpm_setup <- function(overwrite = TRUE) {
+  data_dir <- system.file("extdata", package = "gimap")
 
-  download.file("https://figshare.com/ndownloader/files/34989919",
-    destfile = tpm_file)
+  tpm_file <- file.path(data_dir, "CCLE_expression.csv")
+
+  if (!file.exists(tpm_file) | overwrite) {
+    if (!file.exists(file.path(data_dir, "CCLE_expression.csv.zip"))) {
+      download.file("https://figshare.com/ndownloader/files/34989919",
+        destfile = tpm_file
+      )
+    } else {
+      unzip(file.path(data_dir, "CCLE_expression.csv.zip"),
+        exdir = data_dir, overwrite = TRUE
+      )
+    }
+  }
+  if (dir.exists(file.path(data_dir, "__MACOSX"))) {
+    file.remove(file.path(data_dir, "__MACOSX"))
+  }
+
 
   data_df <- readr::read_csv(tpm_file,
     show_col_types = FALSE,
     name_repair = make.names
   )
 
-  cell_line_ids <- data_df$X
+  if ("X" %in% colnames(data_df)) {
+    cell_line_ids <- data_df$X
 
-  genes <- stringr::word(colnames(data_df)[-1], sep = "\\.\\.", 1)
+    genes <- stringr::word(colnames(data_df)[-1], sep = "\\.\\.", 1)
 
-  colnames(data_df) <- c("cell_line_ids", genes)
+    colnames(data_df) <- c("cell_line_ids", genes)
 
-  data_df <- as.data.frame(t(data_df[, -1]))
-  colnames(data_df) <- cell_line_ids
-  data_df$genes <- genes
+    data_df <- as.data.frame(t(data_df[, -1]))
+    colnames(data_df) <- cell_line_ids
+    data_df$genes <- genes
 
-  data_df %>%
-    dplyr::select(genes, dplyr::everything()) %>%
-    readr::write_csv(tpm_file)
-
+    data_df %>%
+      dplyr::select(genes, dplyr::everything()) %>%
+      readr::write_csv(tpm_file)
+  }
   return(tpm_file)
 }
 
 # This function sets up the tpm data from DepMap is called by the `gimap_annotate()`
 # function if the cn_annotate = TRUE
+#' @param overwrite Should the files be redownloaded?
 #' @importFrom utils download.file
-cn_setup <- function() {
+cn_setup <- function(overwrite = TRUE) {
   options(timeout = 1000)
 
+  data_dir <- system.file("extdata", package = "gimap")
+
   cn_file <- file.path(
-    system.file("extdata", package = "gimap"),
+    data_dir,
     "CCLE_gene_cn.csv"
   )
 
-  download.file("https://figshare.com/ndownloader/files/34989937",
-    destfile = cn_file)
+  if (!file.exists(cn_file) | overwrite) {
+    if (!file.exists(file.path(data_dir, "CCLE_gene_cn.csv.zip"))) {
+      download.file("https://figshare.com/ndownloader/files/34989937",
+        destfile = cn_file
+      )
+    } else {
+      unzip(file.path(data_dir, "CCLE_gene_cn.csv.zip"),
+        exdir = data_dir, overwrite = TRUE
+      )
+    }
+  }
+  if (dir.exists(file.path(data_dir, "__MACOSX"))) {
+    file.remove(file.path(data_dir, "__MACOSX"))
+  }
 
   data_df <- readr::read_csv(cn_file,
     show_col_types = FALSE,
     name_repair = make.names
   )
+  if ("X" %in% colnames(data_df)) {
+    cell_line_ids <- data_df$X
 
-  cell_line_ids <- data_df$X
+    genes <- stringr::word(colnames(data_df)[-1], sep = "\\.\\.", 1)
 
-  genes <- stringr::word(colnames(data_df)[-1], sep = "\\.\\.", 1)
+    colnames(data_df) <- c("cell_line_ids", genes)
 
-  colnames(data_df) <- c("cell_line_ids", genes)
+    data_df <- as.data.frame(t(data_df[, -1]))
+    colnames(data_df) <- cell_line_ids
+    data_df$genes <- genes
 
-  data_df <- as.data.frame(t(data_df[, -1]))
-  colnames(data_df) <- cell_line_ids
-  data_df$genes <- genes
-
-  data_df %>%
-    dplyr::select(genes, dplyr::everything()) %>%
-    readr::write_csv(cn_file)
+    data_df %>%
+      dplyr::select(genes, dplyr::everything()) %>%
+      readr::write_csv(cn_file)
+  }
 
   return(cn_file)
 }
 
 # This function sets up the control genes file from DepMap is called by the `gimap_annotate()`
+#' @param overwrite Should the file be redownloaded and reset up?
 #' @importFrom utils download.file
-crtl_genes <- function() {
-  crtl_genes_file <- file.path(
-    system.file("extdata", package = "gimap"),
-    "Achilles_common_essentials.csv"
-  )
+crtl_genes <- function(overwrite = TRUE) {
+  data_dir <- system.file("extdata", package = "gimap")
 
-  if (!file.exists(crtl_genes_file)) {
-    download.file("https://figshare.com/ndownloader/files/34989871",
-      destfile = crtl_genes_file)
+  crtl_genes_file <- file.path(data_dir, "Achilles_common_essentials.csv")
 
-    crtl_genes <- readr::read_csv(crtl_genes_file, show_col_types = FALSE) %>%
-      tidyr::separate(col = gene, into = c("gene_symbol", "entrez_id"), remove = FALSE, extra = "drop")
+  if (!file.exists(crtl_genes_file) | overwrite) {
+    # Can also be downloaded like this:
+    if (!file.exists(file.path(data_dir, "Achilles_common_essentials.csv.zip"))) {
+      download.file("https://figshare.com/ndownloader/files/34989871",
+        destfile = crtl_genes_file
+      )
+    } else {
+      unzip(file.path(data_dir, "Achilles_common_essentials.csv.zip"),
+        exdir = data_dir,
+        overwrite = TRUE
+      )
 
-    readr::write_csv(crtl_genes, crtl_genes_file)
-  } else {
-    crtl_genes <- readr::read_csv(crtl_genes_file)
+      if (dir.exists(file.path(data_dir, "__MACOSX"))) {
+        file.remove(file.path(data_dir, "__MACOSX"))
+      }
+    }
   }
+  crtl_genes <- readr::read_csv(crtl_genes_file, show_col_types = FALSE) %>%
+    tidyr::separate(col = gene, into = c("gene_symbol", "entrez_id"), remove = FALSE, extra = "drop")
 
   return(crtl_genes$gene_symbol)
 }
@@ -344,7 +400,8 @@ crtl_genes <- function() {
 #' }
 supported_cell_lines <- function() {
   depmap_metadata <- readr::read_csv("https://figshare.com/ndownloader/files/35020903",
-                                     show_col_types = FALSE)
+    show_col_types = FALSE
+  )
 
   return(sort(depmap_metadata$stripped_cell_line_name))
 }

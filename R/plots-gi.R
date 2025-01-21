@@ -112,23 +112,32 @@ plot_exp_v_obs_scatter <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop
 #' plot_rank_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
 #' plot_volcano(gimap_dataset, reps_to_drop = "Day05_RepA_early")
 #' }
-plot_rank_scatter <- function(gimap_dataset, reps_to_drop = ""){
+plot_rank_scatter <- function(gimap_dataset, reps_to_drop = "") {
+  if (!("gimap_dataset" %in% class(gimap_dataset))) {
+    stop(
+      "This function only works",
+      "with gimap_dataset objects which can be made with the setup_data() function."
+    )
+  }
 
-  if (!("gimap_dataset" %in% class(gimap_dataset))) stop("This function only works",
-     "with gimap_dataset objects which can be made with the setup_data() function.")
-
-  if (is.null(gimap_dataset$overall_results)) stop("This function only works with",
-     "gimap_dataset objects which have had gi calculated with calc_gi()")
+  if (is.null(gimap_dataset$overall_results)) {
+    stop(
+      "This function only works with",
+      "gimap_dataset objects which have had gi calculated with calc_gi()"
+    )
+  }
 
   return(
     gimap_dataset$gi_scores %>%
-      filter(target_type == "gene_gene") %>% #get only double targeting
+      filter(target_type == "gene_gene") %>% # get only double targeting
       filter(!(rep %in% reps_to_drop)) %>%
       mutate(Rank = dense_rank(mean_gi_score)) %>%
-      ggplot(aes(x=Rank,
-                 y=mean_gi_score,
-                 color = rep)) +
-      geom_point(size=1, alpha=0.7) +
+      ggplot(aes(
+        x = Rank,
+        y = mean_gi_score,
+        color = rep
+      )) +
+      geom_point(size = 1, alpha = 0.7) +
       theme_classic() +
       theme(legend.title = element_blank()) +
       ylab("GI score") +
@@ -163,13 +172,20 @@ plot_rank_scatter <- function(gimap_dataset, reps_to_drop = ""){
 #' plot_rank_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
 #' plot_volcano(gimap_dataset, reps_to_drop = "Day05_RepA_early")
 #' }
-plot_volcano <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop = ""){
+plot_volcano <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop = "") {
+  if (!("gimap_dataset" %in% class(gimap_dataset))) {
+    stop(
+      "This function only works",
+      "with gimap_dataset objects which can be made with the setup_data() function."
+    )
+  }
 
-  if (!("gimap_dataset" %in% class(gimap_dataset))) stop("This function only works",
-    "with gimap_dataset objects which can be made with the setup_data() function.")
-
-  if (is.null(gimap_dataset$overall_results)) stop("This function only works with",
-    "gimap_dataset objects which have had gi calculated with calc_gi()")
+  if (is.null(gimap_dataset$overall_results)) {
+    stop(
+      "This function only works with",
+      "gimap_dataset objects which have had gi calculated with calc_gi()"
+    )
+  }
 
   gplot <- gimap_dataset$gi_scores %>%
     filter(target_type == "gene_gene") %>% # get only double targeting
@@ -238,36 +254,49 @@ plot_volcano <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop = ""){
 #' # "NDEL1_NDE1" is top result so let's plot that
 #' plot_targets_bar(gimap_dataset, target1 = "NDEL1", target2 = "NDE1")
 #' }
-plot_targets_bar <- function(gimap_dataset, target1, target2, reps_to_drop = ""){
+plot_targets_bar <- function(gimap_dataset, target1, target2, reps_to_drop = "") {
+  if (!("gimap_dataset" %in% class(gimap_dataset))) {
+    stop(
+      "This function only works",
+      "with gimap_dataset objects which can be made with the setup_data() function."
+    )
+  }
 
-  if (!("gimap_dataset" %in% class(gimap_dataset))) stop("This function only works",
-    "with gimap_dataset objects which can be made with the setup_data() function.")
-
-  if (is.null(gimap_dataset$overall_results)) stop("This function only works with",
-    "gimap_dataset objects which have had gi calculated with calc_gi()")
+  if (is.null(gimap_dataset$overall_results)) {
+    stop(
+      "This function only works with",
+      "gimap_dataset objects which have had gi calculated with calc_gi()"
+    )
+  }
 
   return(
     gimap_dataset$gi_scores %>%
       filter(!(rep %in% reps_to_drop)) %>%
       filter((grepl(target1, pgRNA_target)) | (grepl(target2, pgRNA_target))) %>%
-      ggplot(aes(y = mean_observed_cs, #This is not the right column
-                 x = target_type,
-                 fill = target_type)) +
+      ggplot(aes(
+        y = mean_observed_cs, # This is not the right column
+        x = target_type,
+        fill = target_type
+      )) +
       geom_bar(stat = "identity") +
-      geom_point(pch = 21, size=3) +
+      geom_point(pch = 21, size = 3) +
       theme_bw() +
       ylab("CRISPR score") +
       xlab("") +
       ggtitle(paste0(target1, "/", target2)) +
       geom_hline(yintercept = 0) +
-      scale_x_discrete(labels = c("ctrl_gene" = paste0(target2, " KO"),
-                                  #this assumes that target2 is the ctrl_{target2} gene
-                                  "gene_ctrl" = paste0(target1, " KO"),
-                                  #this assumes that target1 is the {target1}_ctrl gene
-                                  "gene_gene" = "DKO")) +
-      theme(legend.position = "none",
-            panel.background = element_blank(),
-            panel.grid = element_blank(),
-            axis.text.x = element_text(angle = 45, hjust=1))
+      scale_x_discrete(labels = c(
+        "ctrl_gene" = paste0(target2, " KO"),
+        # this assumes that target2 is the ctrl_{target2} gene
+        "gene_ctrl" = paste0(target1, " KO"),
+        # this assumes that target1 is the {target1}_ctrl gene
+        "gene_gene" = "DKO"
+      )) +
+      theme(
+        legend.position = "none",
+        panel.background = element_blank(),
+        panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1)
+      )
   )
 }

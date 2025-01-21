@@ -17,9 +17,9 @@ utils::globalVariables(c(
   "comparison", ".", "col_names", "lfc_adj1", "t.test", "wilcox.test", "p.adjust",
   "cor", "quantile", "var", "browseURL", "single_crispr", "mean_single_crispr_2",
   "mean_single_crispr_1", "expected_single_crispr", "double_crispr", "double_gi_score",
-  "fdr", "lfc",  "mean_expected_cs", "mean_gi_score", "mean_single_crispr",
+  "fdr", "lfc", "mean_expected_cs", "mean_gi_score", "mean_single_crispr",
   "expected_double_crispr", "p_val", "single_gi_score", "Rank", "broad_target_type",
-   "logfdr", "pointColor"
+  "logfdr", "pointColor"
 ))
 
 
