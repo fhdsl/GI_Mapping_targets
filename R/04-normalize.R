@@ -94,8 +94,10 @@ gimap_normalize <- function(.data = NULL,
 
 
   if (!is.null(gimap_dataset$normalized_log_fc) & !overwrite) {
-    stop("Normalization has already been preformed on this dataset.",
-         "set overwrite = TRUE if you'd like the existing data to be overwritten.")
+    stop(
+      "Normalization has already been preformed on this dataset.",
+      "set overwrite = TRUE if you'd like the existing data to be overwritten."
+    )
   }
 
   if (overwrite) {
@@ -149,8 +151,10 @@ gimap_normalize <- function(.data = NULL,
   ### IF WE HAVE TIMEPOINTS
   if (!is.null(timepoints)) {
     if (!(timepoints %in% colnames(gimap_dataset$metadata$sample_metadata))) {
-      stop("The column name specified for 'timepoints' does not exist in",
-           "gimap_dataset$metadata$sample_metadata")
+      stop(
+        "The column name specified for 'timepoints' does not exist in",
+        "gimap_dataset$metadata$sample_metadata"
+      )
     }
 
     # Rename and recode the timepoints variable
@@ -203,19 +207,25 @@ gimap_normalize <- function(.data = NULL,
   )
 
   if ((nrow(missing_ids) > 0) & (nrow(missing_ids) < num_ids_wo_annot)) {
-    message("The following ", nrow(missing_ids),
-            " IDs were not found in the annotation data: \n",
-            paste0(missing_ids, collapse = ", "))
+    message(
+      "The following ", nrow(missing_ids),
+      " IDs were not found in the annotation data: \n",
+      paste0(missing_ids, collapse = ", ")
+    )
 
     if (rm_ids_wo_annot) {
       lfc_df <- lfc_df %>%
         filter(!pg_ids %in% missing_ids$missing_ids)
-      message("The input data for the IDs which were not found in the annotation",
-              "data has been filtered out and will not be included in the analysis output.")
+      message(
+        "The input data for the IDs which were not found in the annotation",
+        "data has been filtered out and will not be included in the analysis output."
+      )
     } else {
-      message("The input data for the IDs which were not found in the annotation data",
-              "will be kept throughout the analysis, but any data from the annotation",
-              "won't be available for them.")
+      message(
+        "The input data for the IDs which were not found in the annotation data",
+        "will be kept throughout the analysis, but any data from the annotation",
+        "won't be available for them."
+      )
     }
   } else {
     missing_ids_file <- file.path(missing_ids_file)
@@ -231,7 +241,8 @@ gimap_normalize <- function(.data = NULL,
 
   comparison_df <- lfc_df %>%
     dplyr::mutate_at(
-      dplyr::vars(!c(pg_ids, dplyr::ends_with("_control"))), ~ .x - ctrl_mean) %>%
+      dplyr::vars(!c(pg_ids, dplyr::ends_with("_control"))), ~ .x - ctrl_mean
+    ) %>%
     dplyr::select(!dplyr::matches(pg_ids) & !dplyr::ends_with("_control")) %>%
     dplyr::left_join(gimap_dataset$annotation, by = c("pg_ids" = "pgRNA_id")) %>%
     tidyr::pivot_longer(dplyr::ends_with(treatment_group_names),
@@ -241,14 +252,16 @@ gimap_normalize <- function(.data = NULL,
 
   ########################### Perform adjustments #############################
   if (normalize_by_unexpressed) {
-
-    stopifnot("For normalize_by_unexpressed to be TRUE you need to have added TPM
+    stopifnot(
+      "For normalize_by_unexpressed to be TRUE you need to have added TPM
               data in the annotation step using cell_line_annotation or custom_tpm" =
-                "unexpressed_ctrl_flag" %in% colnames(comparison_df))
+        "unexpressed_ctrl_flag" %in% colnames(comparison_df)
+    )
 
     comparison_df <- comparison_df %>%
       dplyr::mutate(
-        lfc = lfc - median(lfc[unexpressed_ctrl_flag == TRUE]))
+        lfc = lfc - median(lfc[unexpressed_ctrl_flag == TRUE])
+      )
   }
   medians_df <- comparison_df %>%
     dplyr::group_by(norm_ctrl_flag, rep) %>%
