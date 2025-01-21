@@ -261,9 +261,11 @@ gimap_annotate <- function(.data = NULL,
   return(gimap_dataset)
 }
 
+#' Download and set up DepMap TPM data
+#' @description  This function sets up the tpm data from DepMap is
+#' called by the `gimap_annotate()` function
 #' @param overwrite should the files be re downloaded
-#' @importFrom utils download.file
-# This function sets up the tpm data from DepMap is called by the `gimap_annotate()` function
+#' @importFrom utils download.file zip
 tpm_setup <- function(overwrite = TRUE) {
   data_dir <- system.file("extdata", package = "gimap")
 
@@ -308,10 +310,11 @@ tpm_setup <- function(overwrite = TRUE) {
   return(tpm_file)
 }
 
-# This function sets up the tpm data from DepMap is called by the `gimap_annotate()`
-# function if the cn_annotate = TRUE
+#' Download and set up DepMap CN
+#' @description This function sets up the tpm data from DepMap is called by the `gimap_annotate()`
+#' function if the cn_annotate = TRUE
 #' @param overwrite Should the files be redownloaded?
-#' @importFrom utils download.file
+#' @importFrom utils download.file zip
 cn_setup <- function(overwrite = TRUE) {
   options(timeout = 1000)
 
@@ -360,9 +363,10 @@ cn_setup <- function(overwrite = TRUE) {
   return(cn_file)
 }
 
-# This function sets up the control genes file from DepMap is called by the `gimap_annotate()`
+#' Download and set up control genes
+#' @description This function sets up the control genes file from DepMap is called by the `gimap_annotate()`
 #' @param overwrite Should the file be redownloaded and reset up?
-#' @importFrom utils download.file
+#' @importFrom utils download.file zip
 crtl_genes <- function(overwrite = TRUE) {
   data_dir <- system.file("extdata", package = "gimap")
 
