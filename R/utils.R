@@ -184,7 +184,7 @@ key_encrypt_creds_path <- function() {
 #'
 #' }
 get_figshare <- function(file_name = NA,
-                         item = "12280541",
+                         item = "19700056",
                          output_dir = system.file("extdata", package = "gimap"),
                          return_list = FALSE) {
 
