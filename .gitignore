@@ -19,3 +19,4 @@ inst/extdata/CCLE_expression.csv
 counts_pgPEN.PC.correct.v3.txt
 .secrets/*
 .secrets/encryption.R
+Achilles_common_essentials.csvCCLE_expression.csvCCLE_gene_cn.csv
