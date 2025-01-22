@@ -23,7 +23,7 @@
 #' instead of the tpm data from DepMap. However other data from DepMap like CN will be added.
 #' @importFrom stringr word
 #' @import dplyr
-#' @importFrom utils download.file
+#' @importFrom utils download.file unzip
 #' @export
 #' @examples \dontrun{
 #'
@@ -265,7 +265,7 @@ gimap_annotate <- function(.data = NULL,
 #' @description  This function sets up the tpm data from DepMap is
 #' called by the `gimap_annotate()` function
 #' @param overwrite should the files be re downloaded
-#' @importFrom utils download.file zip
+#' @importFrom utils download.file unzip
 tpm_setup <- function(overwrite = TRUE) {
   data_dir <- system.file("extdata", package = "gimap")
 
@@ -312,7 +312,7 @@ tpm_setup <- function(overwrite = TRUE) {
 #' @description This function sets up the tpm data from DepMap is called by the `gimap_annotate()`
 #' function if the cn_annotate = TRUE
 #' @param overwrite Should the files be redownloaded?
-#' @importFrom utils download.file zip
+#' @importFrom utils download.file unzip
 cn_setup <- function(overwrite = TRUE) {
   options(timeout = 1000)
 
@@ -362,7 +362,7 @@ cn_setup <- function(overwrite = TRUE) {
 #' Download and set up control genes
 #' @description This function sets up the control genes file from DepMap is called by the `gimap_annotate()`
 #' @param overwrite Should the file be redownloaded and reset up?
-#' @importFrom utils download.file zip
+#' @importFrom utils download.file unzip
 crtl_genes <- function(overwrite = TRUE) {
   data_dir <- system.file("extdata", package = "gimap")
 
