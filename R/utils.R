@@ -148,3 +148,93 @@ save_example_data <- function() {
 plot_options <- function() {
   list(theme_bw(base_size = 12))
 }
+
+#' Default creds path
+#' @param app_name What app set up are you looking for? Supported apps are 'google' 'calendly' and 'github'
+encrypt_creds_path <- function(app_name) {
+  list.files(
+    pattern = paste0("figshare_encrypt.rds"),
+    recursive = TRUE,
+    system.file("extdata", package = "gimap"),
+    full.names = TRUE
+  )
+}
+#' Get file path to an key encryption RDS
+key_encrypt_creds_path <- function() {
+  list.files(
+    pattern = "encrypt_pass.rds",
+    recursive = TRUE,
+    system.file("extdata", package = "gimap"),
+    full.names = TRUE
+  )
+}
+#' Handler function for GET requests from Figshare
+#' @param item What is the item we are retrieving?
+#' @param file_name Which item are we downloading?
+#' @param output_dir Where should the file be saved?
+#' @param return_list Should the list of files be returned instead of the file
+#' @importFrom utils menu installed.packages
+#' @import httr
+#' @importFrom jsonlite fromJSON
+#' @export
+#'
+#' @examples \dontrun{
+#'
+#' get_figshare(return_list = TRUE)
+#'
+#' }
+get_figshare <- function(file_name = NA,
+                         item = "19700056",
+                         output_dir = system.file("extdata", package = "gimap"),
+                         return_list = FALSE) {
+
+  decrypted <- openssl::aes_cbc_decrypt(
+    readRDS(encrypt_creds_path()),
+   key = readRDS(key_encrypt_creds_path())
+  )
+
+  url <- file.path("https://api.figshare.com/v2/articles", item)
+
+  # Github api get
+  result <- httr::GET(
+    url,
+    httr::progress(),
+    httr::add_headers(Authorization = paste0("Bearer ", unserialize(decrypted)$client_secret)),
+    httr::accept_json()
+  )
+
+  if (httr::status_code(result) != 200) {
+    httr::stop_for_status(result)
+  }
+
+  # Process and return results
+  result_content <- httr::content(result, "text",
+                                  encoding = "UTF-8")
+  result_list <- jsonlite::fromJSON(result_content)
+
+  if (return_list) {
+    return(result_list$files)
+  }
+  file_id <- result_list$files %>%
+    dplyr::filter(name == file_name) %>%
+    dplyr::pull(id)
+
+  message("Downloading: ", file_name)
+  result <- httr::GET(
+    file.path('https://api.figshare.com/v2/file/download/', file_id),
+    httr::progress(),
+    httr::add_headers(Authorization = paste0("Bearer ", unserialize(decrypted)$client_secret)),
+    httr::accept_json()
+  )
+
+  if (httr::status_code(result) != 200) {
+    httr::stop_for_status(result)
+  }
+
+  result_content <- httr::content(result, "text",
+                                  encoding = "UTF-8")
+
+  writeLines(result_content, file.path(output_dir, file_name))
+
+  return(result_content)
+}

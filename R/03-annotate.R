@@ -23,7 +23,7 @@
 #' instead of the tpm data from DepMap. However other data from DepMap like CN will be added.
 #' @importFrom stringr word
 #' @import dplyr
-#' @importFrom utils download.file
+#' @importFrom utils download.file unzip
 #' @export
 #' @examples \dontrun{
 #'
@@ -146,9 +146,9 @@ gimap_annotate <- function(.data = NULL,
 
     tpm <- vroom::vroom(tpm_file,
       show_col_types = FALSE,
-      col_select = c("genes", my_depmap_id)
+      col_select = c("genes", !!my_depmap_id)
     ) %>%
-      dplyr::rename(log2_tpm = dplyr::all_of(my_depmap_id))
+      dplyr::rename(log2_tpm = dplyr::all_of(!!my_depmap_id))
 
     ############################ COPY NUMBER ANNOTATION ##########################
     cn_file <- file.path(system.file("extdata", package = "gimap"), "CCLE_gene_cn.csv")
@@ -157,9 +157,9 @@ gimap_annotate <- function(.data = NULL,
     # Read in the CN data
     depmap_cn <- readr::read_csv(cn_file,
       show_col_types = FALSE,
-      col_select = c("genes", dplyr::all_of(my_depmap_id))
+      col_select = c("genes", dplyr::all_of(!!my_depmap_id))
     ) %>%
-      dplyr::rename(log2_cn = dplyr::all_of(my_depmap_id))
+      dplyr::rename(log2_cn = dplyr::all_of(!!my_depmap_id))
 
     annotation_df <- annotation_df %>%
       dplyr::left_join(depmap_cn, by = c("gene1_symbol" = "genes")) %>%
@@ -265,7 +265,7 @@ gimap_annotate <- function(.data = NULL,
 #' @description  This function sets up the tpm data from DepMap is
 #' called by the `gimap_annotate()` function
 #' @param overwrite should the files be re downloaded
-#' @importFrom utils download.file zip
+#' @importFrom utils download.file unzip
 tpm_setup <- function(overwrite = TRUE) {
   data_dir <- system.file("extdata", package = "gimap")
 
@@ -273,9 +273,7 @@ tpm_setup <- function(overwrite = TRUE) {
 
   if (!file.exists(tpm_file) | overwrite) {
     if (!file.exists(file.path(data_dir, "CCLE_expression.csv.zip"))) {
-      download.file("https://figshare.com/ndownloader/files/34989919",
-        destfile = tpm_file
-      )
+      get_figshare(file_name = "CCLE_expression.csv")
     } else {
       unzip(file.path(data_dir, "CCLE_expression.csv.zip"),
         exdir = data_dir, overwrite = TRUE
@@ -314,7 +312,7 @@ tpm_setup <- function(overwrite = TRUE) {
 #' @description This function sets up the tpm data from DepMap is called by the `gimap_annotate()`
 #' function if the cn_annotate = TRUE
 #' @param overwrite Should the files be redownloaded?
-#' @importFrom utils download.file zip
+#' @importFrom utils download.file unzip
 cn_setup <- function(overwrite = TRUE) {
   options(timeout = 1000)
 
@@ -327,9 +325,7 @@ cn_setup <- function(overwrite = TRUE) {
 
   if (!file.exists(cn_file) | overwrite) {
     if (!file.exists(file.path(data_dir, "CCLE_gene_cn.csv.zip"))) {
-      download.file("https://figshare.com/ndownloader/files/34989937",
-        destfile = cn_file
-      )
+      get_figshare(file_name = "CCLE_gene_cn.csv")
     } else {
       unzip(file.path(data_dir, "CCLE_gene_cn.csv.zip"),
         exdir = data_dir, overwrite = TRUE
@@ -366,7 +362,7 @@ cn_setup <- function(overwrite = TRUE) {
 #' Download and set up control genes
 #' @description This function sets up the control genes file from DepMap is called by the `gimap_annotate()`
 #' @param overwrite Should the file be redownloaded and reset up?
-#' @importFrom utils download.file zip
+#' @importFrom utils download.file unzip
 crtl_genes <- function(overwrite = TRUE) {
   data_dir <- system.file("extdata", package = "gimap")
 
@@ -375,15 +371,12 @@ crtl_genes <- function(overwrite = TRUE) {
   if (!file.exists(crtl_genes_file) | overwrite) {
     # Can also be downloaded like this:
     if (!file.exists(file.path(data_dir, "Achilles_common_essentials.csv.zip"))) {
-      download.file("https://figshare.com/ndownloader/files/34989871",
-        destfile = crtl_genes_file
-      )
+      get_figshare(file_name = "Achilles_common_essentials.csv")
     } else {
       unzip(file.path(data_dir, "Achilles_common_essentials.csv.zip"),
         exdir = data_dir,
         overwrite = TRUE
       )
-
       if (dir.exists(file.path(data_dir, "__MACOSX"))) {
         file.remove(file.path(data_dir, "__MACOSX"))
       }
