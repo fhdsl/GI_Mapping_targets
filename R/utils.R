@@ -58,7 +58,15 @@ get_example_data <- function(which_data) {
     return(readr::read_csv(file, skip = 1))
   } else if (which_data == "gimap") {
     file <- list.files(
-      pattern = "gimap_dataset.RDS",
+      pattern = "gimap_timepoint_dataset.RDS",
+      recursive = TRUE,
+      system.file("extdata", package = "gimap"),
+      full.names = TRUE
+    )
+    return(readr::read_rds(file))
+  } else if (which_data == "gimap_treatment") {
+    file <- list.files(
+      pattern = "gimap_timepoint_dataset.RDS",
       recursive = TRUE,
       system.file("extdata", package = "gimap"),
       full.names = TRUE
