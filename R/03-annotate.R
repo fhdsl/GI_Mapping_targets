@@ -146,9 +146,9 @@ gimap_annotate <- function(.data = NULL,
 
     tpm <- vroom::vroom(tpm_file,
       show_col_types = FALSE,
-      col_select = c("genes", my_depmap_id)
+      col_select = c("genes", !!my_depmap_id)
     ) %>%
-      dplyr::rename(log2_tpm = dplyr::all_of(my_depmap_id))
+      dplyr::rename(log2_tpm = dplyr::all_of(!!my_depmap_id))
 
     ############################ COPY NUMBER ANNOTATION ##########################
     cn_file <- file.path(system.file("extdata", package = "gimap"), "CCLE_gene_cn.csv")
@@ -157,9 +157,9 @@ gimap_annotate <- function(.data = NULL,
     # Read in the CN data
     depmap_cn <- readr::read_csv(cn_file,
       show_col_types = FALSE,
-      col_select = c("genes", dplyr::all_of(my_depmap_id))
+      col_select = c("genes", dplyr::all_of(!!my_depmap_id))
     ) %>%
-      dplyr::rename(log2_cn = dplyr::all_of(my_depmap_id))
+      dplyr::rename(log2_cn = dplyr::all_of(!!my_depmap_id))
 
     annotation_df <- annotation_df %>%
       dplyr::left_join(depmap_cn, by = c("gene1_symbol" = "genes")) %>%
