@@ -32,7 +32,9 @@ Imports:
     broom,
     utils,
     stats,
-    stringr
+    stringr, 
+    httr,
+    jsonlite
 Suggests:
     testthat (>= 3.0.0),
     roxygen2,
