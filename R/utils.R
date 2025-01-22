@@ -189,16 +189,14 @@ key_encrypt_creds_path <- function() {
 #' @examples \dontrun{
 #'
 #' get_figshare(return_list = TRUE)
-#'
 #' }
 get_figshare <- function(file_name = NA,
                          item = "19700056",
                          output_dir = system.file("extdata", package = "gimap"),
                          return_list = FALSE) {
-
   decrypted <- openssl::aes_cbc_decrypt(
     readRDS(encrypt_creds_path()),
-   key = readRDS(key_encrypt_creds_path())
+    key = readRDS(key_encrypt_creds_path())
   )
 
   url <- file.path("https://api.figshare.com/v2/articles", item)
@@ -217,7 +215,8 @@ get_figshare <- function(file_name = NA,
 
   # Process and return results
   result_content <- httr::content(result, "text",
-                                  encoding = "UTF-8")
+    encoding = "UTF-8"
+  )
   result_list <- jsonlite::fromJSON(result_content)
 
   if (return_list) {
@@ -229,7 +228,7 @@ get_figshare <- function(file_name = NA,
 
   message("Downloading: ", file_name)
   result <- httr::GET(
-    file.path('https://api.figshare.com/v2/file/download/', file_id),
+    file.path("https://api.figshare.com/v2/file/download/", file_id),
     httr::progress(),
     httr::add_headers(Authorization = paste0("Bearer ", unserialize(decrypted)$client_secret)),
     httr::accept_json()
@@ -240,7 +239,8 @@ get_figshare <- function(file_name = NA,
   }
 
   result_content <- httr::content(result, "text",
-                                  encoding = "UTF-8")
+    encoding = "UTF-8"
+  )
 
   writeLines(result_content, file.path(output_dir, file_name))
 
