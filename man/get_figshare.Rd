@@ -6,7 +6,7 @@
 \usage{
 get_figshare(
   file_name = NA,
-  item = "12280541",
+  item = "19700056",
   output_dir = system.file("extdata", package = "gimap"),
   return_list = FALSE
 )
