@@ -172,11 +172,22 @@ key_encrypt_creds_path <- function() {
 #' @param item What is the item we are retrieving?
 #' @param file_name Which item are we downloading?
 #' @param output_dir Where should the file be saved?
+#' @param return_list Should the list of files be returned instead of the file
 #' @importFrom utils menu installed.packages
 #' @import httr
 #' @importFrom jsonlite fromJSON
 #' @export
-get_figshare <- function(item = "12280541", file_name, output_dir = system.file("extdata", package = "gimap")) {
+#'
+#' @examples \dontrun{
+#'
+#' get_figshare(return_list = TRUE)
+#'
+#' }
+get_figshare <- function(file_name = NA,
+                         item = "12280541",
+                         output_dir = system.file("extdata", package = "gimap"),
+                         return_list = FALSE) {
+
   decrypted <- openssl::aes_cbc_decrypt(
     readRDS(encrypt_creds_path()),
    key = readRDS(key_encrypt_creds_path())
@@ -187,6 +198,7 @@ get_figshare <- function(item = "12280541", file_name, output_dir = system.file(
   # Github api get
   result <- httr::GET(
     url,
+    httr::progress(),
     httr::add_headers(Authorization = paste0("Bearer ", unserialize(decrypted)$client_secret)),
     httr::accept_json()
   )
@@ -200,13 +212,19 @@ get_figshare <- function(item = "12280541", file_name, output_dir = system.file(
                                   encoding = "UTF-8")
   result_list <- jsonlite::fromJSON(result_content)
 
+  if (return_list) {
+    return(result_list$files)
+  }
   file_id <- result_list$files %>%
     dplyr::filter(name == file_name) %>%
     dplyr::pull(id)
 
-  result <- httr::GET(file.path('https://api.figshare.com/v2/file/download/', file_id),
-                      httr::add_headers(Authorization = paste0("Bearer ", unserialize(decrypted)$client_secret)),
-                      httr::accept_json()
+  message("Downloading: ", file_name)
+  result <- httr::GET(
+    file.path('https://api.figshare.com/v2/file/download/', file_id),
+    httr::progress(),
+    httr::add_headers(Authorization = paste0("Bearer ", unserialize(decrypted)$client_secret)),
+    httr::accept_json()
   )
 
   if (httr::status_code(result) != 200) {

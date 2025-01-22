@@ -377,7 +377,6 @@ crtl_genes <- function(overwrite = TRUE) {
         exdir = data_dir,
         overwrite = TRUE
       )
-
       if (dir.exists(file.path(data_dir, "__MACOSX"))) {
         file.remove(file.path(data_dir, "__MACOSX"))
       }
