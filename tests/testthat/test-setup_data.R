@@ -5,9 +5,11 @@ example_sample_metadata <- data.frame(id = 1:5, replicate = factor(c(1, 1, 2, 2,
 
 # Test elements inside output list
 test_that("setup_data() works correctly", {
-  result <- setup_data(counts = example_counts,
-                       pg_ids = example_pg_ids,
-                       sample_metadata = example_sample_metadata)
+  result <- setup_data(
+    counts = example_counts,
+    pg_ids = example_pg_ids,
+    sample_metadata = example_sample_metadata
+  )
 
   expect_s3_class(result, "gimap_dataset")
   expect_equal(result$raw_counts, example_counts)

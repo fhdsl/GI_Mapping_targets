@@ -27,3 +27,4 @@ qc_plots/*
 CCLE_gene_cn.csv$CCLE_expression.csv$
 make_it_noisy.R$
 Achilles_common_essentials.csv$
+Inst/extdata/rmd/*

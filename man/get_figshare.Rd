@@ -27,6 +27,5 @@ Handler function for GET requests from Figshare
 \dontrun{
 
 get_figshare(return_list = TRUE)
-
 }
 }

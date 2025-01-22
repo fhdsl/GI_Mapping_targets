@@ -58,7 +58,15 @@ get_example_data <- function(which_data) {
     return(readr::read_csv(file, skip = 1))
   } else if (which_data == "gimap") {
     file <- list.files(
-      pattern = "gimap_dataset.RDS",
+      pattern = "gimap_timepoint_dataset.RDS",
+      recursive = TRUE,
+      system.file("extdata", package = "gimap"),
+      full.names = TRUE
+    )
+    return(readr::read_rds(file))
+  } else if (which_data == "gimap_treatment") {
+    file <- list.files(
+      pattern = "gimap_timepoint_dataset.RDS",
       recursive = TRUE,
       system.file("extdata", package = "gimap"),
       full.names = TRUE
@@ -72,22 +80,6 @@ get_example_data <- function(which_data) {
       full.names = TRUE
     )
     return(readr::read_tsv(file, show_col_types = FALSE))
-  } else if (which_data == "final_treatment") {
-    file <- list.files(
-      pattern = "gimap_dataset_final_treatment.RDS",
-      recursive = TRUE,
-      system.file("extdata", package = "gimap"),
-      full.names = TRUE
-    )
-    return(readr::read_rds(file))
-  } else if (which_data == "final_treatment") {
-    file <- list.files(
-      pattern = "gimap_dataset_final_treatment.RDS",
-      recursive = TRUE,
-      system.file("extdata", package = "gimap"),
-      full.names = TRUE
-    )
-    return(readr::read_rds(file))
   } else {
     stop("Specification for `which_data` not understood; Need to use 'gimap', 'count', 'meta', or 'annotation' ")
   }
@@ -181,16 +173,14 @@ key_encrypt_creds_path <- function() {
 #' @examples \dontrun{
 #'
 #' get_figshare(return_list = TRUE)
-#'
 #' }
 get_figshare <- function(file_name = NA,
                          item = "19700056",
                          output_dir = system.file("extdata", package = "gimap"),
                          return_list = FALSE) {
-
   decrypted <- openssl::aes_cbc_decrypt(
     readRDS(encrypt_creds_path()),
-   key = readRDS(key_encrypt_creds_path())
+    key = readRDS(key_encrypt_creds_path())
   )
 
   url <- file.path("https://api.figshare.com/v2/articles", item)
@@ -209,7 +199,8 @@ get_figshare <- function(file_name = NA,
 
   # Process and return results
   result_content <- httr::content(result, "text",
-                                  encoding = "UTF-8")
+    encoding = "UTF-8"
+  )
   result_list <- jsonlite::fromJSON(result_content)
 
   if (return_list) {
@@ -221,7 +212,7 @@ get_figshare <- function(file_name = NA,
 
   message("Downloading: ", file_name)
   result <- httr::GET(
-    file.path('https://api.figshare.com/v2/file/download/', file_id),
+    file.path("https://api.figshare.com/v2/file/download/", file_id),
     httr::progress(),
     httr::add_headers(Authorization = paste0("Bearer ", unserialize(decrypted)$client_secret)),
     httr::accept_json()
@@ -232,7 +223,8 @@ get_figshare <- function(file_name = NA,
   }
 
   result_content <- httr::content(result, "text",
-                                  encoding = "UTF-8")
+    encoding = "UTF-8"
+  )
 
   writeLines(result_content, file.path(output_dir, file_name))
 

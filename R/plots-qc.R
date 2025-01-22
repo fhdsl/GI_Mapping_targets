@@ -16,7 +16,7 @@
 #'
 qc_cdf <- function(gimap_dataset, wide_ar = 0.75) {
   long_form <-
-    tidyr::pivot_longer(data.frame(gimap_dataset$transformed_data$count_norm),
+    tidyr::pivot_longer(data.frame(gimap_dataset$transformed_data$log2_cpm),
       everything(),
       names_to = "sample",
       values_to = "count_normalized"
