@@ -23,4 +23,4 @@ test_that("HTML file is created and content is correct", {
 
   expect_true(file.exists(html_file))
 })
-s
+
