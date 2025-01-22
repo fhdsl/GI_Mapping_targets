@@ -22,3 +22,5 @@ missing_ids_file.csv
 qc_plots/*
 ^CRAN-SUBMISSION$
 ^cran-comments.md$
+.secrets/*
+.secrets/encryption.R

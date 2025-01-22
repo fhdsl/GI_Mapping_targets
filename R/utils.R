@@ -148,3 +148,75 @@ save_example_data <- function() {
 plot_options <- function() {
   list(theme_bw(base_size = 12))
 }
+
+#' Default creds path
+#' @param app_name What app set up are you looking for? Supported apps are 'google' 'calendly' and 'github'
+encrypt_creds_path <- function(app_name) {
+  list.files(
+    pattern = paste0("figshare_encrypt.rds"),
+    recursive = TRUE,
+    system.file("extdata", package = "gimap"),
+    full.names = TRUE
+  )
+}
+#' Get file path to an key encryption RDS
+key_encrypt_creds_path <- function() {
+  list.files(
+    pattern = "encrypt_pass.rds",
+    recursive = TRUE,
+    system.file("extdata", package = "gimap"),
+    full.names = TRUE
+  )
+}
+#' Handler function for GET requests from Figshare
+#' @param item What is the item we are retrieving?
+#' @param file_name Which item are we downloading?
+#' @param output_dir Where should the file be saved?
+#' @importFrom utils menu installed.packages
+#' @import httr
+#' @importFrom jsonlite fromJSON
+#' @export
+get_figshare <- function(item = "12280541", file_name, output_dir = system.file("extdata", package = "gimap")) {
+  decrypted <- openssl::aes_cbc_decrypt(
+    readRDS(encrypt_creds_path()),
+   key = readRDS(key_encrypt_creds_path())
+  )
+
+  url <- file.path("https://api.figshare.com/v2/articles", item)
+
+  # Github api get
+  result <- httr::GET(
+    url,
+    httr::add_headers(Authorization = paste0("Bearer ", unserialize(decrypted)$client_secret)),
+    httr::accept_json()
+  )
+
+  if (httr::status_code(result) != 200) {
+    httr::stop_for_status(result)
+  }
+
+  # Process and return results
+  result_content <- httr::content(result, "text",
+                                  encoding = "UTF-8")
+  result_list <- jsonlite::fromJSON(result_content)
+
+  file_id <- result_list$files %>%
+    dplyr::filter(name == file_name) %>%
+    dplyr::pull(id)
+
+  result <- httr::GET(file.path('https://api.figshare.com/v2/file/download/', file_id),
+                      httr::add_headers(Authorization = paste0("Bearer ", unserialize(decrypted)$client_secret)),
+                      httr::accept_json()
+  )
+
+  if (httr::status_code(result) != 200) {
+    httr::stop_for_status(result)
+  }
+
+  result_content <- httr::content(result, "text",
+                                  encoding = "UTF-8")
+
+  writeLines(result_content, file.path(output_dir, file_name))
+
+  return(result_content)
+}

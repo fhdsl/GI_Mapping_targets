@@ -273,9 +273,7 @@ tpm_setup <- function(overwrite = TRUE) {
 
   if (!file.exists(tpm_file) | overwrite) {
     if (!file.exists(file.path(data_dir, "CCLE_expression.csv.zip"))) {
-      download.file("https://figshare.com/ndownloader/files/34989919",
-        destfile = tpm_file
-      )
+      get_figshare(file_name = "CCLE_expression.csv")
     } else {
       unzip(file.path(data_dir, "CCLE_expression.csv.zip"),
         exdir = data_dir, overwrite = TRUE
@@ -327,9 +325,7 @@ cn_setup <- function(overwrite = TRUE) {
 
   if (!file.exists(cn_file) | overwrite) {
     if (!file.exists(file.path(data_dir, "CCLE_gene_cn.csv.zip"))) {
-      download.file("https://figshare.com/ndownloader/files/34989937",
-        destfile = cn_file
-      )
+      get_figshare(file_name = "CCLE_gene_cn.csv")
     } else {
       unzip(file.path(data_dir, "CCLE_gene_cn.csv.zip"),
         exdir = data_dir, overwrite = TRUE
@@ -375,9 +371,7 @@ crtl_genes <- function(overwrite = TRUE) {
   if (!file.exists(crtl_genes_file) | overwrite) {
     # Can also be downloaded like this:
     if (!file.exists(file.path(data_dir, "Achilles_common_essentials.csv.zip"))) {
-      download.file("https://figshare.com/ndownloader/files/34989871",
-        destfile = crtl_genes_file
-      )
+      get_figshare(file_name = "Achilles_common_essentials.csv")
     } else {
       unzip(file.path(data_dir, "Achilles_common_essentials.csv.zip"),
         exdir = data_dir,
