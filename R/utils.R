@@ -24,37 +24,54 @@ utils::globalVariables(c(
 
 
 #' Returns example data for package
-#' @description This function loads and returns example data for the packagae. Which dataset is returned must be specified
+#' @description This function loads and returns example data for the package.
+#' Which dataset is returned must be specified. Data will be downloaded from Figshare
+#' the first time it is used.
 #' @param which_data options are "count" or "meta"; specifies which example dataset should be returned
 #' @export
 #' @examples \dontrun{
 #'
-#' gimap_dataset <- get_example_data("gimap")
+#' counts_timepoint <- get_example_data("count")
+#' counts_treatment <- get_example_data("count_treatment")
+#' gimap_timepoint_dataset <- get_example_data("gimap")
+#' gimap_treatment_dataset <- get_example_data("gimap_treatment")
+#' metadata <- get_example_data("meta")
+#' annotation <- get_example_data("annotation")
 #' }
 get_example_data <- function(which_data) {
+
+  data_dir <- list.files(
+    pattern = "Dockerfile",
+    recursive = TRUE,
+    system.file("extdata", package = "gimap"),
+    full.names = TRUE
+  )
+  data_dir <- dirname(data_dir)
+
   if (which_data == "count") {
-    file <- list.files(
-      pattern = "PP_pgPEN_HeLa_counts.txt",
-      recursive = TRUE,
-      system.file("extdata", package = "gimap"),
-      full.names = TRUE
-    )
+    file <- file.path(data_dir, "PP_pgPEN_HeLa_counts.txt")
+
+    if (!file.exists(file)) {
+      get_figshare(
+        file_name = basename(file),
+        item = "28264271")
+    }
     return(readr::read_tsv(file))
   } else if (which_data == "count_treatment") {
-    file <- list.files(
-      pattern = "counts_pgPEN_PC9_example.tsv",
-      recursive = TRUE,
-      system.file("extdata", package = "gimap"),
-      full.names = TRUE
-    )
+    file <- file.path(data_dir, "counts_pgPEN_PC9_example.tsv")
+    if (!file.exists(file)) {
+      get_figshare(
+        file_name = basename(file),
+        item = "28264271")
+    }
     return(readr::read_tsv(file))
   } else if (which_data == "meta") {
-    file <- list.files(
-      pattern = "pgRNA_ID_pgPEN_library_comp.csv",
-      recursive = TRUE,
-      system.file("extdata", package = "gimap"),
-      full.names = TRUE
-    )
+    file <- file.path(data_dir, "pgRNA_ID_pgPEN_library_comp.csv")
+    if (!file.exists(file)) {
+      get_figshare(
+        file_name = basename(file),
+        item = "28264271")
+    }
     return(readr::read_csv(file, skip = 1))
   } else if (which_data == "gimap") {
     file <- list.files(
@@ -66,19 +83,19 @@ get_example_data <- function(which_data) {
     return(readr::read_rds(file))
   } else if (which_data == "gimap_treatment") {
     file <- list.files(
-      pattern = "gimap_timepoint_dataset.RDS",
+      pattern = "gimap_treatment_dataset.RDS",
       recursive = TRUE,
       system.file("extdata", package = "gimap"),
       full.names = TRUE
     )
     return(readr::read_rds(file))
   } else if (which_data == "annotation") {
-    file <- list.files(
-      pattern = "pgPEN_annotations.txt",
-      recursive = TRUE,
-      system.file("extdata", package = "gimap"),
-      full.names = TRUE
-    )
+    file <- file.path(data_dir, "pgPEN_annotations.txt")
+    if (!file.exists(file)) {
+      get_figshare(
+        file_name = basename(file),
+        item = "28264271")
+    }
     return(readr::read_tsv(file, show_col_types = FALSE))
   } else {
     stop("Specification for `which_data` not understood; Need to use 'gimap', 'count', 'meta', or 'annotation' ")
