@@ -15,7 +15,7 @@ Authors@R: c(
   person("Siobhan", "O'Brien", role = c("aut")),
   person("Alice", "Berger", role = c("aut")))
 Description: Allows a pipeline to be built for analyzing genetic interactions of paired guide CRISPR screens. It is based off of original research from the Alice Berger lab at Fred Hutchinson Cancer Center <https://arxiv.org/pdf/2306.00944>.
-License: GPL-3 + file LICENSE
+License: file LICENSE
 URL: https://github.com/FredHutch/gimap
 BugReports: https://github.com/FredHutch/gimap/issues
 Imports:
