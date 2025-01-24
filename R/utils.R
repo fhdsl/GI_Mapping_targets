@@ -40,66 +40,40 @@ utils::globalVariables(c(
 #' }
 get_example_data <- function(which_data) {
 
-  data_dir <- list.files(
-    pattern = "Dockerfile",
-    recursive = TRUE,
-    system.file("extdata", package = "gimap"),
-    full.names = TRUE
+  data_dir <- system.file("extdata", package = "gimap")
+
+  file_name <- switch(which_data,
+         "count" = "PP_pgPEN_HeLa_counts.txt",
+         "count_treatment" = "counts_pgPEN_PC9_example.tsv",
+         "meta" = "pgRNA_ID_pgPEN_library_comp.csv",
+         "gimap" = "gimap_dataset_timepoint.RDS",
+         "gimap_treatment" = "gimap_dataset_treatment.RDS",
+         "annotation" = "pgPEN_annotations.txt"
   )
-  data_dir <- dirname(data_dir)
 
-  if (which_data == "count") {
-    file <- file.path(data_dir, "PP_pgPEN_HeLa_counts.txt")
+  file_path <- file.path(data_dir, file_name)
 
-    if (!file.exists(file)) {
+  if (!grepl("RDS$", file_name)) {
+    if (!file.exists(file_path)) {
       get_figshare(
-        file_name = basename(file),
-        item = "28264271")
+        file_name = file_name,
+        item = "28264271",
+        output_dir = data_dir)
     }
-    return(readr::read_tsv(file))
-  } else if (which_data == "count_treatment") {
-    file <- file.path(data_dir, "counts_pgPEN_PC9_example.tsv")
-    if (!file.exists(file)) {
-      get_figshare(
-        file_name = basename(file),
-        item = "28264271")
-    }
-    return(readr::read_tsv(file))
-  } else if (which_data == "meta") {
-    file <- file.path(data_dir, "pgRNA_ID_pgPEN_library_comp.csv")
-    if (!file.exists(file)) {
-      get_figshare(
-        file_name = basename(file),
-        item = "28264271")
-    }
-    return(readr::read_csv(file, skip = 1))
-  } else if (which_data == "gimap") {
-    file <- list.files(
-      pattern = "gimap_timepoint_dataset.RDS",
-      recursive = TRUE,
-      system.file("extdata", package = "gimap"),
-      full.names = TRUE
-    )
-    return(readr::read_rds(file))
-  } else if (which_data == "gimap_treatment") {
-    file <- list.files(
-      pattern = "gimap_treatment_dataset.RDS",
-      recursive = TRUE,
-      system.file("extdata", package = "gimap"),
-      full.names = TRUE
-    )
-    return(readr::read_rds(file))
-  } else if (which_data == "annotation") {
-    file <- file.path(data_dir, "pgPEN_annotations.txt")
-    if (!file.exists(file)) {
-      get_figshare(
-        file_name = basename(file),
-        item = "28264271")
-    }
-    return(readr::read_tsv(file, show_col_types = FALSE))
-  } else {
-    stop("Specification for `which_data` not understood; Need to use 'gimap', 'count', 'meta', or 'annotation' ")
   }
+  dataset <- switch(which_data,
+                      "count" = readr::read_tsv(file_path,
+                                                show_col_types = FALSE),
+                      "count_treatment" = readr::read_tsv(file_path,
+                                                          show_col_types = FALSE),
+                      "meta" = readr::read_csv(file_path,
+                                               skip = 1,
+                                               show_col_types = FALSE),
+                      "gimap" = readr::read_rds(file_path),
+                      "gimap_treatment" = readr::read_rds(file_path),
+                      "annotation" = readr::read_tsv(file_path, show_col_types = FALSE)
+  )
+  return(dataset)
 }
 
 
@@ -185,16 +159,20 @@ key_encrypt_creds_path <- function() {
 #' @importFrom utils menu installed.packages
 #' @import httr
 #' @importFrom jsonlite fromJSON
+#' @importFrom openssl aes_cbc_decrypt
 #' @export
 #'
 #' @examples \dontrun{
 #'
 #' get_figshare(return_list = TRUE)
 #' }
-get_figshare <- function(file_name = NA,
+  get_figshare <- function(file_name = NA,
                          item = "19700056",
-                         output_dir = system.file("extdata", package = "gimap"),
+                         output_dir = NULL,
                          return_list = FALSE) {
+
+  if (is.null(output_dir)) output_dir <- system.file("extdata", package = "gimap")
+
   decrypted <- openssl::aes_cbc_decrypt(
     readRDS(encrypt_creds_path()),
     key = readRDS(key_encrypt_creds_path())
@@ -206,7 +184,8 @@ get_figshare <- function(file_name = NA,
   result <- httr::GET(
     url,
     httr::progress(),
-    httr::add_headers(Authorization = paste0("Bearer ", unserialize(decrypted)$client_secret)),
+    httr::add_headers(
+      Authorization = paste0("Bearer ", unserialize(decrypted)$client_secret)),
     httr::accept_json()
   )
 
@@ -231,7 +210,8 @@ get_figshare <- function(file_name = NA,
   result <- httr::GET(
     file.path("https://api.figshare.com/v2/file/download/", file_id),
     httr::progress(),
-    httr::add_headers(Authorization = paste0("Bearer ", unserialize(decrypted)$client_secret)),
+    httr::add_headers(
+      Authorization = paste0("Bearer ", unserialize(decrypted)$client_secret)),
     httr::accept_json()
   )
 

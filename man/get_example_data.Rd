@@ -19,8 +19,9 @@ the first time it is used.
 
 counts_timepoint <- get_example_data("count")
 counts_treatment <- get_example_data("count_treatment")
-gimap_dataset <- get_example_data("gimap")
+gimap_timepoint_dataset <- get_example_data("gimap")
+gimap_treatment_dataset <- get_example_data("gimap_treatment")
 metadata <- get_example_data("meta")
-annotation <- get_example_data("annot")
+annotation <- get_example_data("annotation")
 }
 }
