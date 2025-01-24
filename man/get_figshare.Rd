@@ -7,7 +7,7 @@
 get_figshare(
   file_name = NA,
   item = "19700056",
-  output_dir = system.file("extdata", package = "gimap"),
+  output_dir = NULL,
   return_list = FALSE
 )
 }
