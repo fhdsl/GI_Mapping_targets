@@ -40,7 +40,7 @@ run_qc <- function(gimap_dataset,
   }
 
   # Determine the template
-  templateFile <- system.file("rmd/gimapQCTemplate.Rmd", package = "gimap")
+  templateFile <- system.file("extdata/gimapQCTemplate.Rmd", package = "gimap")
 
   # Make sure that the directory exists!
   directory <- dirname(output_file)
