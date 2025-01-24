@@ -24,65 +24,56 @@ utils::globalVariables(c(
 
 
 #' Returns example data for package
-#' @description This function loads and returns example data for the packagae. Which dataset is returned must be specified
+#' @description This function loads and returns example data for the package.
+#' Which dataset is returned must be specified. Data will be downloaded from Figshare
+#' the first time it is used.
 #' @param which_data options are "count" or "meta"; specifies which example dataset should be returned
 #' @export
 #' @examples \dontrun{
 #'
-#' gimap_dataset <- get_example_data("gimap")
+#' counts_timepoint <- get_example_data("count")
+#' counts_treatment <- get_example_data("count_treatment")
+#' gimap_timepoint_dataset <- get_example_data("gimap")
+#' gimap_treatment_dataset <- get_example_data("gimap_treatment")
+#' metadata <- get_example_data("meta")
+#' annotation <- get_example_data("annotation")
 #' }
 get_example_data <- function(which_data) {
-  if (which_data == "count") {
-    file <- list.files(
-      pattern = "PP_pgPEN_HeLa_counts.txt",
-      recursive = TRUE,
-      system.file("extdata", package = "gimap"),
-      full.names = TRUE
-    )
-    return(readr::read_tsv(file))
-  } else if (which_data == "count_treatment") {
-    file <- list.files(
-      pattern = "counts_pgPEN_PC9_example.tsv",
-      recursive = TRUE,
-      system.file("extdata", package = "gimap"),
-      full.names = TRUE
-    )
-    return(readr::read_tsv(file))
-  } else if (which_data == "meta") {
-    file <- list.files(
-      pattern = "pgRNA_ID_pgPEN_library_comp.csv",
-      recursive = TRUE,
-      system.file("extdata", package = "gimap"),
-      full.names = TRUE
-    )
-    return(readr::read_csv(file, skip = 1))
-  } else if (which_data == "gimap") {
-    file <- list.files(
-      pattern = "gimap_timepoint_dataset.RDS",
-      recursive = TRUE,
-      system.file("extdata", package = "gimap"),
-      full.names = TRUE
-    )
-    return(readr::read_rds(file))
-  } else if (which_data == "gimap_treatment") {
-    file <- list.files(
-      pattern = "gimap_timepoint_dataset.RDS",
-      recursive = TRUE,
-      system.file("extdata", package = "gimap"),
-      full.names = TRUE
-    )
-    return(readr::read_rds(file))
-  } else if (which_data == "annotation") {
-    file <- list.files(
-      pattern = "pgPEN_annotations.txt",
-      recursive = TRUE,
-      system.file("extdata", package = "gimap"),
-      full.names = TRUE
-    )
-    return(readr::read_tsv(file, show_col_types = FALSE))
-  } else {
-    stop("Specification for `which_data` not understood; Need to use 'gimap', 'count', 'meta', or 'annotation' ")
+
+  data_dir <- system.file("extdata", package = "gimap")
+
+  file_name <- switch(which_data,
+         "count" = "PP_pgPEN_HeLa_counts.txt",
+         "count_treatment" = "counts_pgPEN_PC9_example.tsv",
+         "meta" = "pgRNA_ID_pgPEN_library_comp.csv",
+         "gimap" = "gimap_dataset_timepoint.RDS",
+         "gimap_treatment" = "gimap_dataset_treatment.RDS",
+         "annotation" = "pgPEN_annotations.txt"
+  )
+
+  file_path <- file.path(data_dir, file_name)
+
+  if (!grepl("RDS$", file_name)) {
+    if (!file.exists(file_path)) {
+      get_figshare(
+        file_name = file_name,
+        item = "28264271",
+        output_dir = data_dir)
+    }
   }
+  dataset <- switch(which_data,
+                      "count" = readr::read_tsv(file_path,
+                                                show_col_types = FALSE),
+                      "count_treatment" = readr::read_tsv(file_path,
+                                                          show_col_types = FALSE),
+                      "meta" = readr::read_csv(file_path,
+                                               skip = 1,
+                                               show_col_types = FALSE),
+                      "gimap" = readr::read_rds(file_path),
+                      "gimap_treatment" = readr::read_rds(file_path),
+                      "annotation" = readr::read_tsv(file_path, show_col_types = FALSE)
+  )
+  return(dataset)
 }
 
 
@@ -168,16 +159,20 @@ key_encrypt_creds_path <- function() {
 #' @importFrom utils menu installed.packages
 #' @import httr
 #' @importFrom jsonlite fromJSON
+#' @importFrom openssl aes_cbc_decrypt
 #' @export
 #'
 #' @examples \dontrun{
 #'
 #' get_figshare(return_list = TRUE)
 #' }
-get_figshare <- function(file_name = NA,
+  get_figshare <- function(file_name = NA,
                          item = "19700056",
-                         output_dir = system.file("extdata", package = "gimap"),
+                         output_dir = NULL,
                          return_list = FALSE) {
+
+  if (is.null(output_dir)) output_dir <- system.file("extdata", package = "gimap")
+
   decrypted <- openssl::aes_cbc_decrypt(
     readRDS(encrypt_creds_path()),
     key = readRDS(key_encrypt_creds_path())
@@ -189,7 +184,8 @@ get_figshare <- function(file_name = NA,
   result <- httr::GET(
     url,
     httr::progress(),
-    httr::add_headers(Authorization = paste0("Bearer ", unserialize(decrypted)$client_secret)),
+    httr::add_headers(
+      Authorization = paste0("Bearer ", unserialize(decrypted)$client_secret)),
     httr::accept_json()
   )
 
@@ -214,7 +210,8 @@ get_figshare <- function(file_name = NA,
   result <- httr::GET(
     file.path("https://api.figshare.com/v2/file/download/", file_id),
     httr::progress(),
-    httr::add_headers(Authorization = paste0("Bearer ", unserialize(decrypted)$client_secret)),
+    httr::add_headers(
+      Authorization = paste0("Bearer ", unserialize(decrypted)$client_secret)),
     httr::accept_json()
   )
 

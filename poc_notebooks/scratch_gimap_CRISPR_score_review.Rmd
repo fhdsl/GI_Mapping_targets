@@ -1,0 +1,140 @@
+---
+title: "scratch gimap CRISPR Score Review"
+output: html_document
+date: "`r Sys.Date()`"
+---
+
+```{r warning=FALSE, message=FALSE}
+library(tidyverse)
+library(devtools)
+library(magrittr)
+library(ggpubr)
+
+devtools::load_all()
+```
+
+## Get the gimap CRISPR Score results
+
+```{r}
+ gimap_dataset <- get_example_data("gimap") %>%
+   gimap_filter() %>%
+   gimap_annotate(cell_line = "HELA") %>%
+   gimap_normalize(
+     timepoints = "day") %>%
+  calc_crispr()
+```
+
+## Load the GI Mapping CRISPR Score results
+
+```{r}
+old_crispr_results <- read_tsv("HeLa_lfc_annot_adj_pgRNA.txt")
+```
+### Negative and positive control medians 
+
+We are expecting negative controls to be now set to a median of 0. 
+
+For the original data: 
+```{r}
+old_neg_controls <- old_lfc_results %>%
+  dplyr::filter(target_type == "ctrl_ctrl") %>%
+  dplyr::group_by(rep) %>%
+  dplyr::summarize(neg_ctrl_med = median(lfc_adj2)) %>%
+  dplyr::pull(neg_ctrl_med)
+
+old_neg_controls
+```
+
+For the new data: 
+```{r}
+new_neg_controls <- gimap_dataset$single_crispr_score %>%
+  dplyr::filter(target_type == "ctrl_ctrl", rep != "Day05_RepA_early") %>%
+  dplyr::group_by(rep) %>%
+  dplyr::summarize(neg_ctrl_med = median(lfc_adj)) %>%
+  dplyr::pull(neg_ctrl_med)
+
+new_neg_controls
+```
+
+We are expecting negative controls to be now set to a median of -1. 
+
+For the original data: 
+```{r}
+old_pos_controls <- old_lfc_results %>%
+  dplyr::filter(target_type == "gene_ctrl" & gene1_essential_flag == TRUE | 
+                  target_type =="ctrl_gene" & gene2_essential_flag == TRUE) %>%
+  dplyr::group_by(rep) %>%
+  dplyr::summarize(pos_ctrl_med = median(CRISPR_score)) %>%
+  dplyr::pull(pos_ctrl_med)
+
+old_pos_controls
+```
+
+For the new data: 
+```{r}
+new_pos_controls <- gimap_dataset$single_crispr_score %>%
+  dplyr::filter(rep != "Day05_RepA_early") %>%
+  dplyr::group_by(rep) %>%
+  dplyr::summarize(pos_ctrl_med = median(single_crispr)) %>%
+  dplyr::pull(pos_ctrl_med)
+
+new_pos_controls
+```
+
+#### sync the reps values
+
+```{r}
+old_crispr_results %<>% mutate(
+  rep = recode(rep, "A" = "Day22_RepA_late", "B" = "Day22_RepB_late", "C" = "Day22_RepC_late")
+)
+```
+
+## Inspect/Compare
+
+```{r}
+ncol(gimap_dataset$crispr_score)
+ncol(old_crispr_results)
+
+print("Column names in new results not in old results")
+setdiff(colnames(gimap_dataset$crispr_score), colnames(old_crispr_results))
+print("Column names in old results not in new results")
+setdiff(colnames(old_crispr_results), colnames(gimap_dataset$crispr_score))
+
+
+nrow(gimap_dataset$crispr_score)
+nrow(old_crispr_results)
+```
+
+From [this line in the code](https://github.com/FredHutch/gimap/blob/273d9cb50d80b0d8c29375582eec9d1946bd7556/R/05-crispr-calc.R#L133), it appears that the `double_crispr_score` column from gimap results is related to the `CRISPR_score` column from GI_Mapping results.
+
+Why are there so many more rows in gimap results? Some data does get dropped after the join (225993 rows before the drop_na)
+
+There appears to be 4 entries for each pgRNA ID and rep combo. They share the same original CRISPR score but once you look at others, that seems to be where the differences are.  
+
+```{r}
+joindf <- dplyr::full_join(old_crispr_results, gimap_dataset$crispr_score,
+                           by = c("pgRNA_id" = "pg_ids", "rep"),
+                           suffix = c("_old", "_new")) %>%
+  select(double_crispr_score, CRISPR_score, rep, pgRNA_id) %>% #225993 rows prior to drop_na
+  drop_na() %>%
+  distinct()
+
+nrow(joindf)
+```
+
+```{r}
+joindf %>% ggplot(aes(x=double_crispr_score, y = CRISPR_score)) +
+  geom_point(alpha=0.1) +
+  xlab("gimap Normalization/LFC: lfc_adj") +
+  ylab("GI Mapping Normalization/LFC: lfc_adj2") +
+  theme_classic() +
+  stat_regline_equation(label.y = 2.35) + stat_cor(label.y = 1.95) +
+  facet_wrap(~rep)
+```
+```{r}
+joindf %>% ggplot(aes(x=double_crispr_score, y = CRISPR_score)) +
+  geom_point(alpha=0.1) +
+  xlab("gimap Normalization/LFC: lfc_adj") +
+  ylab("GI Mapping Normalization/LFC: lfc_adj2") +
+  theme_classic() +
+  stat_regline_equation(label.y = 2.35) + stat_cor(label.y = 1.95)
+```

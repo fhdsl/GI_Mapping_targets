@@ -1,0 +1,118 @@
+---
+title: "scratch gimap Genetic Interaction Review"
+output: html_document
+date: "`r Sys.Date()`"
+---
+
+```{r warning=FALSE, message=FALSE}
+library(tidyverse)
+library(devtools)
+library(magrittr)
+
+devtools::load_all()
+```
+
+## Get the gimap GI results
+
+```{r}
+gimap_dataset <- get_example_data("gimap") %>%
+  gimap_filter() %>%
+  gimap_annotate(cell_line = "HELA") %>%
+  gimap_normalize(
+    timepoints = "day"
+  ) %>%
+  calc_crispr() %>%
+  calc_gi()
+```
+
+```{r}
+saveRDS(gimap_dataset, "gimap_dataset_calculated.RDS")
+```
+
+## Load the GI Mapping GI results
+
+```{r}
+old_gi_results <- readRDS("d.HeLa_GI_scores_target")
+```
+
+#### sync the reps values
+
+```{r}
+old_gi_results %<>% mutate(
+  rep = recode(rep, "A" = "Day22_RepA_late", "B" = "Day22_RepB_late", "C" = "Day22_RepC_late")
+)
+```
+
+## Compare results
+
+### Columns
+
+```{r}
+colnames(gimap_dataset$gi_scores)
+nrow(gimap_dataset$gi_scores)
+```
+
+```{r}
+colnames(old_gi_results)
+```
+
+Looks like we want to compare the pgRNA targets which should be the `pgRNA_target_double` column for the gimap results and the `pgRNA_target` column for the GI Mapping results
+
+Columns in the GI Mapping results not in the gimap results seem to include model results (`intercept`, `slope`) as well as some significance values (`p_val`, `fdr`), observed and expected CRISPR score (`mean_observed_CS` and `mean_expected_CS` (which I think I need for plotting)). And how does `mean_GI_score` relate to the three GI score columns in the gimap results? The three GI score columns relate to the different target types.  
+
+### Target overlap
+
+```{r}
+length(unique(gimap_dataset$normalized_log_fc$pgRNA_target))
+length(unique(old_gi_results$pgRNA_target))
+length(unique(gimap_dataset$gi_scores$pgRNA_target))
+length(intersect(unique(old_gi_results$pgRNA_target), unique(gimap_dataset$gi_scores$pgRNA_target)))
+```
+
+### Number of observations/rows total and rep column overlap
+
+```{r}
+nrow(old_gi_results)
+nrow(gimap_dataset$gi_scores)
+```
+
+The gimap results has far more rows...
+
+```{r}
+table(old_gi_results$rep)
+
+table(gimap_dataset$gi_scores$rep)
+```
+
+While the replicate values themselves can't be completely synced like we've done in other reviews due to the gimap results including the Day05_RepA_early datapoints, this further shows the far greater number of observations (even if there are fewer represented pgRNA targets) in the gimap results....
+
+```{r}
+head(old_gi_results)
+```
+
+## Split out the comparisons we want to make
+
+Have to drop NA's because the gimap results include `Day05_RepA_early` datapoints while the GI Mapping doesn't. Also have to drop NAs because there are GI Mapping targets that aren't represented in the gimap targets?
+
+```{r}
+# Reshape the data so we can plot
+joined_df <- gimap_dataset$gi_scores %>% 
+  dplyr::inner_join(old_gi_results, 
+                   by = c("pgRNA_target", "rep", "target_type"), 
+                   suffix = c("_new", "_old")) %>% 
+  dplyr::filter(!grepl("Day05", rep))
+```
+
+
+
+```{r}
+joined_df %>% 
+  ggplot(aes(x = mean_gi_score, y = mean_GI_score)) +
+  geom_point() +
+  xlab("New Mean GI score") + 
+  ylab("Old Mean GI score") + 
+  facet_wrap(~target_type) +
+  theme(legend.position = "none")
+
+ggplot2::ggsave("comparison.png")
+```

@@ -1,0 +1,184 @@
+---
+title: "Scratch gimap ReplicateVariation"
+author: "Kate Isaac"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE}
+library(gimap)
+library(tidyverse)
+
+example_data <- get_example_data("count")
+
+example_pg_metadata <- get_example_data("meta")
+
+example_counts <- example_data %>%
+  select(c("Day00_RepA", "Day05_RepA", "Day22_RepA", "Day22_RepB", "Day22_RepC")) %>%
+  as.matrix()
+
+example_pg_id <- example_data %>%
+  dplyr::select("id")
+
+example_sample_metadata <- data.frame(
+  id = 1:5,
+  day = as.factor(c("Day00", "Day05", "Day22", "Day22", "Day22")),
+  rep = as.factor(c("RepA", "RepA", "RepA", "RepB", "RepC"))
+)
+
+gimap_dataset <- setup_data(counts = example_counts,
+                            pg_ids = example_pg_id,
+                            sample_metadata = example_sample_metadata)
+
+```
+```{r warning=FALSE}
+qc_filter_zerocounts <- function(gimap_dataset){
+  
+  counts_filter <- unlist(lapply(1:nrow(gimap_dataset$raw_counts), 
+                                 function(x) 0 %in% gimap_dataset$raw_counts[x,]
+                                 )
+                          )
+  
+  zerocount_df <- data.frame("RawCount0" = c(FALSE, TRUE), 
+                             n = c(sum(!counts_filter), sum(counts_filter))
+                             ) %>%
+    mutate(percent = round(((n/sum(n))*100),2))
+  
+  return(list(filter = counts_filter, reportdf = zerocount_df))
+  
+}
+
+qc_filter_output <- qc_filter_zerocounts(gimap_dataset)
+
+
+eda <- example_counts[qc_filter_output$filter,c(3:5)] %>% 
+  cbind(example_pg_id[qc_filter_output$filter,]) %>% 
+  pivot_longer(starts_with("Day22"), values_to = "counts") %>% 
+  group_by(id) %>% 
+  summarize(numzero = sum(counts == 0), 
+            max_diff = max(counts) - min(counts), 
+            sec_diff = min(counts[counts > 0]) - min(counts)
+            )
+```
+### How many day 22 pgRNAs have counts of 0 across x number of replicates
+
+```{r}
+countdf <- eda %>% 
+  group_by(numzero) %>% 
+  summarize(count = n())
+
+countdf %>%
+  ggplot(aes(x=numzero, y = count)) + 
+  geom_bar(stat="identity") + 
+  theme_classic() + 
+  ylab("Number of pgRNAs") + 
+  xlab("Number of replicates with a zero") + 
+  geom_text(aes(label = count, group = numzero), vjust = -0.5, size=2)
+
+```
+
+Those nearly `r countdf[which(countdf$numzero == 3),"count"]` with all 3 replicates having a count of 0 could be real biological signal that we don't want to remove or at least want to take note of for special analysis. While those with only 1 or 2 replicates with a count of 0 may have high variation and may be worth filtering.   
+
+
+```{r}
+
+example_counts[which(example_pg_id == unlist(eda[which(eda$numzero == 0)[1],"id"])),]
+
+example_counts[which(example_pg_id == unlist(eda[which(eda$numzero == 0)[2],"id"])),]
+
+```
+
+The two with 0 replicates have a zero count on day 0 (`r unlist(eda[which(eda$numzero == 0)[1],"id"])`) and a zero count on day 5 (`r unlist(eda[which(eda$numzero == 0)[2],"id"])`)
+
+### What's the observed differences among the replicates
+
+```{r warning=FALSE}
+eda %>% 
+  filter(numzero > 0) %>% 
+  pivot_longer(c("max_diff", "sec_diff"), values_to = "diff") %>% 
+  ggplot(aes(y = diff)) + 
+  geom_boxplot() + 
+  facet_wrap(~name) + 
+  theme_bw() + 
+  theme(panel.background = element_blank(), 
+        panel.grid = element_blank(), 
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +
+  scale_y_log10()
+```
+
+```{r warning=FALSE}
+eda %>% 
+  filter(numzero > 0) %>% 
+  pivot_longer(c("max_diff", "sec_diff"), values_to = "diff") %>% 
+  ggplot(aes(y = diff)) + 
+  geom_boxplot() + 
+  facet_wrap(~name) + 
+  theme_bw() + 
+  theme(panel.background = element_blank(), 
+        panel.grid = element_blank(), 
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+```
+
+```{r}
+vardf <- gimap_dataset$transformed_data$log2_cpm[,3:5] %>% 
+  as.data.frame() %>% 
+  mutate(row = row_number()) %>%
+    tidyr::pivot_longer(-row) %>%
+    group_by(row) %>%
+    summarize(mean = mean(value),
+              var = var(value))
+
+```
+
+```{r}
+vardf %>% 
+  ggplot(aes(x=var)) + 
+  geom_histogram(binwidth=0.1) + 
+  theme(panel.background = element_blank(), 
+        panel.grid = element_blank()) + 
+  xlab("variance") +
+  ylab("pgRNA construct count")
+```
+
+```{r}
+vardf %>% 
+  ggplot(aes(y=var)) + 
+  geom_boxplot() + 
+  theme(panel.background = element_blank(), 
+        panel.grid = element_blank()) + 
+  ylab("variance")
+
+
+```
+
+Taking a similar approach to the low plasmid count filter, we construct a distribution of the variation within replicates for each pgRNA and find the quantiles as well as the upper outlier and then use the upper outlier as a potential filter value, filtering out contstructs who have a higher variance than the upper outlier. 
+
+```{r}
+statdf <- vardf %>% 
+  summarize(median = median(var),
+            Q1 = quantile(var, probs = 0.25),
+            Q3 = quantile(var, probs = 0.75),
+            upper_outlier = (Q3 + 1.5*(Q3 - Q1)))
+
+statdf
+```
+
+```{r}
+sum(vardf$var > statdf$upper_outlier)
+```
+
+The upper outlier variance is pretty low, `r statdf$upper_outlier` and `r sum(vardf$var > statdf$upper_outlier)` (number of pgRNA constructs that would be filtered) is nearly three times the number of pgRNAs that are flagged by the zero count filter (`r qc_filter_output$reportdf[which(qc_filter_output$reportdf$RawCount0 == TRUE),"n"]`). I want to compare how this potential filter overlaps with the original, and then look into setting a more stringent (higher variance filter) with this approach. Can we decrease the number of filtered pgRNAs while still respecting the intent of the original filter?
+
+```{r}
+sessionInfo()
+```
+
+ 
