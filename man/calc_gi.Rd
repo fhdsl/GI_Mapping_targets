@@ -7,22 +7,27 @@
 calc_gi(.data = NULL, gimap_dataset)
 }
 \arguments{
-\item{.data}{Data can be piped in with tidyverse pipes from function to function. But the data must still be a gimap_dataset}
+\item{.data}{Data can be piped in with tidyverse pipes from function to
+function. But the data must still be a gimap_dataset}
 
-\item{gimap_dataset}{A special dataset structure that is setup using the `setup_data()` function.}
+\item{gimap_dataset}{A special dataset structure that is setup using the
+`setup_data()` function.}
 }
 \description{
-Create results table that has CRISPR scores, Wilcoxon rank-sum test and t tests.
+Create results table that has CRISPR scores, Wilcoxon rank-sum
+test and t tests.
 The output of the `gimap` package is genetic interaction scores which _is the
 distance between the observed CRISPR score and the expected CRISPR score._
-The expected CRISPR scores are what we expect for the CRISPR values should two
-genes be unrelated to each other. The further away an observed CRISPR score is
-from its expected the more we suspect genetic interaction.
+The expected CRISPR scores are what we expect for the CRISPR values should
+two genes be unrelated to each other. The further away an observed CRISPR
+scoreis from its expected the more we suspect genetic interaction.
 This can be true in a positive way (a CRISPR knockout pair caused more cell
-proliferation than expected) or in a negative way (a CRISPR knockout pair caused
-more cell lethality than expected).
+proliferation than expected) or in a negative way (a CRISPR knockout pair
+caused more cell lethality than expected).
 
-The genetic interaction scores are based on a linear model calculated for each sample where `observed_crispr_single` is the outcome variable and `expected_crispr_single` is the predictor variable.
+The genetic interaction scores are based on a linear model calculated for
+each sample where `observed_crispr_single` is the outcome variable and
+`expected_crispr_single` is the predictor variable.
 For each sample: lm(observed_crispr_single ~ expected_crispr_single)
 
 Using `y = mx+b`, we can fill in the following values:
@@ -31,11 +36,18 @@ Using `y = mx+b`, we can fill in the following values:
 * `m` = slope from linear model for this sample
 * `b` = intercept from linear model for this sample
 
-The intercept and slope from this linear model are used to adjust the CRISPR scores for each sample:
-single target gi score = observed single crispr - (intercept + slope * expected single crispr)
-double_target_gi_score = double crispr score - (intercept + slope * expected double crispr)
+The intercept and slope from this linear model are used to adjust the CRISPR
+scores for each sample:
+single target gi score =
+  observed single crispr - (intercept + slope * expected single crispr)
+double_target_gi_score =
+  double crispr score - (intercept + slope * expected double crispr)
 These single and double target genetic interaction scores are calculated at
-the construct level and are then summarized using a t-test to see if the the distribution of the set of double targeting constructs is significantly different than the overall distribution single targeting constructs. After multiple testing correction, FDR values are reported. Low FDR value for a double construct means high suspicion of paralogs.
+the construct level and are then summarized using a t-test to see if the the
+distribution of the set of double targeting constructs is significantly
+different than the overall distribution single targeting constructs.
+After multiple testing correction, FDR values are reported.
+Low FDR value for a double construct means high suspicion of paralogs.
 }
 \examples{
 \dontrun{

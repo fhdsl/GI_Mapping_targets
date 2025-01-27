@@ -28,3 +28,4 @@ CCLE_gene_cn.csv$CCLE_expression.csv$
 make_it_noisy.R$
 poc_notebooks/*
 inst/extdata/pgPEN_annotations.txtinst/extdata/pgRNA_ID_pgPEN_library_comp.csvinst/extdata/PP_pgPEN_HeLa_counts.txtinst/extdata/counts_pgPEN_PC9_example.tsvmake_it_noisy.RDockerfile
+LICENSE

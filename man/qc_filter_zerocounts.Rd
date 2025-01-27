@@ -2,7 +2,8 @@
 % Please edit documentation in R/02-gimap_filter.R
 \name{qc_filter_zerocounts}
 \alias{qc_filter_zerocounts}
-\title{Create a filter for pgRNAs which have a raw count of 0 for any sample/time point}
+\title{Create a filter for pgRNAs which have a raw count of 0 for any sample/time
+# point}
 \usage{
 qc_filter_zerocounts(gimap_dataset, filter_zerocount_target_col = NULL)
 }
@@ -11,13 +12,14 @@ qc_filter_zerocounts(gimap_dataset, filter_zerocount_target_col = NULL)
 which contains the raw count data}
 
 \item{filter_zerocount_target_col}{default is NULL; Which sample column(s)
-should be used to check for counts of 0? If NULL and not specified, downstream
-analysis will select all sample columns}
+should be used to check for counts of 0? If NULL and not specified,
+downstream analysis will select all sample columns}
 }
 \value{
 a named list with the filter `filter` specifying which pgRNA have a
 count zero for at least one sample/time point and a report df `reportdf` for
-the number and percent of pgRNA which have a count zero for at least one sample/time point
+the number and percent of pgRNA which have a count zero for at least one
+sample/time point
 }
 \description{
 This function flags and reports which and how many pgRNAs have a

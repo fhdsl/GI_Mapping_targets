@@ -7,12 +7,11 @@
 supported_cell_lines()
 }
 \description{
-This function downloads the metadata for DepMap and lists which cell
-lines are supported.
+This function downloads the metadata for DepMap and lists which
+cell lines are supported.
 }
 \examples{
-\dontrun{
 
 cell_lines <- supported_cell_lines()
-}
+
 }

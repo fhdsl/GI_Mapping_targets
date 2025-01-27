@@ -192,3 +192,5 @@ And then putting "rstudio" for both the username and password.
 
 
 \* This work is funded by NCI grant R01CA262556 as well as funding from the Translational Data Science IRC of Fred Hutchinson Cancer Center.
+
+Email csavonen@fredhutch.org with any questions!

@@ -1,26 +1,32 @@
 #' Annotate gimap data
 #' @description In this function, a `gimap_dataset` is annotated as far as which
 #' genes should be used as controls.
-#' @param .data Data can be piped in with tidyverse pipes from function to function.
-#'  But the data must still be a gimap_dataset
-#' @param gimap_dataset A special dataset structure that is setup using the `setup_data()` function.
-#' @param annotation_file If no file is given, will attempt to use the design file
-#' from
-#' https://media.addgene.org/cms/filer_public/a9/9a/a99a9328-324b-42ff-8ccc-30c544b899e4/pgrna_library.xlsx
-#' @param control_genes A vector of gene symbols (e.g. AAMP) that should be labeled
-#' as control genes. These will be used for log fold change calculations. If no list is given
-#' then DepMap Public 23Q4 Achilles_common_essentials.csv is used https://depmap.org/portal/download/all/
-#' @param cell_line_annotate (Optional) TRUE or FALSE you'd also like to have cell_line_annotation
-#' from DepMap.
+#' @param .data Data can be piped in with tidyverse pipes from function to
+#' function. But the data must still be a gimap_dataset
+#' @param gimap_dataset A special dataset structure that is setup using the
+#' `setup_data()` function.
+#' @param annotation_file If no file is given, will attempt to use the design
+#' file from
+#' https://media.addgene.org/cms/filer_public/a9/9a/
+#' a99a9328-324b-42ff-8ccc-30c544b899e4/pgrna_library.xlsx
+#' @param control_genes A vector of gene symbols (e.g. AAMP) that should be
+#' labeled as control genes. These will be used for log fold change
+#' calculations. If no list is given then DepMap Public 23Q4
+#' Achilles_common_essentials.csv is used
+#' https://depmap.org/portal/download/all/
+#' @param cell_line_annotate (Optional) TRUE or FALSE you'd also like to have
+#' cell_line_annotation from DepMap.
 #' @param cell_line which cell line are you using? (e.g., HELA, PC9, etc.).
 #' Required argument if cell_line_annotate is TRUE.
 #' @param custom_tpm (Optional) You may supply your own data frame of transcript
 #' per million expression to be used for this calculation if you can't or don't
-#' want to use DepMap data annotation for your cell_line. This data frame needs to have
-#' two columns: 'log2_tpm' that has the log2 tpm expression data for this cell line and
-#' and 'genes' which needs to be gene symbols that match those in the data. eg. "NDL1".
-#' Note that you can use custom_tpm with cell_line_annotate but your custom_tpm will be used
-#' instead of the tpm data from DepMap. However other data from DepMap like CN will be added.
+#' want to use DepMap data annotation for your cell_line. This data frame needs
+#' to have two columns: 'log2_tpm' that has the log2 tpm expression data for
+#' this cell line and and 'genes' which needs to be gene symbols that match
+#' those in the data. eg. "NDL1".
+#' Note that you can use custom_tpm with cell_line_annotate but your custom_tpm
+#' will be used instead of the tpm data from DepMap. However other data from
+#' DepMap like CN will be added.
 #' @importFrom stringr word
 #' @import dplyr
 #' @importFrom utils download.file unzip
@@ -33,7 +39,8 @@
 #' run_qc(gimap_dataset)
 #'
 #' # By default DepMap annotation will be used to determine genes which are
-#' # unexpressed. In the `gimap_normalize` this will by default be used to normalize to.
+#' # unexpressed. In the `gimap_normalize` this will by default be used to
+#' # normalize to.
 #' gimap_dataset <- gimap_dataset %>%
 #'   gimap_filter() %>%
 #'   gimap_annotate(cell_line = "HELA")
@@ -44,7 +51,8 @@
 #'
 #' # You can also say cell_line_annotate = false if you don't want to use DepMap
 #' # annotation BUT if you don't also specify that you say you are
-#' # `normalize_by_unexpressed = FALSE` in the normalize step you will get a warning.
+#' # `normalize_by_unexpressed = FALSE` in the normalize step you will get a
+#' # warning.
 #' gimap_dataset <- get_example_data("gimap") %>%
 #'   gimap_filter() %>%
 #'   gimap_annotate(cell_line_annotate = FALSE) %>%
@@ -80,19 +88,26 @@ gimap_annotate <- function(.data = NULL,
 
   if (all(cell_line_annotate, is.null(cell_line))) {
     stop(
-      "By default `cell_line_annotate` = TRUE which means if you want DepMap annotation",
-      " you must specify which cell line you are using with the `cell_line` argument",
+      "By default `cell_line_annotate` = TRUE which means if you want DepMap",
+      " annotation",
+      " you must specify which cell line you are using with the `cell_line`",
+      " argument",
       " OR set `cell_line_annotate` = FALSE.",
       " However this means you cannot use expression data for normalization",
-      " Aka in gimap_normalize(): `normalize_by_unexpressed` must be set to FALSE",
-      " unless you supply your own expression data using the `custom_tpm` argument"
+      " Aka in gimap_normalize(): `normalize_by_unexpressed` must be set to",
+      " FALSE",
+      " unless you supply your own expression data using the `custom_tpm`",
+      " argument"
     )
   }
 
   # Get the annotation data based on the pg construct design
   if (!is.null(annotation_file)) {
     if (!file.exists(annotation_file)) {
-      stop("The annotation_file specified cannot be found. Please double check the file path")
+      stop(
+        "The annotation_file specified cannot be found.",
+        "Please double check the file path"
+      )
     }
     annotation_df <- read_table(annotation_file)
   } else {
@@ -105,12 +120,17 @@ gimap_annotate <- function(.data = NULL,
   # If control genes aren't provided then we get some from DepMap
   if (!is.null(control_genes)) {
     if (!file.exists(control_genes)) {
-      stop("The annotation_file specified cannot be found. Please double check the file path")
+      stop(
+        "The annotation_file specified cannot be found.",
+        "Please double check the file path"
+      )
     }
     control_genes <- read_table(control_genes)[, 1]
   } else {
-    # This file is from https://depmap.org/portal/download/all/ and from DepMap Public 19Q3 All Files
-    # Essential gene labeling is from inst/extdata/Achilles_common_essentials.csv
+    # This file is from https://depmap.org/portal/download/all/ and
+    # from DepMap Public 19Q3 All Files
+    # Essential gene labeling is from
+    # inst/extdata/Achilles_common_essentials.csv
     control_genes <- crtl_genes()
   }
 
@@ -131,7 +151,8 @@ gimap_annotate <- function(.data = NULL,
       stop(
         "The cell line specified, ",
         cell_line,
-        "was not found in the DepMap data. Run supported_cell_lines() to see the full list"
+        "was not found in the DepMap data.",
+        "Run supported_cell_lines() to see the full list"
       )
     }
 
@@ -150,8 +171,11 @@ gimap_annotate <- function(.data = NULL,
     ) %>%
       dplyr::rename(log2_tpm = dplyr::all_of(!!my_depmap_id))
 
-    ############################ COPY NUMBER ANNOTATION ##########################
-    cn_file <- file.path(system.file("extdata", package = "gimap"), "CCLE_gene_cn.csv")
+    ############################ COPY NUMBER ANNOTATION #######################
+    cn_file <- file.path(
+      system.file("extdata", package = "gimap"),
+      "CCLE_gene_cn.csv"
+    )
     if (!file.exists(cn_file)) cn_setup()
 
     # Read in the CN data
@@ -180,7 +204,10 @@ gimap_annotate <- function(.data = NULL,
         colnames(custom_tpm)
     )
 
-    annotation_genes <- unique(c(annotation_df$gene1_symbol, annotation_df$gene2_symbol))
+    annotation_genes <- unique(c(
+      annotation_df$gene1_symbol,
+      annotation_df$gene2_symbol
+    ))
     gene_matches <- sum(!is.na(match(annotation_genes, custom_tpm$genes)))
     percent <- round(gene_matches / length(annotation_genes) * 100)
 
@@ -210,18 +237,31 @@ gimap_annotate <- function(.data = NULL,
       gene1_essential_flag = gene1_symbol %in% control_genes,
       gene2_essential_flag = gene2_symbol %in% control_genes,
       pgRNA_target = dplyr::case_when(
-        target_type == "gene_gene" ~ paste(gene1_symbol, gene2_symbol, sep = "_"),
-        target_type == "gene_ctrl" ~ paste(gene1_symbol, "ctrl", sep = "_"),
-        target_type == "ctrl_gene" ~ paste("ctrl", gene2_symbol, sep = "_"),
+        target_type == "gene_gene" ~ paste(gene1_symbol,
+          gene2_symbol,
+          sep = "_"
+        ),
+        target_type == "gene_ctrl" ~ paste(gene1_symbol,
+          "ctrl",
+          sep = "_"
+        ),
+        target_type == "ctrl_gene" ~ paste("ctrl",
+          gene2_symbol,
+          sep = "_"
+        ),
         TRUE ~ target_type
       )
     ) %>%
     dplyr::mutate(norm_ctrl_flag = dplyr::case_when(
       target_type == "gene_gene" ~ "double_targeting",
-      target_type == "gene_ctrl" & gene1_essential_flag == TRUE ~ "positive_control",
-      target_type == "ctrl_gene" & gene2_essential_flag == TRUE ~ "positive_control",
-      target_type == "gene_ctrl" & gene1_essential_flag != TRUE ~ "single_targeting",
-      target_type == "ctrl_gene" & gene2_essential_flag != TRUE ~ "single_targeting",
+      target_type == "gene_ctrl" & gene1_essential_flag == TRUE ~
+        "positive_control",
+      target_type == "ctrl_gene" & gene2_essential_flag == TRUE ~
+        "positive_control",
+      target_type == "gene_ctrl" & gene1_essential_flag != TRUE ~
+        "single_targeting",
+      target_type == "ctrl_gene" & gene2_essential_flag != TRUE ~
+        "single_targeting",
       target_type == "ctrl_ctrl" ~ "negative_control"
     )) %>%
     dplyr::mutate(
@@ -236,14 +276,19 @@ gimap_annotate <- function(.data = NULL,
     annotation_df <- annotation_df %>%
       dplyr::left_join(tpm, by = c("gene1_symbol" = "genes")) %>%
       dplyr::rename(gene1_expressed_flag = expressed_flag) %>%
-      dplyr::left_join(tpm, by = c("gene2_symbol" = "genes"), suffix = c("_gene1", "_gene2")) %>%
+      dplyr::left_join(tpm,
+        by = c("gene2_symbol" = "genes"),
+        suffix = c("_gene1", "_gene2")
+      ) %>%
       dplyr::rename(gene2_expressed_flag = expressed_flag) %>%
       dplyr::mutate(
         unexpressed_ctrl_flag = dplyr::case_when(
-          norm_ctrl_flag == "double_targeting" & gene1_expressed_flag == FALSE &
+          norm_ctrl_flag == "double_targeting" &
+            gene1_expressed_flag == FALSE &
             gene2_expressed_flag == FALSE ~ TRUE,
-          norm_ctrl_flag == "single_targeting" & (gene1_expressed_flag == FALSE |
-            gene2_expressed_flag == FALSE) ~ TRUE,
+          norm_ctrl_flag == "single_targeting" & (
+            gene1_expressed_flag == FALSE |
+              gene2_expressed_flag == FALSE) ~ TRUE,
           TRUE ~ FALSE
         )
       )
@@ -309,8 +354,8 @@ tpm_setup <- function(overwrite = TRUE) {
 }
 
 #' Download and set up DepMap CN
-#' @description This function sets up the tpm data from DepMap is called by the `gimap_annotate()`
-#' function if the cn_annotate = TRUE
+#' @description This function sets up the tpm data from DepMap is called
+#' by the `gimap_annotate()` function if the cn_annotate = TRUE
 #' @param overwrite Should the files be redownloaded?
 #' @importFrom utils download.file unzip
 cn_setup <- function(overwrite = TRUE) {
@@ -360,7 +405,8 @@ cn_setup <- function(overwrite = TRUE) {
 }
 
 #' Download and set up control genes
-#' @description This function sets up the control genes file from DepMap is called by the `gimap_annotate()`
+#' @description This function sets up the control genes file from DepMap is
+#' called by the `gimap_annotate()`
 #' @param overwrite Should the file be redownloaded and reset up?
 #' @importFrom utils download.file unzip
 crtl_genes <- function(overwrite = TRUE) {
@@ -370,7 +416,10 @@ crtl_genes <- function(overwrite = TRUE) {
 
   if (!file.exists(crtl_genes_file) | overwrite) {
     # Can also be downloaded like this:
-    if (!file.exists(file.path(data_dir, "Achilles_common_essentials.csv.zip"))) {
+    if (!file.exists(file.path(
+      data_dir,
+      "Achilles_common_essentials.csv.zip"
+    ))) {
       get_figshare(file_name = "Achilles_common_essentials.csv")
     } else {
       unzip(file.path(data_dir, "Achilles_common_essentials.csv.zip"),
@@ -383,22 +432,26 @@ crtl_genes <- function(overwrite = TRUE) {
     }
   }
   crtl_genes <- readr::read_csv(crtl_genes_file, show_col_types = FALSE) %>%
-    tidyr::separate(col = gene, into = c("gene_symbol", "entrez_id"), remove = FALSE, extra = "drop")
+    tidyr::separate(
+      col = gene, into = c("gene_symbol", "entrez_id"),
+      remove = FALSE, extra = "drop"
+    )
 
   return(crtl_genes$gene_symbol)
 }
 
 
 #' List the supported cell lines
-#' @description This function downloads the metadata for DepMap and lists which cell
-#' lines are supported.
+#' @description This function downloads the metadata for DepMap and lists which
+#' cell lines are supported.
 #' @export
-#' @examples \dontrun{
+#' @examples
 #'
 #' cell_lines <- supported_cell_lines()
-#' }
+#'
 supported_cell_lines <- function() {
-  depmap_metadata <- readr::read_csv("https://figshare.com/ndownloader/files/35020903",
+  depmap_metadata <- readr::read_csv(
+    "https://figshare.com/ndownloader/files/35020903",
     show_col_types = FALSE
   )
 

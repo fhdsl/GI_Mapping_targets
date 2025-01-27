@@ -23,7 +23,7 @@
 #' plot_exp_v_obs_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
 #' plot_rank_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
 #' plot_volcano(gimap_dataset, reps_to_drop = "Day05_RepA_early")
-#' }
+#'}
 plot_exp_v_obs_scatter <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop = "") {
   if (!("gimap_dataset" %in% class(gimap_dataset))) {
     stop(
