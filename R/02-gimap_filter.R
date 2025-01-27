@@ -216,7 +216,7 @@ gimap_filter <- function(.data = NULL,
           # Use pivot longer to put the sample names of the samples in a `name`
           # column
           tidyr::pivot_longer(
-            # colnames(gimap_dataset$raw_counts)[filter_replicates_target_col],
+            colnames(gimap_dataset$raw_counts)[filter_replicates_target_col],
             values_to = "counts"
           ) %>% # and the corresponding values in a `counts` column
           group_by(row) %>% # group by the row index/reference
