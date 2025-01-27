@@ -10,5 +10,6 @@ crtl_genes(overwrite = TRUE)
 \item{overwrite}{Should the file be redownloaded and reset up?}
 }
 \description{
-This function sets up the control genes file from DepMap is called by the `gimap_annotate()`
+This function sets up the control genes file from DepMap is
+called by the `gimap_annotate()`
 }

@@ -248,7 +248,7 @@ qc_cor_heatmap <- function(gimap_dataset) {
 #' @export
 #' @import ggplot2
 #' @return a ggplot histogram
-#' @examples \dontrun{
+#' @examples
 #'
 #' gimap_dataset <- get_example_data("gimap")
 #'
@@ -263,7 +263,6 @@ qc_cor_heatmap <- function(gimap_dataset) {
 #' # or to specify a "cutoff" value that will be displayed as a dashed vertical
 #' # line as well as to specify a different column (or set of columns) to select
 #' qc_plasmid_histogram(gimap_dataset, cutoff = 2, filter_plasmid_target_col = 1:2)
-#' }
 #'
 qc_plasmid_histogram <- function(gimap_dataset, cutoff = NULL, filter_plasmid_target_col = NULL, wide_ar = 0.75) {
   if (is.null(filter_plasmid_target_col)) {

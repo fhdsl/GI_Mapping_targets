@@ -35,7 +35,7 @@ output_dir <- "output_timepoints"
 dir.create(output_dir, showWarnings = FALSE)
 ```
 
-```{r}
+```{r eval = FALSE}
 example_data <- get_example_data("count")
 ```
 
@@ -47,7 +47,7 @@ We're going to set up three datasets that we will provide to the `set_up()` func
 - `pg_ids` - the IDs that correspond to the rows of the counts and specify the construct
 - `sample_metadata` - metadata that describes the columns of the counts including their timepoints
 
-```{r}
+```{r eval = FALSE}
 counts <- example_data %>%
   select(c("Day00_RepA", "Day05_RepA", "Day22_RepA", "Day22_RepB", "Day22_RepC")) %>%
   as.matrix()
@@ -55,14 +55,14 @@ counts <- example_data %>%
 
 `pg_id` are just the unique IDs listed in the same order/sorted the same way as the count data.
 
-```{r}
+```{r eval = FALSE}
 pg_ids <- example_data %>%
   dplyr::select("id")
 ```
 
 Sample metadata is the information that describes the samples and is sorted the same order as the columns in the count data.
 
-```{r}
+```{r eval = FALSE}
 sample_metadata <- data.frame(
   col_names = c("Day00_RepA", "Day05_RepA", "Day22_RepA", "Day22_RepB", "Day22_RepC"),
   day = as.numeric(c("0", "5", "22", "22", "22")),
@@ -72,7 +72,7 @@ sample_metadata <- data.frame(
 
 We'll need to provide `example_counts`, `pg_ids` and `sample_metadata` to `setup_data()`.
 
-```{r}
+```{r eval = FALSE}
 gimap_dataset <- setup_data(
   counts = counts,
   pg_ids = pg_ids,
@@ -82,7 +82,7 @@ gimap_dataset <- setup_data(
 
 It's ideal to run quality checks first. The `run_qc()` function will create a report we can look at to assess this.
 
-```
+```{r eval = FALSE}
 run_qc(gimap_dataset,
        output_file = "example_qc_report.Rmd",
        overwrite = TRUE,
@@ -91,7 +91,7 @@ run_qc(gimap_dataset,
 
 You can take a look at an [example QC report here](http://htmlpreview.github.io/?https://raw.githubusercontent.com/FredHutch/gimap/main/inst/example_qc_report.html).
 
-```{r}
+```{r eval = FALSE}
 gimap_dataset <- gimap_dataset %>%
   gimap_filter() %>%
   gimap_annotate(cell_line = "HELA") %>%
@@ -114,7 +114,7 @@ Genetic interaction is calculated by:
 - `p_val` - p values from the testing whether a double knockout construct is significantly different in its genetic interaction score from single targets.  
 - `fdr` - False discovery rate corrected p values
 
-```{r}
+```{r eval = FALSE}
 gimap_dataset$gi_scores %>%
   dplyr::arrange(fdr) %>%
   head() %>%
@@ -125,21 +125,21 @@ gimap_dataset$gi_scores %>%
 
 You can remove any samples from these plots by altering the `reps_to_drop` argument.
 
-```{r}
+```{r eval = FALSE}
 plot_exp_v_obs_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
 ```
 
-```{r}
+```{r eval = FALSE}
 plot_rank_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
 ```
 
-```{r}
+```{r eval = FALSE}
 plot_volcano(gimap_dataset, reps_to_drop = "Day05_RepA_early", facet_rep = FALSE)
 ```
 
 Here's how you can save plots like the above.
 
-```{r}
+```{r eval = FALSE}
 ggplot2::ggsave("volcano_plot.png")
 ```
 
@@ -147,7 +147,7 @@ ggplot2::ggsave("volcano_plot.png")
 
 We can pick out a specific pair to plot.
 
-```{r}
+```{r eval = FALSE}
 # "NDEL1_NDE1" is top result so let's plot that
 plot_targets_bar(gimap_dataset, target1 = "NDEL1", target2 = "NDE1")
 ```
@@ -156,11 +156,11 @@ plot_targets_bar(gimap_dataset, target1 = "NDEL1", target2 = "NDE1")
 
 We can save all these data as an RDS or the genetic interaction scores themselves to a tsv file.
 
-```{r}
+```{r eval = FALSE}
 saveRDS(gimap_dataset, "gimap_dataset_final.RDS")
 ```
 
-```{r}
+```{r eval = FALSE}
 readr::write_tsv(gimap_dataset$gi_scores, "gi_scores.tsv")
 ```
 
@@ -168,6 +168,6 @@ readr::write_tsv(gimap_dataset$gi_scores, "gi_scores.tsv")
 
 This is just for provenance purposes.
 
-```{r}
+```{r eval = FALSE}
 sessionInfo()
 ```

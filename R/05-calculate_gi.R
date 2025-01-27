@@ -1,17 +1,20 @@
 Sys.setenv(VROOM_CONNECTION_SIZE = 500072)
 
 #' Calculate Genetic Interaction scores
-#' @description Create results table that has CRISPR scores, Wilcoxon rank-sum test and t tests.
+#' @description Create results table that has CRISPR scores, Wilcoxon rank-sum
+#' test and t tests.
 #' The output of the `gimap` package is genetic interaction scores which _is the
 #' distance between the observed CRISPR score and the expected CRISPR score._
-#' The expected CRISPR scores are what we expect for the CRISPR values should two
-#' genes be unrelated to each other. The further away an observed CRISPR score is
-#' from its expected the more we suspect genetic interaction.
+#' The expected CRISPR scores are what we expect for the CRISPR values should
+#' two genes be unrelated to each other. The further away an observed CRISPR
+#' scoreis from its expected the more we suspect genetic interaction.
 #' This can be true in a positive way (a CRISPR knockout pair caused more cell
-#' proliferation than expected) or in a negative way (a CRISPR knockout pair caused
-#' more cell lethality than expected).
+#' proliferation than expected) or in a negative way (a CRISPR knockout pair
+#' caused more cell lethality than expected).
 #'
-#' The genetic interaction scores are based on a linear model calculated for each sample where `observed_crispr_single` is the outcome variable and `expected_crispr_single` is the predictor variable.
+#' The genetic interaction scores are based on a linear model calculated for
+#' each sample where `observed_crispr_single` is the outcome variable and
+#' `expected_crispr_single` is the predictor variable.
 #' For each sample: lm(observed_crispr_single ~ expected_crispr_single)
 #'
 #' Using `y = mx+b`, we can fill in the following values:
@@ -20,13 +23,22 @@ Sys.setenv(VROOM_CONNECTION_SIZE = 500072)
 #' * `m` = slope from linear model for this sample
 #' * `b` = intercept from linear model for this sample
 #'
-#' The intercept and slope from this linear model are used to adjust the CRISPR scores for each sample:
-#' single target gi score = observed single crispr - (intercept + slope * expected single crispr)
-#' double_target_gi_score = double crispr score - (intercept + slope * expected double crispr)
+#' The intercept and slope from this linear model are used to adjust the CRISPR
+#' scores for each sample:
+#' single target gi score =
+#'   observed single crispr - (intercept + slope * expected single crispr)
+#' double_target_gi_score =
+#'   double crispr score - (intercept + slope * expected double crispr)
 #' These single and double target genetic interaction scores are calculated at
-#' the construct level and are then summarized using a t-test to see if the the distribution of the set of double targeting constructs is significantly different than the overall distribution single targeting constructs. After multiple testing correction, FDR values are reported. Low FDR value for a double construct means high suspicion of paralogs.
-#' @param .data Data can be piped in with tidyverse pipes from function to function. But the data must still be a gimap_dataset
-#' @param gimap_dataset A special dataset structure that is setup using the `setup_data()` function.
+#' the construct level and are then summarized using a t-test to see if the the
+#' distribution of the set of double targeting constructs is significantly
+#' different than the overall distribution single targeting constructs.
+#' After multiple testing correction, FDR values are reported.
+#' Low FDR value for a double construct means high suspicion of paralogs.
+#' @param .data Data can be piped in with tidyverse pipes from function to
+#' function. But the data must still be a gimap_dataset
+#' @param gimap_dataset A special dataset structure that is setup using the
+#' `setup_data()` function.
 #' @import dplyr
 #' @importFrom stats lm
 #' @export
@@ -55,36 +67,41 @@ calc_gi <- function(.data = NULL,
 
   # mean_double_control_crispr = mean for the same control sequence
 
-  # expected_crispr_double = single_target_crispr_1 + single_target_crispr_2
-  # expected_crispr_single_1 = single_target_crispr_1 + mean_double_control_crispr
-  # expected_crispr_single_2 = single_target_crispr_2 + mean_double_control_crispr
+  # expected_crispr_double=single_target_crispr_1 + single_target_crispr_2
+  # expected_crispr_single_1=single_target_crispr_1 + mean_double_control_crispr
+  # expected_crispr_single_2=single_target_crispr_2 + mean_double_control_crispr
 
   # linear model is lm(observed_single_crispr ~ expected_single_crispr)
 
-  # single_target_gi_score = observed_single_crispr - (intercept + slope * expected_single_crispr)
-  # double_target_gi_score = double_crispr_score - (intercept + slope * expected_double_crispr)
+  # single_target_gi_score = observed_single_crispr -
+  #      (intercept + slope * expected_single_crispr)
+  # double_target_gi_score = double_crispr_score -
+  #      (intercept + slope * expected_double_crispr)
 
   # Code adapted from
-  # https://github.com/FredHutch/GI_mapping/blob/main/workflow/scripts/04-calculate_GI_scores.Rmd
+  # https://github.com/FredHutch/GI_mapping/blob/main/workflow/scripts/
+  # 04-calculate_GI_scores.Rmd
 
   if (!is.null(.data)) gimap_dataset <- .data
 
   if (!("gimap_dataset" %in% class(gimap_dataset))) {
     stop(
       "This function only works",
-      "with gimap_dataset objects which can be made with the setup_data() function."
+      " with gimap_dataset objects which can be made with the",
+      " setup_data() function."
     )
   }
 
   if (is.null(gimap_dataset$normalized_log_fc)) {
     stop(
       "This function only works",
-      "with already normalized gimap_dataset objects which can be done with the",
-      "gimap_normalize() function."
+      "with already normalized gimap_dataset objects",
+      "which can be done with the gimap_normalize() function."
     )
   }
 
-  # Get mean control target CRISPR scores -- they will be used for expected calculations
+  # Get mean control target CRISPR scores -- they will be used for expected
+  # calculations
   control_target_df <- gimap_dataset$normalized_log_fc %>%
     dplyr::filter(target_type == "ctrl_ctrl") %>%
     tidyr::pivot_longer(
@@ -95,14 +112,22 @@ calc_gi <- function(.data = NULL,
     # If there's the same control sequence, and rep
     dplyr::group_by(rep, control_gRNA_seq, norm_ctrl_flag) %>%
     # Then take the mean for when controls have the same sequence
-    dplyr::summarize(mean_double_control_crispr = mean(crispr_score, na.rm = TRUE)) %>%
-    dplyr::select(rep, control_gRNA_seq, mean_double_control_crispr, norm_ctrl_flag)
-  # This means we have a mean double control crispr for each rep and control sequence
+    dplyr::summarize(
+      mean_double_control_crispr =
+        mean(crispr_score, na.rm = TRUE)
+    ) %>%
+    dplyr::select(
+      rep,
+      control_gRNA_seq, mean_double_control_crispr, norm_ctrl_flag
+    )
+  # This means we have a mean double control crispr for each rep and
+  # control sequence
 
   # Calculate CRISPR scores for single targets
   single_crispr_df <- gimap_dataset$normalized_log_fc %>%
     dplyr::filter(target_type %in% c("ctrl_gene", "gene_ctrl")) %>%
-    # We will be joining things based on the gRNA sequences so we do some recoding here
+    # We will be joining things based on the gRNA sequences so
+    # we do some recoding here
     mutate(
       targeting_gRNA_seq = case_when(
         target_type == "gene_ctrl" ~ gRNA1_seq,
@@ -122,7 +147,8 @@ calc_gi <- function(.data = NULL,
       suffix = c("", "_control")
     ) %>%
     group_by(rep, pgRNA_target, targeting_gRNA_seq) %>%
-    # Taking the mean of the single target crisprs that have the same targeting sequence
+    # Taking the mean of the single target crisprs that have the same
+    # targeting sequence
     mutate(mean_single_crispr = mean(crispr_score, na.rm = TRUE)) %>%
     dplyr::select(rep,
       pgRNA_target,
@@ -134,7 +160,8 @@ calc_gi <- function(.data = NULL,
       norm_ctrl_flag
     ) %>%
     dplyr::distinct() %>%
-    ## calculate expected double-targeting GI score by summing the two mean single-targeting
+    ## calculate expected double-targeting GI score by summing the two mean
+    ## single-targeting
     ## CRISPR scores for that paralog pair
     dplyr::mutate(
       expected_single_crispr = single_crispr + mean_double_control_crispr,
@@ -205,7 +232,8 @@ calc_gi <- function(.data = NULL,
   gi_calc_single <- gimap_dataset$crispr_score$single_crispr_score %>%
     dplyr::left_join(single_lm_df, by = "rep") %>%
     dplyr::mutate(
-      single_gi_score = single_crispr - (intercept + slope * expected_single_crispr)
+      single_gi_score = single_crispr -
+        (intercept + slope * expected_single_crispr)
     )
 
   # Do the linear model adjustments but don't collapse double
@@ -213,7 +241,8 @@ calc_gi <- function(.data = NULL,
     # Using the single target's linear model here
     dplyr::left_join(single_lm_df, by = "rep") %>%
     dplyr::mutate(
-      double_gi_score = double_crispr - (intercept + slope * expected_double_crispr)
+      double_gi_score = double_crispr -
+        (intercept + slope * expected_double_crispr)
     )
 
   # Which replicates we have?
@@ -305,11 +334,10 @@ calc_gi <- function(.data = NULL,
 #' @param gi_calc_double a data.frame with adjusted double gi scores
 #' @importFrom stats p.adjust t.test wilcox.test
 gimap_rep_stats <- function(replicate, gi_calc_double, gi_calc_single) {
-  ## get a vector of GI scores for all single-targeting ("control") pgRNAs for each rep
-  ## get double-targeting pgRNAs for this rep, do a t-test to compare the double-
-
-  ## targeting GI scores for each paralog pair to the control vector
-
+  ## get a vector of GI scores for all single-targeting ("control") pgRNAs
+  ## for each rep
+  ## get double-targeting pgRNAs for this rep, do a t-test to compare the
+  ## double-targeting GI scores for each paralog pair to the control vector
   ## adjust for multiple testing using the Benjamini-Hochberg method
 
   per_rep_stats_double <- gi_calc_double %>%

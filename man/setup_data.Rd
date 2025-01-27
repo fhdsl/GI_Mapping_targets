@@ -7,29 +7,40 @@
 setup_data(counts = NULL, pg_ids = NULL, sample_metadata = NULL)
 }
 \arguments{
-\item{counts}{a matrix of data that contains the counts where rows are each paired_guide target and columns are each sample}
+\item{counts}{a matrix of data that contains the counts where rows are each
+paired_guide target and columns are each sample}
 
-\item{pg_ids}{the pgRNA IDs: metadata associated with the pgRNA constructs that correspond to the rows of the counts data}
+\item{pg_ids}{the pgRNA IDs: metadata associated with the pgRNA constructs
+that correspond to the rows of the counts data}
 
-\item{sample_metadata}{metadata associated with the samples of the dataset that correspond to the columns of the counts data.
-Should include a column that has replicate information as well as a column that contains timepoint information respectively (this will be used for log fold calculations). These columns should be factors.}
+\item{sample_metadata}{metadata associated with the samples of the dataset
+that correspond to the columns of the counts data.
+Should include a column that has replicate information as well as a column
+that contains timepoint information respectively (this will be used for log
+ fold calculations). These columns should be factors.}
 }
 \value{
-A special gimap_dataset to be used with the other functions in this package.
+A special gimap_dataset to be used with the other functions in this
+package.
 }
 \description{
-This function allows people to have their data ready to be processed by gimap
+This function allows people to have their data ready to be
+ processed by gimap
 }
 \examples{
 \dontrun{
 
 example_counts <- get_example_data("count") \%>\%
-  dplyr::select(c("Day00_RepA", "Day05_RepA", "Day22_RepA", "Day22_RepB", "Day22_RepC")) \%>\%
+  dplyr::select(c(
+    "Day00_RepA", "Day05_RepA", "Day22_RepA", "Day22_RepB",
+    "Day22_RepC"
+  )) \%>\%
   as.matrix()
 
 gimap_dataset <- setup_data(counts = example_counts)
 
-# You can see what an example dataset looks like by pulling the example gimap_dataset:
+# You can see what an example dataset looks like by pulling the example
+# gimap_dataset:
 gimap_dataset <- get_example_data("gimap")
 }
 }

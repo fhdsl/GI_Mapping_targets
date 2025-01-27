@@ -20,7 +20,7 @@
 #' # Plot:
 #'
 #' plot_crispr(gimap_dataset)
-#' }
+#'}
 plot_crispr <- function(.data = NULL, gimap_dataset, output_file = "crispr_norm_plot.png") {
   if (!is.null(.data)) gimap_dataset <- .data
 

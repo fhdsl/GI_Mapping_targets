@@ -39,16 +39,15 @@ utils::globalVariables(c(
 #' annotation <- get_example_data("annotation")
 #' }
 get_example_data <- function(which_data) {
-
   data_dir <- system.file("extdata", package = "gimap")
 
   file_name <- switch(which_data,
-         "count" = "PP_pgPEN_HeLa_counts.txt",
-         "count_treatment" = "counts_pgPEN_PC9_example.tsv",
-         "meta" = "pgRNA_ID_pgPEN_library_comp.csv",
-         "gimap" = "gimap_dataset_timepoint.RDS",
-         "gimap_treatment" = "gimap_dataset_treatment.RDS",
-         "annotation" = "pgPEN_annotations.txt"
+    "count" = "PP_pgPEN_HeLa_counts.txt",
+    "count_treatment" = "counts_pgPEN_PC9_example.tsv",
+    "meta" = "pgRNA_ID_pgPEN_library_comp.csv",
+    "gimap" = "gimap_dataset_timepoint.RDS",
+    "gimap_treatment" = "gimap_dataset_treatment.RDS",
+    "annotation" = "pgPEN_annotations.txt"
   )
 
   file_path <- file.path(data_dir, file_name)
@@ -58,20 +57,24 @@ get_example_data <- function(which_data) {
       get_figshare(
         file_name = file_name,
         item = "28264271",
-        output_dir = data_dir)
+        output_dir = data_dir
+      )
     }
   }
   dataset <- switch(which_data,
-                      "count" = readr::read_tsv(file_path,
-                                                show_col_types = FALSE),
-                      "count_treatment" = readr::read_tsv(file_path,
-                                                          show_col_types = FALSE),
-                      "meta" = readr::read_csv(file_path,
-                                               skip = 1,
-                                               show_col_types = FALSE),
-                      "gimap" = readr::read_rds(file_path),
-                      "gimap_treatment" = readr::read_rds(file_path),
-                      "annotation" = readr::read_tsv(file_path, show_col_types = FALSE)
+    "count" = readr::read_tsv(file_path,
+      show_col_types = FALSE
+    ),
+    "count_treatment" = readr::read_tsv(file_path,
+      show_col_types = FALSE
+    ),
+    "meta" = readr::read_csv(file_path,
+      skip = 1,
+      show_col_types = FALSE
+    ),
+    "gimap" = readr::read_rds(file_path),
+    "gimap_treatment" = readr::read_rds(file_path),
+    "annotation" = readr::read_tsv(file_path, show_col_types = FALSE)
   )
   return(dataset)
 }
@@ -166,11 +169,10 @@ key_encrypt_creds_path <- function() {
 #'
 #' get_figshare(return_list = TRUE)
 #' }
-  get_figshare <- function(file_name = NA,
+get_figshare <- function(file_name = NA,
                          item = "19700056",
                          output_dir = NULL,
                          return_list = FALSE) {
-
   if (is.null(output_dir)) output_dir <- system.file("extdata", package = "gimap")
 
   decrypted <- openssl::aes_cbc_decrypt(
@@ -185,7 +187,8 @@ key_encrypt_creds_path <- function() {
     url,
     httr::progress(),
     httr::add_headers(
-      Authorization = paste0("Bearer ", unserialize(decrypted)$client_secret)),
+      Authorization = paste0("Bearer ", unserialize(decrypted)$client_secret)
+    ),
     httr::accept_json()
   )
 
@@ -211,7 +214,8 @@ key_encrypt_creds_path <- function() {
     file.path("https://api.figshare.com/v2/file/download/", file_id),
     httr::progress(),
     httr::add_headers(
-      Authorization = paste0("Bearer ", unserialize(decrypted)$client_secret)),
+      Authorization = paste0("Bearer ", unserialize(decrypted)$client_secret)
+    ),
     httr::accept_json()
   )
 

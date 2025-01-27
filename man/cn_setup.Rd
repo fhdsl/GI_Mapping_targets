@@ -10,6 +10,6 @@ cn_setup(overwrite = TRUE)
 \item{overwrite}{Should the files be redownloaded?}
 }
 \description{
-This function sets up the tpm data from DepMap is called by the `gimap_annotate()`
-function if the cn_annotate = TRUE
+This function sets up the tpm data from DepMap is called
+by the `gimap_annotate()` function if the cn_annotate = TRUE
 }
