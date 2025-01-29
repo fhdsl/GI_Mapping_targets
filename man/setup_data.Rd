@@ -36,7 +36,7 @@ example_counts <- get_example_data("count") \%>\%
   )) \%>\%
   as.matrix()
 
-pg_ids <- example_data \%>\% dplyr::select("id")
+pg_ids <- get_example_data("count") \%>\% dplyr::select("id")
 
 sample_metadata <- data.frame(
  col_names = c("Day00_RepA", "Day05_RepA", "Day22_RepA", "Day22_RepB", "Day22_RepC"),
