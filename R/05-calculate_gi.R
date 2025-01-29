@@ -39,10 +39,14 @@ Sys.setenv(VROOM_CONNECTION_SIZE = 500072)
 #' function. But the data must still be a gimap_dataset
 #' @param gimap_dataset A special dataset structure that is setup using the
 #' `setup_data()` function.
+#' @return A gimap dataset with statistics and genetic interaction scores
+#' calculated. Overall results in the returned object can be obtained using
+#' gimap_dataset$overall_results Whereas target level genetic interaction
+#' scores can be retrieved using `gimap_dataset$gi_scores`.
 #' @import dplyr
 #' @importFrom stats lm
 #' @export
-#' @examples \dontrun{
+#' @examples \donttest{
 #' gimap_dataset <- get_example_data("gimap")
 #'
 #' # Highly recommended but not required

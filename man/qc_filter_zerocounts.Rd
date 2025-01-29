@@ -26,7 +26,7 @@ This function flags and reports which and how many pgRNAs have a
 raw count of 0 for any sample/time point
 }
 \examples{
-\dontrun{
+\donttest{
 gimap_dataset <- get_example_data("gimap")
 qc_filter_zerocounts(gimap_dataset)
 

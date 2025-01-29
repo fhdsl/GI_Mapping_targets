@@ -1,4 +1,4 @@
-#' Plots for Genetic interactions
+#' Expected vs Observed CRISPR Scatterplot
 #' @description This plot is meant to be functionally equivalent to Fig S5K (for HeLa, equivalent of Fig 3a for PC9).
 #' Scatter plot of target-level observed versus expected CRISPR scores in the screen.
 #' The solid line is the linear regression line for the negative control (single KO) pgRNAs,
@@ -9,7 +9,9 @@
 #' @import dplyr
 #' @import ggplot2
 #' @export
-#' @examples \dontrun{
+#' @return A ggplot2 scatterplot of the target level observed vs expected
+#' CRISPR scores.
+#' @examples \donttest{
 #'
 #' gimap_dataset <- get_example_data("gimap") %>%
 #'   gimap_filter() %>%
@@ -96,6 +98,7 @@ plot_exp_v_obs_scatter <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop
 #' @param reps_to_drop Names of replicates that should be not plotted (Optional)
 #' @import dplyr
 #' @import ggplot2
+#' @return A ggplot2 rankplot of the target level genetic interaction scores.
 #' @export
 #' @examples \dontrun{
 #'
@@ -156,6 +159,7 @@ plot_rank_scatter <- function(gimap_dataset, reps_to_drop = "") {
 #' @param reps_to_drop Names of replicates that should be not plotted (Optional)
 #' @import dplyr
 #' @import ggplot2
+#' @return A ggplot2 volcano plot of the target level genetic interaction scores.
 #' @export
 #' @examples \dontrun{
 #'
@@ -238,6 +242,7 @@ plot_volcano <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop = "") {
 #' @import dplyr
 #' @import ggplot2
 #' @export
+#' @return A ggplot2 bar plot of the specific target's genetic interaction scores.
 #' @examples \dontrun{
 #'
 #' gimap_dataset <- get_example_data("gimap") %>%

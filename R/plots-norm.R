@@ -1,10 +1,14 @@
 #' Plot CRISPR scores after normalization
 #' @description This plots normalization after CRISPR scores have been calculated
 #'
-#' @param .data Data can be piped in with tidyverse pipes from function to function. But the data must still be a gimap_dataset
-#' @param gimap_dataset A special dataset structure that is setup using the `setup_data()` function.
+#' @param .data Data can be piped in with tidyverse pipes from function to
+#' function. But the data must still be a gimap_dataset
+#' @param gimap_dataset A special dataset structure that is setup using the
+#' `setup_data()` function.
 #' @param output_file A file for the output
 #' @export
+#' @return A ggplot2 boxplot of the CRISPR scores separated by the type of
+#' target. Can be used to determine the normalization has proceeded properly.
 #'
 #' @import ggplot2
 #'

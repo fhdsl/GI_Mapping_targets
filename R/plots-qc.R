@@ -8,11 +8,11 @@
 #' @importFrom ggplot2 ggplot labs
 #' @return counts_cdf a ggplot
 #' @export
-#' @examples \dontrun{
+#' @examples
 #'
 #' gimap_dataset <- get_example_data("gimap")
 #' qc_cdf(gimap_dataset)
-#' }
+#'
 #'
 qc_cdf <- function(gimap_dataset, wide_ar = 0.75) {
   long_form <-
@@ -46,10 +46,10 @@ qc_cdf <- function(gimap_dataset, wide_ar = 0.75) {
 #' @import ggplot2
 #' @return sample_cpm_histogram a ggplot
 #' @export
-#' @examples \dontrun{
+#' @examples
 #' gimap_dataset <- get_example_data("gimap")
 #' qc_sample_hist(gimap_dataset)
-#' }
+#'
 #'
 qc_sample_hist <- function(gimap_dataset, wide_ar = 0.75) {
   long_form <-
@@ -141,7 +141,7 @@ qc_variance_hist <- function(gimap_dataset, filter_replicates_target_col = NULL,
 #' @import dplyr
 #' @return a ggplot barplot
 #' @export
-#' @examples \dontrun{
+#' @examples
 #' gimap_dataset <- get_example_data("gimap")
 #' qc_constructs_countzero_bar(gimap_dataset)
 #'
@@ -157,7 +157,7 @@ qc_variance_hist <- function(gimap_dataset, filter_replicates_target_col = NULL,
 #'   filter_zerocount_target_col = 3:5,
 #'   filter_replicates_target_col = 3:5
 #' )
-#' }
+#'
 #'
 qc_constructs_countzero_bar <- function(gimap_dataset,
                                         filter_zerocount_target_col = NULL,
@@ -212,10 +212,10 @@ qc_constructs_countzero_bar <- function(gimap_dataset,
 #' @importFrom stats cor
 #' @return `sample_cor_heatmap` a pheatmap
 #' @export
-#' @examples \dontrun{
+#' @examples
 #' gimap_dataset <- get_example_data("gimap")
 #' qc_cor_heatmap(gimap_dataset)
-#' }
+#'
 #'
 qc_cor_heatmap <- function(gimap_dataset) {
   cpm_cor <- gimap_dataset$transformed_data$cpm %>%

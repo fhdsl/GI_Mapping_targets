@@ -64,6 +64,13 @@ do you want this file to be saved? Provide a file path.}
 \item{overwrite}{Should existing normalized_log_fc data in the gimap_dataset
 be overwritten?}
 }
+\value{
+A gimap_dataset with normalized log FC as a data frame that can be
+retrieve by using gimap_dataset$normalized_log_fc. This will contain
+log2FC adjusted stored in a column named `log_adj` and the CRISPR scores
+stored in a column named `crispr_score`. 
+genes in the set.
+}
 \description{
 This calculates the log fold change for a gimap dataset based on
 the annotation and metadata provided.
@@ -88,7 +95,7 @@ log2FC adjusted = log2FC /
 (median negative control for a sample - median positive control for a sample)
 }
 \examples{
-\dontrun{
+\donttest{
 
 gimap_dataset <- get_example_data("gimap")
 

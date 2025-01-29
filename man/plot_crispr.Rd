@@ -7,11 +7,17 @@
 plot_crispr(.data = NULL, gimap_dataset, output_file = "crispr_norm_plot.png")
 }
 \arguments{
-\item{.data}{Data can be piped in with tidyverse pipes from function to function. But the data must still be a gimap_dataset}
+\item{.data}{Data can be piped in with tidyverse pipes from function to
+function. But the data must still be a gimap_dataset}
 
-\item{gimap_dataset}{A special dataset structure that is setup using the `setup_data()` function.}
+\item{gimap_dataset}{A special dataset structure that is setup using the
+`setup_data()` function.}
 
 \item{output_file}{A file for the output}
+}
+\value{
+A ggplot2 boxplot of the CRISPR scores separated by the type of
+target. Can be used to determine the normalization has proceeded properly.
 }
 \description{
 This plots normalization after CRISPR scores have been calculated

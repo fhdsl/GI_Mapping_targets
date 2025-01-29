@@ -27,11 +27,14 @@
 #' Note that you can use custom_tpm with cell_line_annotate but your custom_tpm
 #' will be used instead of the tpm data from DepMap. However other data from
 #' DepMap like CN will be added.
+#' @return A gimap_dataset with annotation data frame that can be retrieve by using
+#' gimap_dataset$annotation. This will contain information about your included
+#' genes in the set.
 #' @importFrom stringr word
 #' @import dplyr
 #' @importFrom utils download.file unzip
 #' @export
-#' @examples \dontrun{
+#' @examples \donttest{
 #'
 #' gimap_dataset <- get_example_data("gimap")
 #'
@@ -163,7 +166,8 @@ gimap_annotate <- function(.data = NULL,
 
     if (!file.exists(tpm_file)) tpm_setup()
 
-    Sys.setenv("VROOM_CONNECTION_SIZE" = 500072)
+    op <- options("VROOM_CONNECTION_SIZE" = 500072)
+    on.exit(options(op))
 
     tpm <- vroom::vroom(tpm_file,
       show_col_types = FALSE,
@@ -445,6 +449,8 @@ crtl_genes <- function(overwrite = TRUE) {
 #' @description This function downloads the metadata for DepMap and lists which
 #' cell lines are supported.
 #' @export
+#' @return A list of the cell line names that are available in DepMap for use
+#' for annotation in this package. 
 #' @examples
 #'
 #' cell_lines <- supported_cell_lines()

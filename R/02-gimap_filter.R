@@ -45,7 +45,7 @@
 #' timepoint replicates
 #' @export
 #' @import dplyr
-#' @examples \dontrun{
+#' @examples \donttest{
 #'
 #' gimap_dataset <- get_example_data("gimap")
 #'
@@ -253,7 +253,8 @@ gimap_filter <- function(.data = NULL,
 #' count zero for at least one sample/time point and a report df `reportdf` for
 #' the number and percent of pgRNA which have a count zero for at least one
 #' sample/time point
-#' @examples \dontrun{
+#' @export
+#' @examples \donttest{
 #' gimap_dataset <- get_example_data("gimap")
 #' qc_filter_zerocounts(gimap_dataset)
 #'
@@ -313,11 +314,12 @@ qc_filter_zerocounts <- function(gimap_dataset,
 #' @importFrom tidyr pivot_wider pivot_longer
 #' @importFrom janitor clean_names
 #' @importFrom stats quantile
+#' @export
 #' @return a named list with the filter `filter` specifying which pgRNAs have
 #' low plasmid log2 CPM (column of interest is `plasmid_cpm_filter`) and a
 #' report df `reportdf` for the number and percent of pgRNA which have a low
 #' plasmid log2 CPM
-#' @examples \dontrun{
+#' @examples \donttest{
 #' gimap_dataset <- get_example_data("gimap")
 #'
 #' qc_filter_plasmid(gimap_dataset)

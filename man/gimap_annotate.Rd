@@ -48,12 +48,17 @@ DepMap like CN will be added.}
 \item{cell_line}{which cell line are you using? (e.g., HELA, PC9, etc.).
 Required argument if cell_line_annotate is TRUE.}
 }
+\value{
+A gimap_dataset with annotation data frame that can be retrieve by using
+gimap_dataset$annotation. This will contain information about your included
+genes in the set.
+}
 \description{
 In this function, a `gimap_dataset` is annotated as far as which
 genes should be used as controls.
 }
 \examples{
-\dontrun{
+\donttest{
 
 gimap_dataset <- get_example_data("gimap")
 

@@ -28,9 +28,9 @@ library(dplyr)
 
 ## Set Up
 
-First let's create a folder we will save files to.
+First we can create a folder we will save files to.
 
-```{r}
+```
 output_dir <- "output_timepoints"
 dir.create(output_dir, showWarnings = FALSE)
 ```
@@ -139,7 +139,7 @@ plot_volcano(gimap_dataset, reps_to_drop = "Day05_RepA_early", facet_rep = FALSE
 
 Here's how you can save plots like the above.
 
-```{r eval = FALSE}
+```
 ggplot2::ggsave("volcano_plot.png")
 ```
 
@@ -156,11 +156,11 @@ plot_targets_bar(gimap_dataset, target1 = "NDEL1", target2 = "NDE1")
 
 We can save all these data as an RDS or the genetic interaction scores themselves to a tsv file.
 
-```{r eval = FALSE}
+```
 saveRDS(gimap_dataset, "gimap_dataset_final.RDS")
 ```
 
-```{r eval = FALSE}
+```
 readr::write_tsv(gimap_dataset$gi_scores, "gi_scores.tsv")
 ```
 

@@ -20,11 +20,15 @@ get_figshare(
 
 \item{return_list}{Should the list of files be returned instead of the file}
 }
+\value{
+Downloads necessary annotation files from Figshare and reads them
+in as data frames.
+}
 \description{
 Handler function for GET requests from Figshare
 }
 \examples{
-\dontrun{
+\donttest{
 
 get_figshare(return_list = TRUE)
 }

@@ -9,13 +9,17 @@ get_example_data(which_data)
 \arguments{
 \item{which_data}{options are "count" or "meta"; specifies which example dataset should be returned}
 }
+\value{
+the respective example data either as a data frame or a specialized
+gimap_dataset depending on what was requested.
+}
 \description{
 This function loads and returns example data for the package.
 Which dataset is returned must be specified. Data will be downloaded from Figshare
 the first time it is used.
 }
 \examples{
-\dontrun{
+\donttest{
 
 counts_timepoint <- get_example_data("count")
 counts_treatment <- get_example_data("count_treatment")

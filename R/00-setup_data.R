@@ -13,7 +13,7 @@
 #' @return A special gimap_dataset to be used with the other functions in this
 #' package.
 #' @export
-#' @examples \dontrun{
+#' @examples
 #'
 #' example_counts <- get_example_data("count") %>%
 #'   dplyr::select(c(
@@ -22,12 +22,21 @@
 #'   )) %>%
 #'   as.matrix()
 #'
-#' gimap_dataset <- setup_data(counts = example_counts)
+#' pg_ids <- example_data %>% dplyr::select("id")
 #'
-#' # You can see what an example dataset looks like by pulling the example
-#' # gimap_dataset:
-#' gimap_dataset <- get_example_data("gimap")
-#' }
+#' sample_metadata <- data.frame(
+#'  col_names = c("Day00_RepA", "Day05_RepA", "Day22_RepA", "Day22_RepB", "Day22_RepC"),
+#'  day = as.numeric(c("0", "5", "22", "22", "22")),
+#'  rep = as.factor(c("RepA", "RepA", "RepA", "RepB", "RepC"))
+#'  )
+#'
+#' gimap_dataset <- setup_data(
+#'   counts = counts,
+#'   pg_ids = pg_ids,
+#'   sample_metadata = sample_metadata
+#' )
+#'
+#'
 setup_data <- function(counts = NULL,
                        pg_ids = NULL,
                        sample_metadata = NULL) {
@@ -84,6 +93,8 @@ setup_data <- function(counts = NULL,
 #' Make an empty gimap dataset object
 #' @description This function makes an empty gimap data object
 #' @export
+#' @return an empty `gimap_dataset` which is a named list which will
+#' be filled by various `gimap` functions.
 gimap_object <- function() {
   gimap_obj <- list(
     raw_counts = NULL,

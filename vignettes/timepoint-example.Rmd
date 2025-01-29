@@ -28,7 +28,7 @@ library(dplyr)
 
 First let's create a folder we will save files to.
 
-```{r}
+```
 output_dir <- "output_timepoints"
 dir.create(output_dir, showWarnings = FALSE)
 ```
@@ -254,13 +254,13 @@ plot_targets_bar(gimap_dataset, target1 = "NDEL1", target2 = "NDE1")
 
 We can save the genetic interactions scores like this:
 
-```{r eval = FALSE}
+```
 readr::write_tsv(gimap_dataset$gi_scores, file.path(output_dir, "gi_scores.tsv"))
 ```
 
 We can save all these data as an RDS.
 
-```{r eval = FALSE}
+```
 saveRDS(gimap_dataset, "gimap_dataset_final_timepoint.RDS")
 ```
 

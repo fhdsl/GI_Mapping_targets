@@ -20,9 +20,8 @@ This function uses pivot_longer to rearrange the data for plotting and then
 plots sample specific histograms of the pgRNA cpm's
 }
 \examples{
-\dontrun{
 gimap_dataset <- get_example_data("gimap")
 qc_sample_hist(gimap_dataset)
-}
+
 
 }

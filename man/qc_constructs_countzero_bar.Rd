@@ -37,7 +37,6 @@ Note, if you select samples/columns to check with the filter that don't have the
   between the columns for the two target_col parameters to have an informative graph
 }
 \examples{
-\dontrun{
 gimap_dataset <- get_example_data("gimap")
 qc_constructs_countzero_bar(gimap_dataset)
 
@@ -53,6 +52,6 @@ qc_constructs_countzero_bar(gimap_dataset,
   filter_zerocount_target_col = 3:5,
   filter_replicates_target_col = 3:5
 )
-}
+
 
 }
