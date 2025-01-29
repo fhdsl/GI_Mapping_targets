@@ -45,13 +45,12 @@
 #' timepoint replicates
 #' @export
 #' @import dplyr
-#' @examples \donttest{
+#' @examples \dontrun{
 #'
 #' gimap_dataset <- get_example_data("gimap")
 #'
 #' # Highly recommended but not required
 #' run_qc(gimap_dataset)
-#'
 #'
 #' gimap_dataset <- gimap_filter(gimap_dataset)
 #'

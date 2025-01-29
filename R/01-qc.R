@@ -32,6 +32,7 @@
 #' gimap_dataset <- get_example_data("gimap")
 #'
 #' run_qc(gimap_dataset)
+#'
 #'}
 run_qc <- function(gimap_dataset,
                    output_file = "./gimap_QC_Report.Rmd",

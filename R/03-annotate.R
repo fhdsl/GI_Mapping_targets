@@ -34,7 +34,7 @@
 #' @import dplyr
 #' @importFrom utils download.file unzip
 #' @export
-#' @examples \donttest{
+#' @examples \dontrun{
 #'
 #' gimap_dataset <- get_example_data("gimap")
 #'
@@ -450,7 +450,7 @@ crtl_genes <- function(overwrite = TRUE) {
 #' cell lines are supported.
 #' @export
 #' @return A list of the cell line names that are available in DepMap for use
-#' for annotation in this package. 
+#' for annotation in this package.
 #' @examples
 #'
 #' cell_lines <- supported_cell_lines()

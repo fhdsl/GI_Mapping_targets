@@ -15,7 +15,7 @@
 #' @export
 #' @examples
 #'
-#' example_counts <- get_example_data("count") %>%
+#' counts <- get_example_data("count") %>%
 #'   dplyr::select(c(
 #'     "Day00_RepA", "Day05_RepA", "Day22_RepA", "Day22_RepB",
 #'     "Day22_RepC"
