@@ -278,7 +278,7 @@ plot_targets_bar <- function(gimap_dataset, target1, target2, reps_to_drop = "")
         x = target_type,
         fill = target_type
       )) +
-      geom_bar(stat = "identity") +
+      geom_bar(stat = "summary", fun.y = "mean") +
       geom_point(pch = 21, size = 3) +
       theme_bw() +
       ylab("CRISPR score") +
