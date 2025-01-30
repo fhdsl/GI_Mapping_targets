@@ -88,10 +88,10 @@ qc_sample_hist <- function(gimap_dataset, wide_ar = 0.75) {
 #' @import dplyr
 #' @return a ggplot histogram
 #' @export
-#' @examples \dontrun{
+#' @examples
 #' gimap_dataset <- get_example_data("gimap")
 #' qc_variance_hist(gimap_dataset)
-#' }
+#'
 #'
 qc_variance_hist <- function(gimap_dataset, filter_replicates_target_col = NULL, wide_ar = 0.75) {
   if (is.null(filter_replicates_target_col)) {
@@ -264,7 +264,10 @@ qc_cor_heatmap <- function(gimap_dataset) {
 #' # line as well as to specify a different column (or set of columns) to select
 #' qc_plasmid_histogram(gimap_dataset, cutoff = 2, filter_plasmid_target_col = 1:2)
 #'
-qc_plasmid_histogram <- function(gimap_dataset, cutoff = NULL, filter_plasmid_target_col = NULL, wide_ar = 0.75) {
+qc_plasmid_histogram <- function(gimap_dataset,
+                                 cutoff = NULL,
+                                 filter_plasmid_target_col = NULL,
+                                 wide_ar = 0.75) {
   if (is.null(filter_plasmid_target_col)) {
     filter_plasmid_target_col <- c(1)
   }

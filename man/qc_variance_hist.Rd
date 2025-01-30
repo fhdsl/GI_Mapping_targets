@@ -28,9 +28,8 @@ This function uses pivot_longer to rearrange the data for plotting,
  plots a histogram of these variances
 }
 \examples{
-\dontrun{
 gimap_dataset <- get_example_data("gimap")
 qc_variance_hist(gimap_dataset)
-}
+
 
 }

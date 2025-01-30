@@ -67,8 +67,6 @@ gimap_dataset <- get_example_data("gimap") \%>\%
   gimap_filter() \%>\%
   gimap_annotate(cell_line = "HELA")
 
-# To see anotations you can do this:
-gimap_dataset$annotation
 
 # You can also say cell_line_annotate = false if you don't want to use DepMap
 # annotation BUT if you don't also specify that you say you are

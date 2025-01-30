@@ -105,7 +105,5 @@ gimap_dataset <- get_example_data("gimap") \%>\%
     missing_ids_file =  tempfile()
   )
 
-# To see results
-gimap_dataset$normalized_log_fc
 }
 }
