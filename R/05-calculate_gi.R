@@ -48,15 +48,7 @@ Sys.setenv(VROOM_CONNECTION_SIZE = 500072)
 #' @export
 #' @examples \dontrun{
 #'
-#' gimap_dataset <- get_example_data("gimap")
-#'
-#' # Highly recommended but not required
-#' run_qc(
-#'   gimap_dataset,
-#'   output_file =  tempfile()
-#' )
-#'
-#' gimap_dataset <- gimap_dataset %>%
+#' gimap_dataset <- get_example_data("gimap") %>%
 #'   gimap_filter() %>%
 #'   gimap_annotate(cell_line = "HELA") %>%
 #'   gimap_normalize(

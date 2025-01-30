@@ -248,7 +248,7 @@ gimap_filter <- function(.data = NULL,
 #' count zero for at least one sample/time point and a report df `reportdf` for
 #' the number and percent of pgRNA which have a count zero for at least one
 #' sample/time point
-#' @examples \donttest{
+#' @examples \dontrun{
 #' gimap_dataset <- get_example_data("gimap")
 #' qc_filter_zerocounts(gimap_dataset)
 #'
@@ -313,7 +313,7 @@ qc_filter_zerocounts <- function(gimap_dataset,
 #' low plasmid log2 CPM (column of interest is `plasmid_cpm_filter`) and a
 #' report df `reportdf` for the number and percent of pgRNA which have a low
 #' plasmid log2 CPM
-#' @examples \donttest{
+#' @examples \dontrun{
 #' gimap_dataset <- get_example_data("gimap")
 #'
 #' qc_filter_plasmid(gimap_dataset)
