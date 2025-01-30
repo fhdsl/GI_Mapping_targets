@@ -27,11 +27,15 @@
 #' @importFrom utils browseURL
 #' @importFrom tidyr pivot_longer
 #' @importFrom magrittr %>%
-#' @examples \dontrun{
+#' @examples \donttest{
 #'
 #' gimap_dataset <- get_example_data("gimap")
 #'
-#' run_qc(gimap_dataset)
+#' run_qc(
+#'  gimap_dataset,
+#'  plots_dir = tempdir(),
+#'  output_file =  tempfile()
+#' )
 #'
 #'}
 run_qc <- function(gimap_dataset,

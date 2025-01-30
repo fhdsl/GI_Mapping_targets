@@ -60,22 +60,18 @@
 #' @return A gimap_dataset with normalized log FC as a data frame that can be
 #' retrieve by using gimap_dataset$normalized_log_fc. This will contain
 #' log2FC adjusted stored in a column named `log_adj` and the CRISPR scores
-#' stored in a column named `crispr_score`. 
+#' stored in a column named `crispr_score`.
 #' genes in the set.
 #' @import dplyr
 #' @export
 #' @examples \donttest{
 #'
-#' gimap_dataset <- get_example_data("gimap")
-#'
-#' # Highly recommended but not required
-#' run_qc(gimap_dataset)
-#'
-#' gimap_dataset <- gimap_dataset %>%
+#' gimap_dataset <- get_example_data("gimap") %>%
 #'   gimap_filter() %>%
 #'   gimap_annotate(cell_line = "HELA") %>%
 #'   gimap_normalize(
-#'     timepoints = "day"
+#'     timepoints = "day",
+#'     missing_ids_file =  tempfile()
 #'   )
 #'
 #' # To see results

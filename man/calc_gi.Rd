@@ -56,20 +56,25 @@ After multiple testing correction, FDR values are reported.
 Low FDR value for a double construct means high suspicion of paralogs.
 }
 \examples{
-\donttest{
+\dontrun{
+
 gimap_dataset <- get_example_data("gimap")
 
 # Highly recommended but not required
-run_qc(gimap_dataset)
+run_qc(
+  gimap_dataset,
+  output_file =  tempfile()
+)
 
 gimap_dataset <- gimap_dataset \%>\%
   gimap_filter() \%>\%
   gimap_annotate(cell_line = "HELA") \%>\%
   gimap_normalize(
-    timepoints = "day"
+    timepoints = "day",
+    missing_ids_file =  tempfile()
   ) \%>\%
   calc_gi()
 
-saveRDS(gimap_dataset, "gimap_dataset_final.RDS")
+saveRDS(gimap_dataset, file.path(tempdir(), "gimap_dataset_final.RDS"))
 }
 }

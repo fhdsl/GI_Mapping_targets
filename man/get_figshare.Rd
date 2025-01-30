@@ -28,8 +28,14 @@ in as data frames.
 Handler function for GET requests from Figshare
 }
 \examples{
-\donttest{
 
-get_figshare(return_list = TRUE)
-}
+get_figshare(
+  return_list = TRUE
+ )
+
+get_figshare(
+  file_name = "Achilles_common_essentials.csv",
+  output_dir =  tempdir()
+ )
+
 }

@@ -29,11 +29,11 @@ gimap_dataset <- get_example_data("gimap") \%>\%
   gimap_filter() \%>\%
   gimap_annotate(cell_line = "HELA") \%>\%
   gimap_normalize(
-    timepoints = "day"
+    timepoints = "day",
+    missing_ids_file =  tempfile()
   )
 
 # Plot:
-
 plot_crispr(gimap_dataset)
 }
 }

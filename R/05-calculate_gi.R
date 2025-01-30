@@ -46,21 +46,26 @@ Sys.setenv(VROOM_CONNECTION_SIZE = 500072)
 #' @import dplyr
 #' @importFrom stats lm
 #' @export
-#' @examples \donttest{
+#' @examples \dontrun{
+#'
 #' gimap_dataset <- get_example_data("gimap")
 #'
 #' # Highly recommended but not required
-#' run_qc(gimap_dataset)
+#' run_qc(
+#'   gimap_dataset,
+#'   output_file =  tempfile()
+#' )
 #'
 #' gimap_dataset <- gimap_dataset %>%
 #'   gimap_filter() %>%
 #'   gimap_annotate(cell_line = "HELA") %>%
 #'   gimap_normalize(
-#'     timepoints = "day"
+#'     timepoints = "day",
+#'     missing_ids_file =  tempfile()
 #'   ) %>%
 #'   calc_gi()
 #'
-#' saveRDS(gimap_dataset, "gimap_dataset_final.RDS")
+#' saveRDS(gimap_dataset, file.path(tempdir(), "gimap_dataset_final.RDS"))
 #' }
 calc_gi <- function(.data = NULL,
                     gimap_dataset) {

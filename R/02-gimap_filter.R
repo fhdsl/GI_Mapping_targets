@@ -47,12 +47,9 @@
 #' @import dplyr
 #' @examples \dontrun{
 #'
-#' gimap_dataset <- get_example_data("gimap")
 #'
-#' # Highly recommended but not required
-#' run_qc(gimap_dataset)
-#'
-#' gimap_dataset <- gimap_filter(gimap_dataset)
+#' gimap_dataset <- get_example_data("gimap") %>%
+#'   gimap_filter()
 #'
 #' # To see filtered data
 #' gimap_dataset$filtered_data
@@ -234,8 +231,7 @@ gimap_filter <- function(.data = NULL,
   return(gimap_dataset)
 }
 
-# Possible filters
-
+#' Filter out samples of zero counts
 #' Create a filter for pgRNAs which have a raw count of 0 for any sample/time
 #' # point
 #' @description This function flags and reports which and how many pgRNAs have a

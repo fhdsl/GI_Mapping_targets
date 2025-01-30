@@ -17,7 +17,8 @@
 #'   gimap_filter() %>%
 #'   gimap_annotate(cell_line = "HELA") %>%
 #'   gimap_normalize(
-#'     timepoints = "day"
+#'     timepoints = "day",
+#'      missing_ids_file =  tempfile()
 #'   ) %>%
 #'   calc_gi()
 #'
