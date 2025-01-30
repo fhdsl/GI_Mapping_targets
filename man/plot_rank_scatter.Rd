@@ -11,6 +11,9 @@ plot_rank_scatter(gimap_dataset, reps_to_drop = "")
 
 \item{reps_to_drop}{Names of replicates that should be not plotted (Optional)}
 }
+\value{
+A ggplot2 rankplot of the target level genetic interaction scores.
+}
 \description{
 This plot is meant to be functionally equivalent to Fig 5a (for HeLa, equivalent of Fig 3c for PC9).
 Rank plot of target-level GI scores.

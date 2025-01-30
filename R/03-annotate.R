@@ -27,26 +27,21 @@
 #' Note that you can use custom_tpm with cell_line_annotate but your custom_tpm
 #' will be used instead of the tpm data from DepMap. However other data from
 #' DepMap like CN will be added.
+#' @return A gimap_dataset with annotation data frame that can be retrieve by using
+#' gimap_dataset$annotation. This will contain information about your included
+#' genes in the set.
 #' @importFrom stringr word
 #' @import dplyr
 #' @importFrom utils download.file unzip
 #' @export
 #' @examples \dontrun{
 #'
-#' gimap_dataset <- get_example_data("gimap")
-#'
-#' # Highly recommended but not required
-#' run_qc(gimap_dataset)
-#'
 #' # By default DepMap annotation will be used to determine genes which are
 #' # unexpressed. In the `gimap_normalize` this will by default be used to
 #' # normalize to.
-#' gimap_dataset <- gimap_dataset %>%
+#' gimap_dataset <- get_example_data("gimap") %>%
 #'   gimap_filter() %>%
 #'   gimap_annotate(cell_line = "HELA")
-#'
-#' # To see anotations you can do this:
-#' gimap_dataset$annotation
 #'
 #'
 #' # You can also say cell_line_annotate = false if you don't want to use DepMap
@@ -58,7 +53,8 @@
 #'   gimap_annotate(cell_line_annotate = FALSE) %>%
 #'   gimap_normalize(
 #'     timepoints = "day",
-#'     normalize_by_unexpressed = FALSE
+#'     normalize_by_unexpressed = FALSE,
+#'     missing_ids_file =  tempfile()
 #'   )
 #'
 #' ### CUSTOM TPM example
@@ -67,8 +63,12 @@
 #' # `genes` and `log2_tpm` as the columns.
 #' gimap_dataset <- get_example_data("gimap") %>%
 #'   gimap_filter() %>%
-#'   gimap_annotate(custom_tpm = custom_tpm) %>%
-#'   gimap_normalize(timepoints = "day")
+#'   gimap_annotate(
+#'     cell_line = "HELA",
+#'     custom_tpm = custom_tpm) %>%
+#'   gimap_normalize(timepoints = "day",
+#'                   missing_ids_file =  tempfile()
+#'                   )
 #' }
 gimap_annotate <- function(.data = NULL,
                            gimap_dataset,
@@ -163,7 +163,8 @@ gimap_annotate <- function(.data = NULL,
 
     if (!file.exists(tpm_file)) tpm_setup()
 
-    Sys.setenv("VROOM_CONNECTION_SIZE" = 500072)
+    op <- options("VROOM_CONNECTION_SIZE" = 500072)
+    on.exit(options(op))
 
     tpm <- vroom::vroom(tpm_file,
       show_col_types = FALSE,
@@ -445,6 +446,8 @@ crtl_genes <- function(overwrite = TRUE) {
 #' @description This function downloads the metadata for DepMap and lists which
 #' cell lines are supported.
 #' @export
+#' @return A list of the cell line names that are available in DepMap for use
+#' for annotation in this package.
 #' @examples
 #'
 #' cell_lines <- supported_cell_lines()

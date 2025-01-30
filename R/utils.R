@@ -29,7 +29,10 @@ utils::globalVariables(c(
 #' the first time it is used.
 #' @param which_data options are "count" or "meta"; specifies which example dataset should be returned
 #' @export
-#' @examples \dontrun{
+#' @returns the respective example data either as a data frame or a specialized
+#' gimap_dataset depending on what was requested.
+#'
+#' @examples \donttest{
 #'
 #' counts_timepoint <- get_example_data("count")
 #' counts_treatment <- get_example_data("count_treatment")
@@ -163,12 +166,21 @@ key_encrypt_creds_path <- function() {
 #' @import httr
 #' @importFrom jsonlite fromJSON
 #' @importFrom openssl aes_cbc_decrypt
+#' @returns Downloads necessary annotation files from Figshare and reads them
+#' in as data frames.
 #' @export
 #'
-#' @examples \dontrun{
+#' @examples
 #'
-#' get_figshare(return_list = TRUE)
-#' }
+#' get_figshare(
+#'   return_list = TRUE
+#'  )
+#'
+#' get_figshare(
+#'   file_name = "Achilles_common_essentials.csv",
+#'   output_dir =  tempdir()
+#'  )
+#'
 get_figshare <- function(file_name = NA,
                          item = "19700056",
                          output_dir = NULL,
@@ -231,3 +243,18 @@ get_figshare <- function(file_name = NA,
 
   return(result_content)
 }
+
+#' Pipe operator
+#'
+#' See \code{magrittr::\link[magrittr:pipe]{\%>\%}} for details.
+#'
+#' @name %>%
+#' @rdname pipe
+#' @keywords internal
+#' @export
+#' @importFrom magrittr %>%
+#' @usage lhs \%>\% rhs
+#' @param lhs A value or the magrittr placeholder.
+#' @param rhs A function call using the magrittr semantics.
+#' @return The result of calling `rhs(lhs)`.
+NULL

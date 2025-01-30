@@ -28,19 +28,27 @@ This function allows people to have their data ready to be
  processed by gimap
 }
 \examples{
-\dontrun{
 
-example_counts <- get_example_data("count") \%>\%
+counts <- get_example_data("count") \%>\%
   dplyr::select(c(
     "Day00_RepA", "Day05_RepA", "Day22_RepA", "Day22_RepB",
     "Day22_RepC"
   )) \%>\%
   as.matrix()
 
-gimap_dataset <- setup_data(counts = example_counts)
+pg_ids <- get_example_data("count") \%>\% dplyr::select("id")
 
-# You can see what an example dataset looks like by pulling the example
-# gimap_dataset:
-gimap_dataset <- get_example_data("gimap")
-}
+sample_metadata <- data.frame(
+ col_names = c("Day00_RepA", "Day05_RepA", "Day22_RepA", "Day22_RepB", "Day22_RepC"),
+ day = as.numeric(c("0", "5", "22", "22", "22")),
+ rep = as.factor(c("RepA", "RepA", "RepA", "RepB", "RepC"))
+ )
+
+gimap_dataset <- setup_data(
+  counts = counts,
+  pg_ids = pg_ids,
+  sample_metadata = sample_metadata
+)
+
+
 }

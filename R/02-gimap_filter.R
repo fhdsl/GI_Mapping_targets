@@ -47,13 +47,9 @@
 #' @import dplyr
 #' @examples \dontrun{
 #'
-#' gimap_dataset <- get_example_data("gimap")
 #'
-#' # Highly recommended but not required
-#' run_qc(gimap_dataset)
-#'
-#'
-#' gimap_dataset <- gimap_filter(gimap_dataset)
+#' gimap_dataset <- get_example_data("gimap") %>%
+#'   gimap_filter()
 #'
 #' # To see filtered data
 #' gimap_dataset$filtered_data
@@ -235,8 +231,7 @@ gimap_filter <- function(.data = NULL,
   return(gimap_dataset)
 }
 
-# Possible filters
-
+#' Filter out samples of zero counts
 #' Create a filter for pgRNAs which have a raw count of 0 for any sample/time
 #' # point
 #' @description This function flags and reports which and how many pgRNAs have a
@@ -260,7 +255,7 @@ gimap_filter <- function(.data = NULL,
 #' # or to specify a different column (or set of columns to select)
 #' qc_filter_zerocount(gimap_dataset, filter_zerocount_target_col = 1:2)
 #' }
-#'
+#' @export
 qc_filter_zerocounts <- function(gimap_dataset,
                                  filter_zerocount_target_col = NULL) {
   if (is.null(filter_zerocount_target_col)) {
@@ -313,6 +308,7 @@ qc_filter_zerocounts <- function(gimap_dataset,
 #' @importFrom tidyr pivot_wider pivot_longer
 #' @importFrom janitor clean_names
 #' @importFrom stats quantile
+#' @export
 #' @return a named list with the filter `filter` specifying which pgRNAs have
 #' low plasmid log2 CPM (column of interest is `plasmid_cpm_filter`) and a
 #' report df `reportdf` for the number and percent of pgRNA which have a low

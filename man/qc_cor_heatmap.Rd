@@ -17,9 +17,8 @@ This function uses the `cor` function to find correlations between the
  sample CPM's and then plots a heatmap of these
 }
 \examples{
-\dontrun{
 gimap_dataset <- get_example_data("gimap")
 qc_cor_heatmap(gimap_dataset)
-}
+
 
 }

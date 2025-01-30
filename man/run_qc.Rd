@@ -59,6 +59,11 @@ This function takes a `gimap_dataset` and creates a QC report
 
 gimap_dataset <- get_example_data("gimap")
 
-run_qc(gimap_dataset)
+run_qc(
+ gimap_dataset,
+ plots_dir = tempdir(),
+ output_file =  tempfile()
+)
+
 }
 }

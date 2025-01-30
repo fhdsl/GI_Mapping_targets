@@ -2,7 +2,8 @@
 % Please edit documentation in R/02-gimap_filter.R
 \name{qc_filter_zerocounts}
 \alias{qc_filter_zerocounts}
-\title{Create a filter for pgRNAs which have a raw count of 0 for any sample/time
+\title{Filter out samples of zero counts
+Create a filter for pgRNAs which have a raw count of 0 for any sample/time
 # point}
 \usage{
 qc_filter_zerocounts(gimap_dataset, filter_zerocount_target_col = NULL)
@@ -33,5 +34,4 @@ qc_filter_zerocounts(gimap_dataset)
 # or to specify a different column (or set of columns to select)
 qc_filter_zerocount(gimap_dataset, filter_zerocount_target_col = 1:2)
 }
-
 }

@@ -24,7 +24,7 @@ library(gimap)
 library(dplyr)
 ```
 
-```{r eval = FALSE}
+```
 output_dir <- "output_treatment"
 dir.create(output_dir, showWarnings = FALSE)
 ```
@@ -267,13 +267,13 @@ plot_targets_bar(gimap_dataset, target1 = "NDEL1", target2 = "NDE1")
 
 We can save the genetic interactions scores like this:
 
-```{r eval = FALSE}
+```
 readr::write_tsv(gimap_dataset$gi_scores, file.path(output_dir, "gi_scores.tsv"))
 ```
 
 We can save all these data as an RDS.
 
-```{r eval = FALSE}
+```
 saveRDS(gimap_dataset, "gimap_dataset_final_treatment.RDS")
 ```
 

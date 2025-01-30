@@ -6,6 +6,10 @@
 \usage{
 supported_cell_lines()
 }
+\value{
+A list of the cell line names that are available in DepMap for use
+for annotation in this package.
+}
 \description{
 This function downloads the metadata for DepMap and lists which
 cell lines are supported.

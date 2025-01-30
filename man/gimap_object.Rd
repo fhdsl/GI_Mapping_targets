@@ -6,6 +6,10 @@
 \usage{
 gimap_object()
 }
+\value{
+an empty `gimap_dataset` which is a named list which will
+be filled by various `gimap` functions.
+}
 \description{
 This function makes an empty gimap data object
 }

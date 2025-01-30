@@ -16,6 +16,9 @@ plot_targets_bar(gimap_dataset, target1, target2, reps_to_drop = "")
 
 \item{reps_to_drop}{Names of replicates that should be not plotted (Optional)}
 }
+\value{
+A ggplot2 bar plot of the specific target's genetic interaction scores.
+}
 \description{
 This plot is for when you'd like to examine a target pair
 specifically -- meant to be functionally equivalent to Fig 3b

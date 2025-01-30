@@ -13,6 +13,12 @@ function. But the data must still be a gimap_dataset}
 \item{gimap_dataset}{A special dataset structure that is setup using the
 `setup_data()` function.}
 }
+\value{
+A gimap dataset with statistics and genetic interaction scores
+calculated. Overall results in the returned object can be obtained using
+gimap_dataset$overall_results Whereas target level genetic interaction
+scores can be retrieved using `gimap_dataset$gi_scores`.
+}
 \description{
 Create results table that has CRISPR scores, Wilcoxon rank-sum
 test and t tests.
@@ -51,19 +57,16 @@ Low FDR value for a double construct means high suspicion of paralogs.
 }
 \examples{
 \dontrun{
-gimap_dataset <- get_example_data("gimap")
 
-# Highly recommended but not required
-run_qc(gimap_dataset)
-
-gimap_dataset <- gimap_dataset \%>\%
+gimap_dataset <- get_example_data("gimap") \%>\%
   gimap_filter() \%>\%
   gimap_annotate(cell_line = "HELA") \%>\%
   gimap_normalize(
-    timepoints = "day"
+    timepoints = "day",
+    missing_ids_file =  tempfile()
   ) \%>\%
   calc_gi()
 
-saveRDS(gimap_dataset, "gimap_dataset_final.RDS")
+saveRDS(gimap_dataset, file.path(tempdir(), "gimap_dataset_final.RDS"))
 }
 }
