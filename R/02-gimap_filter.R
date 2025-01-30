@@ -248,7 +248,6 @@ gimap_filter <- function(.data = NULL,
 #' count zero for at least one sample/time point and a report df `reportdf` for
 #' the number and percent of pgRNA which have a count zero for at least one
 #' sample/time point
-#' @export
 #' @examples \donttest{
 #' gimap_dataset <- get_example_data("gimap")
 #' qc_filter_zerocounts(gimap_dataset)
@@ -256,7 +255,7 @@ gimap_filter <- function(.data = NULL,
 #' # or to specify a different column (or set of columns to select)
 #' qc_filter_zerocount(gimap_dataset, filter_zerocount_target_col = 1:2)
 #' }
-#'
+#' @export
 qc_filter_zerocounts <- function(gimap_dataset,
                                  filter_zerocount_target_col = NULL) {
   if (is.null(filter_zerocount_target_col)) {

@@ -27,7 +27,7 @@
 #' @importFrom utils browseURL
 #' @importFrom tidyr pivot_longer
 #' @importFrom magrittr %>%
-#' @examples \donttest{
+#' @examples \dontrun{
 #'
 #' gimap_dataset <- get_example_data("gimap")
 #'

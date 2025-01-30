@@ -55,7 +55,7 @@ a QC report saved locally
 This function takes a `gimap_dataset` and creates a QC report
 }
 \examples{
-\donttest{
+\dontrun{
 
 gimap_dataset <- get_example_data("gimap")
 
