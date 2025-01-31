@@ -72,14 +72,13 @@ filters, but users can select a subset of these filters or even adjust the
 behavior of each filter
 }
 \examples{
-\dontrun{
-
+\donttest{
 
 gimap_dataset <- get_example_data("gimap") \%>\%
   gimap_filter()
 
 # To see filtered data
-gimap_dataset$filtered_data
+# gimap_dataset$filtered_data
 
 # If you want to only use a single filter or some subset,
 # specify which using the filter_type parameter

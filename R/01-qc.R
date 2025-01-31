@@ -2,11 +2,11 @@
 #' @description This function takes a `gimap_dataset` and creates a QC report
 #' @param gimap_dataset A special dataset structure that is setup using the
 #' `setup_data()` function.
-#' @param plots_dir default is `./qc_plots`; directory to save plots created
-#'  with this function,
+#' @param plots_dir directory to save plots created with this function,
 #' if it doesn't exist already it will be created
 #' @param overwrite default is FALSE; whether to overwrite the QC Report file
-#' @param output_file default is `QC_Report`; name of the output QC report file
+#' @param output_file Needs to be a string that ends with ".Rmd" What the
+#' name of the output QC report file should be.
 #' @param filter_zerocount_target_col default is NULL; Which sample column(s)
 #' should be
 #'  used to check for counts of 0?  If NULL and not specified, downstream
@@ -27,20 +27,20 @@
 #' @importFrom utils browseURL
 #' @importFrom tidyr pivot_longer
 #' @importFrom magrittr %>%
-#' @examples \dontrun{
+#' @examples
 #'
 #' gimap_dataset <- get_example_data("gimap")
 #'
 #' run_qc(
 #'  gimap_dataset,
 #'  plots_dir = tempdir(),
-#'  output_file =  tempfile()
+#'  output_file = paste0(tempfile(), "_QC_Report.Rmd")
 #' )
 #'
-#'}
+#'
 run_qc <- function(gimap_dataset,
-                   output_file = "./gimap_QC_Report.Rmd",
-                   plots_dir = "./qc_plots",
+                   output_file,
+                   plots_dir,
                    overwrite = FALSE,
                    filter_zerocount_target_col = NULL,
                    filter_plasmid_target_col = NULL,
@@ -102,8 +102,10 @@ run_qc <- function(gimap_dataset,
   results_file <- gsub("\\.Rmd$", "\\.html", output_file)
   message("Results in: ", results_file)
 
-  if (open_results) {
-    if (results_file != "") browseURL(results_file)
+  if(interactive()) {
+    if (open_results) {
+      if (results_file != "") browseURL(results_file)
+      }
   }
   results_file
 }

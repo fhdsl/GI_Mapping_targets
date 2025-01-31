@@ -46,7 +46,7 @@ Sys.setenv(VROOM_CONNECTION_SIZE = 500072)
 #' @import dplyr
 #' @importFrom stats lm
 #' @export
-#' @examples \dontrun{
+#' @examples \donttest{
 #'
 #' gimap_dataset <- get_example_data("gimap") %>%
 #'   gimap_filter() %>%

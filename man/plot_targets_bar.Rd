@@ -27,7 +27,7 @@ Data shown are the mean CRISPR score for each single KO or DKO target across
  three biological replicates with replicate data shown in overlaid points.
 }
 \examples{
-\dontrun{
+\donttest{
 
 gimap_dataset <- get_example_data("gimap") \%>\%
   gimap_filter() \%>\%
