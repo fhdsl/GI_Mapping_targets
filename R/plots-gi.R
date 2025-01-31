@@ -101,7 +101,7 @@ plot_exp_v_obs_scatter <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop
 #' @import ggplot2
 #' @return A ggplot2 rankplot of the target level genetic interaction scores.
 #' @export
-#' @examples \dontrun{
+#' @examples \donttest{
 #'
 #' gimap_dataset <- get_example_data("gimap") %>%
 #'   gimap_filter() %>%
@@ -162,7 +162,7 @@ plot_rank_scatter <- function(gimap_dataset, reps_to_drop = "") {
 #' @import ggplot2
 #' @return A ggplot2 volcano plot of the target level genetic interaction scores.
 #' @export
-#' @examples \dontrun{
+#' @examples \donttest{
 #'
 #' gimap_dataset <- get_example_data("gimap") %>%
 #'   gimap_filter() %>%
@@ -244,7 +244,7 @@ plot_volcano <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop = "") {
 #' @import ggplot2
 #' @export
 #' @return A ggplot2 bar plot of the specific target's genetic interaction scores.
-#' @examples \dontrun{
+#' @examples \donttest{
 #'
 #' gimap_dataset <- get_example_data("gimap") %>%
 #'   gimap_filter() %>%

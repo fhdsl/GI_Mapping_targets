@@ -6,6 +6,9 @@
 \usage{
 plot_theme()
 }
+\value{
+A ggplot2 theme that can be used on the plots.
+}
 \description{
 this is a ggplot2 standardized plot theme for this package
 }

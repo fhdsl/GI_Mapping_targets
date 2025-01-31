@@ -23,7 +23,7 @@ target. Can be used to determine the normalization has proceeded properly.
 This plots normalization after CRISPR scores have been calculated
 }
 \examples{
-\dontrun{
+\donttest{
 
 gimap_dataset <- get_example_data("gimap") \%>\%
   gimap_filter() \%>\%

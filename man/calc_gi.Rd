@@ -56,7 +56,7 @@ After multiple testing correction, FDR values are reported.
 Low FDR value for a double construct means high suspicion of paralogs.
 }
 \examples{
-\dontrun{
+\donttest{
 
 gimap_dataset <- get_example_data("gimap") \%>\%
   gimap_filter() \%>\%

@@ -6,8 +6,8 @@
 \usage{
 run_qc(
   gimap_dataset,
-  output_file = "./gimap_QC_Report.Rmd",
-  plots_dir = "./qc_plots",
+  output_file,
+  plots_dir,
   overwrite = FALSE,
   filter_zerocount_target_col = NULL,
   filter_plasmid_target_col = NULL,
@@ -20,10 +20,10 @@ run_qc(
 \item{gimap_dataset}{A special dataset structure that is setup using the
 `setup_data()` function.}
 
-\item{output_file}{default is `QC_Report`; name of the output QC report file}
+\item{output_file}{Needs to be a string that ends with ".Rmd" What the
+name of the output QC report file should be.}
 
-\item{plots_dir}{default is `./qc_plots`; directory to save plots created
- with this function,
+\item{plots_dir}{directory to save plots created with this function,
 if it doesn't exist already it will be created}
 
 \item{overwrite}{default is FALSE; whether to overwrite the QC Report file}
@@ -55,15 +55,14 @@ a QC report saved locally
 This function takes a `gimap_dataset` and creates a QC report
 }
 \examples{
-\dontrun{
 
 gimap_dataset <- get_example_data("gimap")
 
 run_qc(
  gimap_dataset,
  plots_dir = tempdir(),
- output_file =  tempfile()
+ output_file = paste0(tempfile(), "_QC_Report.Rmd")
 )
 
-}
+
 }

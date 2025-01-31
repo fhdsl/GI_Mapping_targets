@@ -38,7 +38,7 @@ constructs for which any plasmid replicate has a log2 CPM value below the
 cutoff
 }
 \examples{
-\dontrun{
+\donttest{
 gimap_dataset <- get_example_data("gimap")
 
 qc_filter_plasmid(gimap_dataset)

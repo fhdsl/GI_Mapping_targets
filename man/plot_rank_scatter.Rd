@@ -20,7 +20,7 @@ Rank plot of target-level GI scores.
 Dashed horizontal lines are for GI scores of 0.25 and -0.5
 }
 \examples{
-\dontrun{
+\donttest{
 
 gimap_dataset <- get_example_data("gimap") \%>\%
   gimap_filter() \%>\%

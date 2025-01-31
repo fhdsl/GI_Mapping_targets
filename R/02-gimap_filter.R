@@ -45,14 +45,13 @@
 #' timepoint replicates
 #' @export
 #' @import dplyr
-#' @examples \dontrun{
-#'
+#' @examples \donttest{
 #'
 #' gimap_dataset <- get_example_data("gimap") %>%
 #'   gimap_filter()
 #'
 #' # To see filtered data
-#' gimap_dataset$filtered_data
+#' # gimap_dataset$filtered_data
 #'
 #' # If you want to only use a single filter or some subset,
 #' # specify which using the filter_type parameter
@@ -248,7 +247,7 @@ gimap_filter <- function(.data = NULL,
 #' count zero for at least one sample/time point and a report df `reportdf` for
 #' the number and percent of pgRNA which have a count zero for at least one
 #' sample/time point
-#' @examples \dontrun{
+#' @examples \donttest{
 #' gimap_dataset <- get_example_data("gimap")
 #' qc_filter_zerocounts(gimap_dataset)
 #'
@@ -313,7 +312,7 @@ qc_filter_zerocounts <- function(gimap_dataset,
 #' low plasmid log2 CPM (column of interest is `plasmid_cpm_filter`) and a
 #' report df `reportdf` for the number and percent of pgRNA which have a low
 #' plasmid log2 CPM
-#' @examples \dontrun{
+#' @examples \donttest{
 #' gimap_dataset <- get_example_data("gimap")
 #'
 #' qc_filter_plasmid(gimap_dataset)
