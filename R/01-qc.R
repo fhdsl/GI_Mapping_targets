@@ -102,8 +102,10 @@ run_qc <- function(gimap_dataset,
   results_file <- gsub("\\.Rmd$", "\\.html", output_file)
   message("Results in: ", results_file)
 
-  if (open_results) {
-    if (results_file != "") browseURL(results_file)
+  if(interactive()) {
+    if (open_results) {
+      if (results_file != "") browseURL(results_file)
+      }
   }
   results_file
 }
