@@ -35,8 +35,7 @@ Imports:
     stringr, 
     httr,
     jsonlite, 
-    openssl, 
-    RCurl
+    openssl
 Suggests:
     testthat (>= 3.0.0),
     roxygen2,
