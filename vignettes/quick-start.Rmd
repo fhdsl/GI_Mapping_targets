@@ -18,6 +18,24 @@ knitr::opts_chunk$set(
 
 For more background on gimap and the calculations done here, [read here](https://github.com/FredHutch/gimap/blob/main/README.md)
 
+## Requirements
+
+Besides installing the gimap package, you will also need to install wget if you do not already have it installed. This will allow you to download the annotation files needed to run `gimap`.
+
+[How to install wget](https://phoenixnap.com/kb/wget-command-with-examples#How_to_Install_wget)
+
+To install the `gimap` package you will need to run:
+```
+install.packages("gimap")
+```
+Or you can install the development version from GitHub:
+```
+install.packages("remotes")
+remotes::install_github("FredHutch/gimap")
+```
+
+## Loading needed packages
+
 ```{r echo = FALSE, results = 'hide'}
 library(gimap)
 ```
