@@ -34,7 +34,7 @@
 #' @import dplyr
 #' @importFrom utils download.file unzip
 #' @export
-#' @examples \donttest{
+#' @examples \dontrun{
 #'
 #' # By default DepMap annotation will be used to determine genes which are
 #' # unexpressed. In the `gimap_normalize` this will by default be used to
@@ -61,14 +61,14 @@
 #' # Lastly, this is also an option:
 #' # where custom data is provided to `custom_tpm` is a data frame with
 #' # `genes` and `log2_tpm` as the columns.
-#' #gimap_dataset <- get_example_data("gimap") %>%
-#' #  gimap_filter() %>%
-#' #  gimap_annotate(
-#' #    cell_line = "HELA",
-#' #    custom_tpm = custom_tpm) %>%
-#' #  gimap_normalize(timepoints = "day",
-#' #                  missing_ids_file =  tempfile()
-#' #                  )
+#' gimap_dataset <- get_example_data("gimap") %>%
+#'   gimap_filter() %>%
+#'   gimap_annotate(
+#'     cell_line = "HELA",
+#'     custom_tpm = custom_tpm) %>%
+#'   gimap_normalize(timepoints = "day",
+#'                   missing_ids_file =  tempfile()
+#'                   )
 #' }
 gimap_annotate <- function(.data = NULL,
                            gimap_dataset,
