@@ -164,7 +164,6 @@ key_encrypt_creds_path <- function() {
 #' @param return_list Should the list of files be returned instead of the file
 #' @importFrom utils menu installed.packages
 #' @import httr
-#' @import RCurl
 #' @importFrom jsonlite fromJSON
 #' @importFrom openssl aes_cbc_decrypt
 #' @returns Downloads necessary annotation files from Figshare and reads them
