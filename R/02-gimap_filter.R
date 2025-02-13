@@ -116,7 +116,7 @@ gimap_filter <- function(.data = NULL,
       p_filter = qc_filter_plasmid(
         gimap_dataset,
         cutoff = cutoff,
-        filter_plasmid_target_col = filter_plasmid_target_col)$filter
+        filter_plasmid_target_col = filter_plasmid_target_col)$filter$plasmid_cpm_filter
       ) %>%
     dplyr::mutate(both = rowSums(.) >= min_n_filters)
 

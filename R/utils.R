@@ -19,7 +19,7 @@ utils::globalVariables(c(
   "mean_single_crispr_1", "expected_single_crispr", "double_crispr", "double_gi_score",
   "fdr", "lfc", "mean_expected_cs", "mean_gi_score", "mean_single_crispr",
   "expected_double_crispr", "p_val", "single_gi_score", "Rank", "broad_target_type",
-  "logfdr", "pointColor"
+  "logfdr", "pointColor", "both"
 ))
 
 
