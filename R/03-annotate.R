@@ -34,7 +34,7 @@
 #' @import dplyr
 #' @importFrom utils download.file unzip
 #' @export
-#' @examples \donttest{
+#' @examples \dontrun{
 #'
 #' # By default DepMap annotation will be used to determine genes which are
 #' # unexpressed. In the `gimap_normalize` this will by default be used to
