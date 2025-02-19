@@ -160,13 +160,27 @@ calc_gi <- function(.data = NULL,
       mean_double_control_crispr,
       norm_ctrl_flag
     ) %>%
-    dplyr::distinct() %>%
-    ## calculate expected double-targeting GI score by summing the two mean
-    ## single-targeting
-    ## CRISPR scores for that paralog pair
-    dplyr::mutate(
-      expected_single_crispr = single_crispr + mean_double_control_crispr,
-    )
+    dplyr::distinct()
+
+
+
+  if (nrow(control_target_df) > 0) {
+    single_crispr_df <- single_crispr_df %>%
+      ## calculate expected double-targeting GI score by summing the two mean
+      ## single-targeting
+      ## CRISPR scores for that paralog pair
+      dplyr::mutate(
+        expected_single_crispr = single_crispr + mean_double_control_crispr,
+      )
+  } else {
+    single_crispr_df <- single_crispr_df %>%
+      ## calculate expected double-targeting GI score by summing the two mean
+      ## single-targeting
+      ## CRISPR scores for that paralog pair
+      dplyr::mutate(
+        expected_single_crispr = single_crispr,
+      )
+  }
 
   # Calculate expected
   expected_single_crispr_df <- single_crispr_df %>%

@@ -5,7 +5,7 @@
 #' each type of pgRNA this data needs some normalization before CRISPR scores
 #' and Genetic Interaction scores can be calculated.
 #'
-#' There are four steps of normalization.
+#' There are three steps of normalization.
 #' 1. `Calculate log2CPM` - First we account for different read depths across
 #' samples and transforms data to log2 counts per million reads.
 #' `log2((counts / total counts for sample)) * 1 million) + 1)`
@@ -46,6 +46,10 @@
 #' treatment or an untreated sample.
 #' For timepoints testing it will be assumed that the mininmum timepoint
 #' is the control.
+#' @param no_neg_ctrl_adj Should the normalization using negative controls
+#' aka double non targetings pgRNAs be skipped? and instead be divided by pos
+#' controls?
+#' @param no_adj Should no adjustment be done and instead log2FC be used?
 #' @param num_ids_wo_annot default is 20; the number of pgRNA IDs to display to
 #' console if they don't have corresponding annotation data;
 #' ff there are more IDs without annotation data than this number, the output
@@ -66,14 +70,13 @@
 #' @export
 #' @examples \donttest{
 #'
-#' gimap_dataset <- get_example_data("gimap") %>%
+#' gimap_dataset_org <- get_example_data("gimap") %>%
 #'   gimap_filter() %>%
 #'   gimap_annotate(cell_line = "HELA") %>%
 #'   gimap_normalize(
 #'     timepoints = "day",
 #'     missing_ids_file =  tempfile()
 #'   )
-#'
 #'}
 gimap_normalize <- function(.data = NULL,
                             gimap_dataset,
@@ -81,6 +84,8 @@ gimap_normalize <- function(.data = NULL,
                             timepoints = NULL,
                             treatments = NULL,
                             control_name = NULL,
+                            no_adj = FALSE,
+                            no_neg_ctrl_adj = FALSE,
                             num_ids_wo_annot = 20,
                             rm_ids_wo_annot = TRUE,
                             missing_ids_file = "missing_ids_file.csv",
@@ -287,6 +292,26 @@ gimap_normalize <- function(.data = NULL,
         lfc = lfc - median(lfc[unexpressed_ctrl_flag == TRUE])
       )
   }
+
+  if (no_neg_ctrl_adj) {
+    medians_df <- comparison_df %>%
+      dplyr::group_by(norm_ctrl_flag, rep) %>%
+      dplyr::summarize(median = median(lfc, na.rm = TRUE)) %>%
+      tidyr::pivot_wider(
+        values_from = median,
+        names_from = norm_ctrl_flag
+      ) %>%
+      dplyr::select(rep, positive_control)
+
+    # logFC adjusted = (log2FC - log2FC_negctls) / |log2FC_posctls|
+    lfc_adj <- comparison_df %>%
+      dplyr::left_join(medians_df, by = "rep") %>%
+      dplyr::mutate(
+        crispr_score = (lfc / positive_control)
+      )
+
+  } else {
+
   medians_df <- comparison_df %>%
     dplyr::group_by(norm_ctrl_flag, rep) %>%
     dplyr::summarize(median = median(lfc, na.rm = TRUE)) %>%
@@ -304,6 +329,15 @@ gimap_normalize <- function(.data = NULL,
         (negative_control - positive_control)
     )
 
+  }
+
+  if (no_adj) {
+    # logFC adjusted = (log2FC - log2FC_negctls) / |log2FC_posctls|
+    lfc_adj <- comparison_df
+      dplyr::mutate(
+        crispr_score = lfc
+      )
+  }
   # These should equal 0 and -1
   lfc_adj %>%
     dplyr::group_by(rep, norm_ctrl_flag) %>%
