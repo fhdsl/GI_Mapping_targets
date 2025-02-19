@@ -32,6 +32,6 @@ gimap_dataset <- get_example_data("gimap")
 qc_filter_zerocounts(gimap_dataset)
 
 # or to specify a different column (or set of columns to select)
-qc_filter_zerocount(gimap_dataset, filter_zerocount_target_col = 1:2)
+qc_filter_zerocounts(gimap_dataset, filter_zerocount_target_col = 1:2)
 }
 }
