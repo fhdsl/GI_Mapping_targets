@@ -55,23 +55,23 @@
 #'
 #' # If you want to only use a single filter or some subset,
 #' # specify which using the filter_type parameter
-#' gimap_dataset <- gimap_filter(gimap_dataset,
-#'   filter_type = "zero_count_only"
-#' )
+#' gimap_dataset <- get_example_data("gimap") %>%
+#'   gimap_filter(filter_type = "zero_count_only")
 #' # or
-#' gimap_dataset <- gimap_filter(gimap_dataset,
-#'   filter_type = "low_plasmid_cpm_only"
-#' )
+#' gimap_dataset <- get_example_data("gimap") %>%
+#'   gimap_filter(filter_type = "low_plasmid_cpm_only")
 #'
 #' # If you want to use multiple filters and more than one to flag a pgRNA
 #' # construct before it's filtered out, use the `min_n_filters` argument
-#' gimap_dataset <- gimap_filter(gimap_dataset,
+#' gimap_dataset <- get_example_data("gimap") %>%
+#' gimap_filter(
 #'   filter_type = "both",
 #'   min_n_filters = 2
 #' )
 #'
 #' # You can also specify which columns the filters will be applied to
-#' gimap_dataset <- gimap_filter(gimap_dataset,
+#' gimap_dataset <- get_example_data("gimap") %>%
+#'  gimap_filter(
 #'   filter_type = "zero_count_only",
 #'   filter_zerocount_target_col = c(1, 2)
 #' )
@@ -88,7 +88,7 @@ gimap_filter <- function(.data = NULL,
 
   if (!("gimap_dataset" %in% class(gimap_dataset))) {
     stop(
-      "This function only works with gimap_dataset objects",
+      "This function only works with gimap_dataset objects ",
       "which can be made with the setup_data() function."
     )
   }
@@ -102,58 +102,27 @@ gimap_filter <- function(.data = NULL,
     )
   }
 
-  zc_filter <- NULL
-  p_filter <- NULL
-  #* ADD any new filters here* assigning it a NULL value
+  filter_call <- switch(filter_type,
+    "both" = "both",
+    "zero_count_only" = "zc_filter",
+    "low_plasmid_cpm_only" = "p_filter"
+  )
 
-  # This section calls the appropriate filtering functions and assigns results
-  # to the filter variables assigned NULL earlier (they will stay NULL if there
-  # filter wasn't selected to be run according to the input to the function)
-  if (filter_type == "both") {
-    zc_filter <- qc_filter_zerocounts(
-      gimap_dataset,
-      filter_zerocount_target_col = filter_zerocount_target_col
-    )$filter
-    p_filter <- qc_filter_plasmid(
-      gimap_dataset,
-      cutoff = cutoff,
-      filter_plasmid_target_col = filter_plasmid_target_col
-    )$filter
-  } else if (filter_type == "zero_count_only") {
-    zc_filter <- qc_filter_zerocounts(
-      gimap_dataset,
-      filter_zerocount_target_col = filter_zerocount_target_col
-    )$filter
-  } else if (filter_type == "low_plasmid_cpm_only") {
-    p_filter <- qc_filter_plasmid(
-      gimap_dataset,
-      cutoff = cutoff,
-      filter_plasmid_target_col = filter_plasmid_target_col
-    )$filter
-  }
+  filter_df <-
+    data.frame(
+      zc_filter = qc_filter_zerocounts(
+        gimap_dataset,
+        filter_zerocount_target_col = filter_zerocount_target_col)$filter,
+      p_filter = qc_filter_plasmid(
+        gimap_dataset,
+        cutoff = cutoff,
+        filter_plasmid_target_col = filter_plasmid_target_col)$filter$plasmid_cpm_filter
+      ) %>%
+    dplyr::mutate(both = rowSums(.) >= min_n_filters)
 
-
-  possible_filters <- list(zc_filter, p_filter)
-  #* ADD any new filters here* within the list of `possible_filters`
-
-  # this first cbinds each filter enumerated in possible_filters together
-  # (no matter how many there are, and ignores the NULLs) using the reduce
-  # function then it finds the row sum (how many are filters flagged each
-  # construct e.g., number of TRUE in each row), and finally compares the
-  # row sum to the `min_n_filters` parameter to report TRUEs and FALSEs
-  # according to whether each construct is flagged by the minimum number of
-  # required filters TRUE means it should be filtered, FALSE means it shouldn't
-  # be filtered
-  one_filter_df <- reduce(possible_filters, cbind) %>%
-    `colnames<-`(c("filter_zero_count", "filter_low_plasmi_cpm"))
-  #* ADD any new filter's name here* as an additional column name; START with
-  #* "Filter"
-  combined_filter <- rowSums(one_filter_df) >= min_n_filters
-  # within `combined_filter` TRUE means that the filtering steps flagged the
-  # pgRNA construct for removal, therefore, we'll want to use the opposite
-  # FALSE values for the filtered data, keeping those that weren't flagged by
-  # filtering steps
-
+  ## The final call is based on what they specify
+  final_call <- filter_df %>%
+    dplyr::pull(filter_call)
 
   # store some data/results from filtering
   ## adding a way to know if the filter step was run since it's optional
@@ -162,21 +131,24 @@ gimap_filter <- function(.data = NULL,
   ## subset the pgRNA IDs such that these are the ones that remain in the
   ## dataset following completion of filtering
   gimap_dataset$filtered_data$metadata_pg_ids <-
-    gimap_dataset$metadata$pg_ids[!combined_filter, ]
+    gimap_dataset$metadata$pg_ids[!final_call, ]
 
   ## subset the log2_cpm data such that these are the ones that remain in the
   # dataset following completion of filtering
   gimap_dataset$filtered_data$transformed_log2_cpm <-
-    gimap_dataset$transformed_data$log2_cpm[!combined_filter, ]
+    gimap_dataset$transformed_data$log2_cpm[!final_call, ]
 
   ## save a list of which pgRNAs are filtered out once filtering is complete
   gimap_dataset$filtered_data$removed_pg_ids <- cbind(
-    gimap_dataset$metadata$pg_ids[combined_filter, ],
-    one_filter_df[combined_filter, ]
-  ) %>%
+    gimap_dataset$metadata$pg_ids[final_call, ],
+    filter_df[final_call, ]
+  )
+
+  gimap_dataset$filtered_data$removed_pg_ids <-
+    gimap_dataset$filtered_data$removed_pg_ids %>%
     # add the IDs as a column together with the TRUEs and FALSEs for each
     # filter, focusing only on pgRNAs which are in some way flagged for removal
-    pivot_longer(starts_with("filter_"),
+    pivot_longer(c(-id, -both),
       # pivot longer so that IDs are repeated and filter names are listed in a
       # column and the last column (`boolVals`) are TRUEs and FALSEs
       names_to = "filter_name",
@@ -252,7 +224,7 @@ gimap_filter <- function(.data = NULL,
 #' qc_filter_zerocounts(gimap_dataset)
 #'
 #' # or to specify a different column (or set of columns to select)
-#' qc_filter_zerocount(gimap_dataset, filter_zerocount_target_col = 1:2)
+#' qc_filter_zerocounts(gimap_dataset, filter_zerocount_target_col = 1:2)
 #' }
 #' @export
 qc_filter_zerocounts <- function(gimap_dataset,

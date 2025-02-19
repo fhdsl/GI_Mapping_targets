@@ -34,14 +34,17 @@
 #' @import dplyr
 #' @importFrom utils download.file unzip
 #' @export
-#' @examples \donttest{
+#' @examples \dontrun{
 #'
 #' # By default DepMap annotation will be used to determine genes which are
 #' # unexpressed. In the `gimap_normalize` this will by default be used to
 #' # normalize to.
 #' gimap_dataset <- get_example_data("gimap") %>%
 #'   gimap_filter() %>%
-#'   gimap_annotate(cell_line = "HELA")
+#'   gimap_annotate(
+#'     cell_line = "HELA",
+#'     missing_ids_file =  tempfile()
+#'   )
 #'
 #'
 #' # You can also say cell_line_annotate = false if you don't want to use DepMap
