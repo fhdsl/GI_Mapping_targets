@@ -42,13 +42,23 @@ plot_exp_v_obs_scatter <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop
     )
   }
 
+  expected_col <- ifelse(!"mean_expected_cs" %in% colnames(gimap_dataset$gi_scores),
+                         "mean_expected_lfc",
+                         "mean_expected_cs")
+
+  observed_col <- ifelse(!"mean_observed_cs" %in% colnames(gimap_dataset$gi_scores),
+                         "mean_observed_lfc",
+                         "mean_observed_cs")
 
   regression_data <- gimap_dataset$gi_scores %>%
     filter(target_type != "gene_gene") %>% # get only single targeting
     filter(!(rep %in% reps_to_drop))
 
-  model <- lm(mean_observed_cs ~ mean_expected_cs, data = regression_data)
-
+  if (expected_col == "mean_expected_cs") {
+    model <- lm(mean_observed_cs ~ mean_expected_cs, data = regression_data)
+  } else if (expected_col == "mean_expected_lfc") {
+    model <- lm(mean_observed_lfc ~ mean_expected_lfc, data = regression_data)
+  }
   gplot <- gimap_dataset$gi_scores %>%
     filter(!(rep %in% reps_to_drop)) %>%
     mutate(broad_target_type = case_when(
@@ -57,8 +67,8 @@ plot_exp_v_obs_scatter <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop
       target_type == "gene_ctrl" ~ "control"
     )) %>%
     ggplot(aes(
-      x = mean_expected_cs,
-      y = mean_observed_cs,
+      x = !!sym(expected_col),
+      y = !!sym(observed_col),
       color = broad_target_type
     )) +
     geom_point(size = 1, alpha = 0.7) +
@@ -68,22 +78,30 @@ plot_exp_v_obs_scatter <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop
     )) +
     theme_classic() +
     theme(legend.title = element_blank()) +
-    xlab("Expected CRISPR score\n(paralog 1 KO + paralog 2 KO)") +
-    ylab("Observed CRISPR score\n(paralog 1 & 2 DKO)") +
     geom_abline(
-      slope = model$coefficients[["mean_expected_cs"]],
+      slope = model$coefficients[[expected_col]],
       intercept = model$coefficients[["(Intercept)"]]
     ) +
     geom_abline(
-      slope = model$coefficients[["mean_expected_cs"]],
+      slope = model$coefficients[[expected_col]],
       intercept = model$coefficients[["(Intercept)"]] + quantile(model$residuals)["75%"],
       linetype = 3
     ) +
     geom_abline(
-      slope = model$coefficients[["mean_expected_cs"]],
+      slope = model$coefficients[[expected_col]],
       intercept = model$coefficients[["(Intercept)"]] + quantile(model$residuals)["25%"],
       linetype = 3
     )
+
+  if (expected_col == "mean_expected_cs") {
+    gplot <- gplot +
+      xlab("Expected CRISPR score\n(paralog 1 KO + paralog 2 KO)") +
+      ylab("Observed CRISPR score\n(paralog 1 & 2 DKO)")
+  } else if (expected_col == "mean_expected_lfc") {
+    gplot <- gplot +
+      xlab("Expected LFC score\n(paralog 1 KO + paralog 2 KO)") +
+      ylab("Observed LFC score\n(paralog 1 & 2 DKO)")
+  }
 
   if (facet_rep) {
     return(gplot + facet_wrap(~rep))
@@ -275,19 +293,21 @@ plot_targets_bar <- function(gimap_dataset, target1, target2, reps_to_drop = "")
     )
   }
 
-  return(
+  expected_col <- ifelse(is.null(gimap_dataset$gi_scores$mean_expected_cs),
+                         "mean_expected_lfc",
+                         "mean_expected_cs")
+  gplot <-
     gimap_dataset$gi_scores %>%
       filter(!(rep %in% reps_to_drop)) %>%
       filter((grepl(target1, pgRNA_target)) | (grepl(target2, pgRNA_target))) %>%
       ggplot(aes(
-        y = mean_observed_cs, # This is not the right column
+        y = !!expected_col,
         x = target_type,
         fill = target_type
       )) +
       geom_bar(stat = "summary", fun.y = "mean") +
       geom_point(pch = 21, size = 3) +
       theme_bw() +
-      ylab("CRISPR score") +
       xlab("") +
       ggtitle(paste0(target1, "/", target2)) +
       geom_hline(yintercept = 0) +
@@ -304,5 +324,14 @@ plot_targets_bar <- function(gimap_dataset, target1, target2, reps_to_drop = "")
         panel.grid = element_blank(),
         axis.text.x = element_text(angle = 45, hjust = 1)
       )
-  )
+
+  if (expected_col == "mean_expected_cs") {
+    gplot <- gplot +
+    ylab("CRISPR score")
+  } else if (expected_col == "mean_expected_lfc") {
+    gplot <- gplot +
+      ylab("CRISPR score")
+  }
+
+  return(gplot)
 }

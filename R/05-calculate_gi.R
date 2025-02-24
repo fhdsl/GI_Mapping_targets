@@ -1,4 +1,3 @@
-Sys.setenv(VROOM_CONNECTION_SIZE = 500072)
 
 #' Calculate Genetic Interaction scores
 #' @description Create results table that has CRISPR scores, Wilcoxon rank-sum
@@ -60,7 +59,8 @@ Sys.setenv(VROOM_CONNECTION_SIZE = 500072)
 #' saveRDS(gimap_dataset, file.path(tempdir(), "gimap_dataset_final.RDS"))
 #' }
 calc_gi <- function(.data = NULL,
-                    gimap_dataset) {
+                    gimap_dataset ,
+                    use_lfc = FALSE) {
   # Summary the calculation
   # single_target_crispr_1 = geneA_nt1, geneA_nt2...
   # single_target_crispr_2 = nt1_geneB, nt2_geneB...
@@ -100,10 +100,15 @@ calc_gi <- function(.data = NULL,
       "which can be done with the gimap_normalize() function."
     )
   }
+  lfc_adj <- gimap_dataset$normalized_log_fc
 
+  if ( !"crispr_score"  %in% colnames(lfc_adj) || use_lfc) {
+    lfc_adj$crispr_score <- lfc_adj$lfc
+    message("Using unadjusted log fold changes to calculate genetic interaction scores")
+  }
   # Get mean control target CRISPR scores -- they will be used for expected
   # calculations
-  control_target_df <- gimap_dataset$normalized_log_fc %>%
+  control_target_df <- lfc_adj %>%
     dplyr::filter(target_type == "ctrl_ctrl") %>%
     tidyr::pivot_longer(
       cols = c(gRNA1_seq, gRNA2_seq),
@@ -125,7 +130,7 @@ calc_gi <- function(.data = NULL,
   # control sequence
 
   # Calculate CRISPR scores for single targets
-  single_crispr_df <- gimap_dataset$normalized_log_fc %>%
+  single_crispr_df <- lfc_adj %>%
     dplyr::filter(target_type %in% c("ctrl_gene", "gene_ctrl")) %>%
     # We will be joining things based on the gRNA sequences so
     # we do some recoding here
@@ -188,7 +193,7 @@ calc_gi <- function(.data = NULL,
     dplyr::distinct()
 
   # Now put it all together into one df
-  double_crispr_df <- gimap_dataset$normalized_log_fc %>%
+  double_crispr_df <- lfc_adj %>%
     dplyr::filter(target_type == "gene_gene") %>%
     dplyr::select(
       pg_ids,
@@ -221,13 +226,8 @@ calc_gi <- function(.data = NULL,
       expected_double_crispr = mean_single_crispr_1 + mean_single_crispr_2
     )
 
-  # Save at the target level
-  gimap_dataset$crispr_score$single_crispr_score <- single_crispr_df
-  gimap_dataset$crispr_score$double_crispr_score <- double_crispr_df
-  gimap_dataset$crispr_score$neg_control_crispr <- control_target_df
-
   # Calculate the linear models from this
-  single_lm_df <- gimap_dataset$crispr_score$single_crispr_score %>%
+  single_lm_df <- single_crispr_df %>%
     dplyr::filter(!is.na(single_crispr), !is.na(expected_single_crispr)) %>%
     dplyr::ungroup() %>%
     dplyr::group_by(rep) %>%
@@ -244,7 +244,7 @@ calc_gi <- function(.data = NULL,
   message("Calculating Genetic Interaction scores")
 
   # Do the linear model adjustments
-  gi_calc_single <- gimap_dataset$crispr_score$single_crispr_score %>%
+  gi_calc_single <- single_crispr_df %>%
     dplyr::left_join(single_lm_df, by = "rep") %>%
     dplyr::mutate(
       single_gi_score = single_crispr -
@@ -252,7 +252,7 @@ calc_gi <- function(.data = NULL,
     )
 
   # Do the linear model adjustments but don't collapse double
-  gi_calc_double <- gimap_dataset$crispr_score$double_crispr_score %>%
+  gi_calc_double <- double_crispr_df %>%
     # Using the single target's linear model here
     dplyr::left_join(single_lm_df, by = "rep") %>%
     dplyr::mutate(
@@ -337,6 +337,28 @@ calc_gi <- function(.data = NULL,
 
   # Store this
   gimap_dataset$overall_results <- single_lm_df
+
+  if (!use_lfc) {
+    # Save at the target level but call them crispr scores
+    gimap_dataset$crispr_score$single_crispr_score <- single_crispr_df
+    gimap_dataset$crispr_score$double_crispr_score <- double_crispr_df
+    gimap_dataset$crispr_score$neg_control_crispr <- control_target_df
+  } else {
+    # Save at the target level but they aren't crispr scores
+    colnames(single_crispr_df) <- gsub("crispr", "lfc", colnames(single_crispr_df))
+    colnames(double_crispr_df) <- gsub("crispr", "lfc", colnames(double_crispr_df))
+    colnames(control_target_df) <- gsub("crispr", "lfc", colnames(control_target_df))
+
+    gimap_dataset$lfc$single_lfc <- single_crispr_df
+    gimap_dataset$lfc$double_lfc <- double_crispr_df
+    gimap_dataset$lfc$neg_control_crispr <- control_target_df
+
+    # The final results also aren't crispr scores
+    gimap_dataset$gi_scores <- gimap_dataset$gi_scores %>%
+      dplyr::rename(mean_expected_lfc = mean_expected_cs,
+                    mean_observed_lfc = mean_observed_cs)
+
+  }
 
   return(gimap_dataset)
 }

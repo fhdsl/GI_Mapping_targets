@@ -7,6 +7,8 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+devtools::load_all()
 ```
 
 ## Setting up data
@@ -74,26 +76,16 @@ gimap_dataset_no_nts <- setup_data(
    ) %>%
    calc_gi()
 
- gimap_dataset_ratio <- gimap_dataset_no_nts %>%
+ gimap_dataset_lfc <- gimap_dataset_no_nts %>%
    gimap_filter() %>%
    gimap_annotate(cell_line = "HELA") %>%
    gimap_normalize(
      timepoints = "day",
-     missing_ids_file =  tempfile(),
-     no_neg_ctrl_adj = TRUE
+     missing_ids_file =  tempfile(), 
+     adj_method = "no_adjustment"
    ) %>%
-   calc_gi()
+   calc_gi(use_lfc = TRUE)
 
- 
-gimap_dataset_no_adj <- gimap_dataset_no_nts %>%
-  gimap_filter() %>%
-  gimap_annotate(cell_line = "HELA") %>%
-  gimap_normalize(
-    timepoints = "day",
-    missing_ids_file =  tempfile(),
-     no_adj = TRUE
-  ) %>%
-  calc_gi()
 ```
  
  
@@ -102,7 +94,7 @@ gimap_dataset_no_adj <- gimap_dataset_no_nts %>%
                         facet_rep = FALSE, 
                         reps_to_drop = "Day05_RepA_early")
 
- plot_exp_v_obs_scatter(gimap_dataset_no_nts,
+ plot_exp_v_obs_scatter(gimap_dataset_lfc,
                         facet_rep = FALSE,
                         reps_to_drop = "Day05_RepA_early")
 ```
@@ -112,12 +104,19 @@ gimap_dataset_no_adj <- gimap_dataset_no_nts %>%
  plot_rank_scatter(gimap_dataset, 
                    reps_to_drop = "Day05_RepA_early")
  
- plot_rank_scatter(gimap_dataset_no_nts, 
+ plot_rank_scatter(gimap_dataset_lfc, 
                    reps_to_drop = "Day05_RepA_early")
 ```
  
 ```{r}
  plot_volcano(gimap_dataset, reps_to_drop = "Day05_RepA_early")
- plot_volcano(gimap_dataset_no_nts, reps_to_drop = "Day05_RepA_early")
+ plot_volcano(gimap_dataset_lfc, reps_to_drop = "Day05_RepA_early")
 ```
 
+
+```{r}
+### GFP and intergenic controls 
+### DO X-Y scatter plot 
+### do LFC vs CRISPR 
+### Maybe normalize the gi scores???
+```
