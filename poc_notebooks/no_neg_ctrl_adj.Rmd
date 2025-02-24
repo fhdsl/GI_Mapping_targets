@@ -112,11 +112,16 @@ gimap_dataset_no_nts <- setup_data(
  plot_volcano(gimap_dataset, reps_to_drop = "Day05_RepA_early")
  plot_volcano(gimap_dataset_lfc, reps_to_drop = "Day05_RepA_early")
 ```
-
-
 ```{r}
-### GFP and intergenic controls 
-### DO X-Y scatter plot 
-### do LFC vs CRISPR 
-### Maybe normalize the gi scores???
+joined_df <- 
+  dplyr::inner_join(gimap_dataset$gi_scores, 
+                  gimap_dataset_lfc$gi_scores, 
+                  by =c("rep", "pgRNA_target"), 
+                  suffix = c("_crispr", "_lfc")) %>% 
+  dplyr::filter(rep != "Day05_RepA_early")
+
+
+ggplot(joined_df, aes(mean_gi_score_crispr, mean_gi_score_lfc)) + 
+  ggplot2::geom_point() + 
+  ggplot2::facet_wrap(~rep)
 ```
