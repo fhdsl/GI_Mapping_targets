@@ -61,8 +61,13 @@ plot_exp_v_obs_scatter <- function(gimap_dataset, facet_rep = FALSE, reps_to_dro
   } else if (expected_col == "mean_expected_lfc") {
     model <- lm(mean_observed_lfc ~ mean_expected_lfc, data = regression_data)
   }
-  gplot <- gimap_dataset$gi_scores %>%
-    filter(!(rep %in% reps_to_drop)) %>%
+
+  if (reps_to_drop != "") {
+  gplot_data <- gimap_dataset$gi_scores %>%
+    filter(!(rep %in% reps_to_drop))
+  }
+  
+  gplot <- gplot_data %>%
     mutate(broad_target_type = case_when(
       target_type == "gene_gene" ~ "DKO",
       target_type == "ctrl_gene" ~ "control",
