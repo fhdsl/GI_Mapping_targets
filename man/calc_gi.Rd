@@ -4,7 +4,7 @@
 \alias{calc_gi}
 \title{Calculate Genetic Interaction scores}
 \usage{
-calc_gi(.data = NULL, gimap_dataset)
+calc_gi(.data = NULL, gimap_dataset, use_lfc = FALSE, stats_by_rep = FALSE)
 }
 \arguments{
 \item{.data}{Data can be piped in with tidyverse pipes from function to
@@ -12,6 +12,9 @@ function. But the data must still be a gimap_dataset}
 
 \item{gimap_dataset}{A special dataset structure that is setup using the
 `setup_data()` function.}
+
+\item{stats_by_rep}{Should statistics be calculated per rep or should replicates
+be collapsed?}
 }
 \value{
 A gimap dataset with statistics and genetic interaction scores
@@ -63,7 +66,7 @@ gimap_dataset <- get_example_data("gimap") \%>\%
   gimap_annotate(cell_line = "HELA") \%>\%
   gimap_normalize(
     timepoints = "day",
-    missing_ids_file =  tempfile()
+    missing_ids_file = tempfile()
   ) \%>\%
   calc_gi()
 

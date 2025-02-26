@@ -58,7 +58,7 @@ In this function, a `gimap_dataset` is annotated as far as which
 genes should be used as controls.
 }
 \examples{
-\donttest{
+\dontrun{
 
 # By default DepMap annotation will be used to determine genes which are
 # unexpressed. In the `gimap_normalize` this will by default be used to
@@ -78,7 +78,7 @@ gimap_dataset <- get_example_data("gimap") \%>\%
   gimap_normalize(
     timepoints = "day",
     normalize_by_unexpressed = FALSE,
-    missing_ids_file =  tempfile()
+    missing_ids_file = tempfile()
   )
 
 ### CUSTOM TPM example
@@ -89,9 +89,11 @@ gimap_dataset <- get_example_data("gimap") \%>\%
   gimap_filter() \%>\%
   gimap_annotate(
     cell_line = "HELA",
-    custom_tpm = custom_tpm) \%>\%
-  gimap_normalize(timepoints = "day",
-                  missing_ids_file =  tempfile()
-                  )
+    custom_tpm = custom_tpm
+  ) \%>\%
+  gimap_normalize(
+    timepoints = "day",
+    missing_ids_file = tempfile()
+  )
 }
 }

@@ -4,7 +4,7 @@
 \alias{plot_volcano}
 \title{Volcano plot for GI scores}
 \usage{
-plot_volcano(gimap_dataset, facet_rep = TRUE, reps_to_drop = "")
+plot_volcano(gimap_dataset, facet_rep = FALSE, reps_to_drop = "")
 }
 \arguments{
 \item{gimap_dataset}{A special dataset structure that is originally setup using `setup_data()` and has had gi scores calculated with `calc_gi()`.}
