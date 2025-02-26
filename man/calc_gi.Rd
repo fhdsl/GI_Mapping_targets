@@ -13,6 +13,10 @@ function. But the data must still be a gimap_dataset}
 \item{gimap_dataset}{A special dataset structure that is setup using the
 `setup_data()` function.}
 
+\item{use_lfc}{Should Log fold change be used to calculate GI scores instead
+of CRISPR scores? If you do not have negative controls or CRISPR scores you
+will need to set this to TRUE.}
+
 \item{stats_by_rep}{Should statistics be calculated per rep or should replicates
 be collapsed?}
 }

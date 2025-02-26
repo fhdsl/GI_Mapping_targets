@@ -65,7 +65,10 @@ genes should be used as controls.
 # normalize to.
 gimap_dataset <- get_example_data("gimap") \%>\%
   gimap_filter() \%>\%
-  gimap_annotate(cell_line = "HELA")
+  gimap_annotate(
+    cell_line = "HELA",
+    missing_ids_file =  tempfile()
+  )
 
 
 # You can also say cell_line_annotate = false if you don't want to use DepMap

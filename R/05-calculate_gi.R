@@ -37,6 +37,9 @@
 #' function. But the data must still be a gimap_dataset
 #' @param gimap_dataset A special dataset structure that is setup using the
 #' `setup_data()` function.
+#' @param use_lfc Should Log fold change be used to calculate GI scores instead
+#' of CRISPR scores? If you do not have negative controls or CRISPR scores you
+#' will need to set this to TRUE.
 #' @param stats_by_rep Should statistics be calculated per rep or should replicates
 #' be collapsed?
 #' @return A gimap dataset with statistics and genetic interaction scores
@@ -104,9 +107,13 @@ calc_gi <- function(.data = NULL,
   }
   lfc_adj <- gimap_dataset$normalized_log_fc
 
-  if (!"crispr_score" %in% colnames(lfc_adj) || use_lfc) {
+  if (!"crispr_score" %in% colnames(lfc_adj) && !use_lfc) {
+    stop("No CRISPR scores found, you can set use_lfc = TRUE to calculate
+         genetic interaction scores using log fold change")
+  }
+  if (use_lfc) {
     lfc_adj$crispr_score <- lfc_adj$lfc
-    message("Using unadjusted log fold changes to calculate genetic interaction scores")
+    message("Calculating Genetic Interaction scores using LFC")
   }
   # Get mean control target CRISPR scores -- they will be used for expected
   # calculations
