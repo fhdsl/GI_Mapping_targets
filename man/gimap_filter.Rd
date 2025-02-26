@@ -82,23 +82,23 @@ gimap_dataset <- get_example_data("gimap") \%>\%
 
 # If you want to only use a single filter or some subset,
 # specify which using the filter_type parameter
-gimap_dataset <- gimap_filter(gimap_dataset,
-  filter_type = "zero_count_only"
-)
+gimap_dataset <- get_example_data("gimap") \%>\%
+  gimap_filter(filter_type = "zero_count_only")
 # or
-gimap_dataset <- gimap_filter(gimap_dataset,
-  filter_type = "low_plasmid_cpm_only"
-)
+gimap_dataset <- get_example_data("gimap") \%>\%
+  gimap_filter(filter_type = "low_plasmid_cpm_only")
 
 # If you want to use multiple filters and more than one to flag a pgRNA
 # construct before it's filtered out, use the `min_n_filters` argument
-gimap_dataset <- gimap_filter(gimap_dataset,
+gimap_dataset <- get_example_data("gimap") \%>\%
+gimap_filter(
   filter_type = "both",
   min_n_filters = 2
 )
 
 # You can also specify which columns the filters will be applied to
-gimap_dataset <- gimap_filter(gimap_dataset,
+gimap_dataset <- get_example_data("gimap") \%>\%
+ gimap_filter(
   filter_type = "zero_count_only",
   filter_zerocount_target_col = c(1, 2)
 )
