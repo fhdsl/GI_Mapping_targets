@@ -53,8 +53,12 @@ plot_exp_v_obs_scatter <- function(gimap_dataset, facet_rep = FALSE, reps_to_dro
   )
 
   regression_data <- gimap_dataset$gi_scores %>%
-    filter(target_type != "gene_gene") %>% # get only single targeting
+    filter(target_type != "gene_gene")
+
+  if (reps_to_drop != "") {
+    regression_data <- regression_data %>% # get only single targeting
     filter(!(rep %in% reps_to_drop))
+  }
 
   if (expected_col == "mean_expected_cs") {
     model <- lm(mean_observed_cs ~ mean_expected_cs, data = regression_data)
@@ -66,7 +70,7 @@ plot_exp_v_obs_scatter <- function(gimap_dataset, facet_rep = FALSE, reps_to_dro
   gplot_data <- gimap_dataset$gi_scores %>%
     filter(!(rep %in% reps_to_drop))
   }
-  
+
   gplot <- gplot_data %>%
     mutate(broad_target_type = case_when(
       target_type == "gene_gene" ~ "DKO",
