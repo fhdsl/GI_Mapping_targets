@@ -54,3 +54,16 @@ test_that("Test Genetic Interaction score calculations using LFC", {
     ) %>%
     calc_gi(use_lfc = TRUE)
 })
+
+
+test_that("Test Genetic Interaction score calculations using LFC", {
+  testthat::skip_on_cran()
+  gimap_dataset <- get_example_data("gimap") %>%
+    gimap_filter() %>%
+    gimap_annotate(cell_line = "HELA") %>%
+    gimap_normalize(
+      timepoints = "day",
+      adj_method = "no_adjustment"
+    ) %>%
+    calc_gi(stats_by_rep = TRUE)
+})
