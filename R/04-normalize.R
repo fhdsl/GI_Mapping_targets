@@ -1,4 +1,5 @@
 #' Normalize Log fold changes
+#'
 #' @description This calculates the log fold change for a gimap dataset based on
 #' the annotation and metadata provided.
 #' gimap takes in a counts matrix that represents the number of cells that have
@@ -47,8 +48,7 @@
 #' For timepoints testing it will be assumed that the mininmum timepoint
 #' is the control.
 #' @param adj_method Must be one of three methods as stated by a character string
-#' "negative_control_adj" or "no_adjustment". Default is
-#'
+#' "negative_control_adj" or "no_adjustment". Default is "negative_control_adj"
 #' "negative_control_adj" where CRISPR scores will be used for the GI scores
 #' "no_adjustment" is where LFC adjusted will be used for the GI scores
 #' @param num_ids_wo_annot default is 20; the number of pgRNA IDs to display to

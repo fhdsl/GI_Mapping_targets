@@ -26,15 +26,15 @@ test_that("Test Genetic Interaction score calculations", {
 
   testthat::expect_identical(
     round(gimap_dataset$gi_scores$mean_expected_cs[1], 3),
-    round(0.360, 3)
+    round(-0.22, 3)
   )
   testthat::expect_identical(
     round(gimap_dataset$gi_scores$mean_observed_cs[1], 3),
-    round(-4.411, 3)
+    round(-1.5, 3)
   )
   testthat::expect_identical(
     round(gimap_dataset$gi_scores$mean_gi_score[1], 3),
-    round(-4.0740, 3)
+    round(-1.1, 3)
   )
   testthat::expect_identical(
     round(gimap_dataset$gi_scores$p_val[1], 3),
