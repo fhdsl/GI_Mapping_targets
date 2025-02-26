@@ -76,9 +76,9 @@
 #'   gimap_annotate(cell_line = "HELA") %>%
 #'   gimap_normalize(
 #'     timepoints = "day",
-#'     missing_ids_file =  tempfile()
+#'     missing_ids_file = tempfile()
 #'   )
-#'}
+#' }
 gimap_normalize <- function(.data = NULL,
                             gimap_dataset,
                             normalize_by_unexpressed = TRUE,
@@ -107,13 +107,13 @@ gimap_normalize <- function(.data = NULL,
   # https://github.com/FredHutch/GI_mapping/blob/main/workflow/scripts/
   # 03-filter_and_calculate_LFC.Rmd
 
-  if (!adj_method %in% c( "negative_control_adj", "no_negative_control", "no_adjustment"))
-
-  if (!is.null(gimap_dataset$normalized_log_fc) & !overwrite) {
-    stop(
-      "Normalization has already been preformed on this dataset.",
-      "set overwrite = TRUE if you'd like the existing data to be overwritten."
-    )
+  if (!adj_method %in% c("negative_control_adj", "no_negative_control", "no_adjustment")) {
+    if (!is.null(gimap_dataset$normalized_log_fc) & !overwrite) {
+      stop(
+        "Normalization has already been preformed on this dataset.",
+        "set overwrite = TRUE if you'd like the existing data to be overwritten."
+      )
+    }
   }
 
   if (overwrite) {
@@ -294,29 +294,27 @@ gimap_normalize <- function(.data = NULL,
   }
 
   if (adj_method == "negative_control_adj") {
+    medians_df <- comparison_df %>%
+      dplyr::group_by(norm_ctrl_flag, rep) %>%
+      dplyr::summarize(median = median(lfc, na.rm = TRUE)) %>%
+      tidyr::pivot_wider(
+        values_from = median,
+        names_from = norm_ctrl_flag
+      ) %>%
+      dplyr::select(rep, negative_control, positive_control)
 
-  medians_df <- comparison_df %>%
-    dplyr::group_by(norm_ctrl_flag, rep) %>%
-    dplyr::summarize(median = median(lfc, na.rm = TRUE)) %>%
-    tidyr::pivot_wider(
-      values_from = median,
-      names_from = norm_ctrl_flag
-    ) %>%
-    dplyr::select(rep, negative_control, positive_control)
-
-  # logFC adjusted = (log2FC - log2FC_negctls) / |log2FC_posctls|
-  lfc_adj <- comparison_df %>%
-    dplyr::left_join(medians_df, by = "rep") %>%
-    dplyr::mutate(
-      crispr_score = (lfc - negative_control) /
-        (negative_control - positive_control)
-    )
-  # These should equal 0 and -1
-  lfc_adj %>%
-    dplyr::group_by(rep, norm_ctrl_flag) %>%
-    dplyr::summarize(median_crispr = median(crispr_score)) %>%
-    dplyr::filter(norm_ctrl_flag %in% c("negative_control", "positive_control"))
-
+    # logFC adjusted = (log2FC - log2FC_negctls) / |log2FC_posctls|
+    lfc_adj <- comparison_df %>%
+      dplyr::left_join(medians_df, by = "rep") %>%
+      dplyr::mutate(
+        crispr_score = (lfc - negative_control) /
+          (negative_control - positive_control)
+      )
+    # These should equal 0 and -1
+    lfc_adj %>%
+      dplyr::group_by(rep, norm_ctrl_flag) %>%
+      dplyr::summarize(median_crispr = median(crispr_score)) %>%
+      dplyr::filter(norm_ctrl_flag %in% c("negative_control", "positive_control"))
   } else {
     lfc_adj <- comparison_df
   }

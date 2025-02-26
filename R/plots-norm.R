@@ -19,12 +19,12 @@
 #'   gimap_annotate(cell_line = "HELA") %>%
 #'   gimap_normalize(
 #'     timepoints = "day",
-#'     missing_ids_file =  tempfile()
+#'     missing_ids_file = tempfile()
 #'   )
 #'
 #' # Plot:
 #' plot_crispr(gimap_dataset)
-#'}
+#' }
 plot_crispr <- function(.data = NULL, gimap_dataset, output_file = "crispr_norm_plot.png") {
   if (!is.null(.data)) gimap_dataset <- .data
 

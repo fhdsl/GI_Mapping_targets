@@ -32,11 +32,10 @@
 #' gimap_dataset <- get_example_data("gimap")
 #'
 #' run_qc(
-#'  gimap_dataset,
-#'  plots_dir = tempdir(),
-#'  output_file = paste0(tempfile(), "_QC_Report.Rmd")
+#'   gimap_dataset,
+#'   plots_dir = tempdir(),
+#'   output_file = paste0(tempfile(), "_QC_Report.Rmd")
 #' )
-#'
 #'
 run_qc <- function(gimap_dataset,
                    output_file,
@@ -102,10 +101,10 @@ run_qc <- function(gimap_dataset,
   results_file <- gsub("\\.Rmd$", "\\.html", output_file)
   message("Results in: ", results_file)
 
-  if(interactive()) {
+  if (interactive()) {
     if (open_results) {
       if (results_file != "") browseURL(results_file)
-      }
+    }
   }
   results_file
 }

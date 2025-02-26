@@ -75,7 +75,7 @@
 #'   filter_type = "zero_count_only",
 #'   filter_zerocount_target_col = c(1, 2)
 #' )
-#'}
+#' }
 gimap_filter <- function(.data = NULL,
                          gimap_dataset,
                          filter_type = "both",

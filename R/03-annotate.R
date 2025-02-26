@@ -54,7 +54,7 @@
 #'   gimap_normalize(
 #'     timepoints = "day",
 #'     normalize_by_unexpressed = FALSE,
-#'     missing_ids_file =  tempfile()
+#'     missing_ids_file = tempfile()
 #'   )
 #'
 #' ### CUSTOM TPM example
@@ -65,10 +65,12 @@
 #'   gimap_filter() %>%
 #'   gimap_annotate(
 #'     cell_line = "HELA",
-#'     custom_tpm = custom_tpm) %>%
-#'   gimap_normalize(timepoints = "day",
-#'                   missing_ids_file =  tempfile()
-#'                   )
+#'     custom_tpm = custom_tpm
+#'   ) %>%
+#'   gimap_normalize(
+#'     timepoints = "day",
+#'     missing_ids_file = tempfile()
+#'   )
 #' }
 gimap_annotate <- function(.data = NULL,
                            gimap_dataset,
