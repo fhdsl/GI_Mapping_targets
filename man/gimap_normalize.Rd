@@ -51,8 +51,7 @@ For timepoints testing it will be assumed that the mininmum timepoint
 is the control.}
 
 \item{adj_method}{Must be one of three methods as stated by a character string
-"negative_control_adj" or "no_adjustment". Default is
-
+"negative_control_adj" or "no_adjustment". Default is "negative_control_adj"
 "negative_control_adj" where CRISPR scores will be used for the GI scores
 "no_adjustment" is where LFC adjusted will be used for the GI scores}
 

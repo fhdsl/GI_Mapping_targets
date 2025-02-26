@@ -31,8 +31,8 @@ gimap_dataset <- get_example_data("gimap") \%>\%
   calc_gi()
 
 # To plot results
-plot_exp_v_obs_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
-plot_rank_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
-plot_volcano(gimap_dataset, reps_to_drop = "Day05_RepA_early")
+plot_exp_v_obs_scatter(gimap_dataset)
+plot_rank_scatter(gimap_dataset)
+plot_volcano(gimap_dataset)
 }
 }
