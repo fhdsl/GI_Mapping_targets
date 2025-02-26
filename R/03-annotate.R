@@ -112,7 +112,7 @@ gimap_annotate <- function(.data = NULL,
         "Please double check the file path"
       )
     }
-    annotation_df <- read_table(annotation_file)
+    annotation_df <- readr::read_table(annotation_file)
   } else {
     annotation_df <- get_example_data("annotation")
   }
@@ -128,7 +128,7 @@ gimap_annotate <- function(.data = NULL,
         "Please double check the file path"
       )
     }
-    control_genes <- read_table(control_genes)[, 1]
+    control_genes <- readr::read_table(control_genes)[, 1]
   } else {
     # This file is from https://depmap.org/portal/download/all/ and
     # from DepMap Public 19Q3 All Files
