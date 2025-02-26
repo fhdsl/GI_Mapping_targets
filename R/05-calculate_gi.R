@@ -107,9 +107,12 @@ calc_gi <- function(.data = NULL,
   }
   lfc_adj <- gimap_dataset$normalized_log_fc
 
-  if (!"crispr_score" %in% colnames(lfc_adj) & !use_lfc) {
-    stop("No CRISPR scores found, you can set use_lfc = TRUE to calculate
+  if (!"crispr_score" %in% colnames(lfc_adj)) {
+
+   if (!use_lfc) {
+      stop("No CRISPR scores found, you can set use_lfc = TRUE to calculate
          genetic interaction scores using log fold change")
+    }
   }
   if (use_lfc) {
     lfc_adj$crispr_score <- lfc_adj$lfc
