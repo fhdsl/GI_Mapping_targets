@@ -2,7 +2,8 @@ pandoc: 3.1.11
 pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
+  example_qc_report: example_qc_report.html
   quick-start: quick-start.html
   timepoint-example: timepoint-example.html
   treatment_example: treatment_example.html
-last_built: 2025-01-18T02:19Z
+last_built: 2025-02-27T20:48Z

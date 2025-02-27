@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">gimap</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.2</span>
       </span>
     </div>
 
@@ -32,6 +32,9 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/example_qc_report.html">QC Report</a>
+    </li>
+    <li>
       <a href="../articles/quick-start.html">Quick Start</a>
     </li>
     <li>
@@ -71,6 +74,18 @@
         </td>
         <td><p>Calculate Genetic Interaction scores</p></td>
       </tr><tr><td>
+          <p><code><a href="cn_setup.html">cn_setup()</a></code> </p>
+        </td>
+        <td><p>Download and set up DepMap CN</p></td>
+      </tr><tr><td>
+          <p><code><a href="crtl_genes.html">crtl_genes()</a></code> </p>
+        </td>
+        <td><p>Download and set up control genes</p></td>
+      </tr><tr><td>
+          <p><code><a href="encrypt_creds_path.html">encrypt_creds_path()</a></code> </p>
+        </td>
+        <td><p>Default creds path</p></td>
+      </tr><tr><td>
           <p><code><a href="example_data_folder.html">example_data_folder()</a></code> </p>
         </td>
         <td><p>Get file path to an default credentials RDS</p></td>
@@ -78,6 +93,10 @@
           <p><code><a href="get_example_data.html">get_example_data()</a></code> </p>
         </td>
         <td><p>Returns example data for package</p></td>
+      </tr><tr><td>
+          <p><code><a href="get_figshare.html">get_figshare()</a></code> </p>
+        </td>
+        <td><p>Handler function for GET requests from Figshare</p></td>
       </tr><tr><td>
           <p><code><a href="gimap_annotate.html">gimap_annotate()</a></code> </p>
         </td>
@@ -91,9 +110,17 @@
         </td>
         <td><p>Normalize Log fold changes</p></td>
       </tr><tr><td>
-          <p><code><a href="gimap_rep_stats.html">gimap_rep_stats()</a></code> </p>
+          <p><code><a href="gimap_object.html">gimap_object()</a></code> </p>
+        </td>
+        <td><p>Make an empty gimap dataset object</p></td>
+      </tr><tr><td>
+          <p><code><a href="gimap_stats.html">gimap_stats()</a></code> </p>
         </td>
         <td><p>Do tests for each replicate –an internal function used by calc_gi() function</p></td>
+      </tr><tr><td>
+          <p><code><a href="key_encrypt_creds_path.html">key_encrypt_creds_path()</a></code> </p>
+        </td>
+        <td><p>Get file path to an key encryption RDS</p></td>
       </tr><tr><td>
           <p><code><a href="plot_crispr.html">plot_crispr()</a></code> </p>
         </td>
@@ -101,7 +128,7 @@
       </tr><tr><td>
           <p><code><a href="plot_exp_v_obs_scatter.html">plot_exp_v_obs_scatter()</a></code> </p>
         </td>
-        <td><p>Plots for Genetic interactions</p></td>
+        <td><p>Expected vs Observed CRISPR Scatterplot</p></td>
       </tr><tr><td>
           <p><code><a href="plot_rank_scatter.html">plot_rank_scatter()</a></code> </p>
         </td>
@@ -137,7 +164,7 @@
       </tr><tr><td>
           <p><code><a href="qc_filter_zerocounts.html">qc_filter_zerocounts()</a></code> </p>
         </td>
-        <td><p>Create a filter for pgRNAs which have a raw count of 0 for any sample/time point</p></td>
+        <td><p>Filter out samples of zero counts Create a filter for pgRNAs which have a raw count of 0 for any sample/time # point</p></td>
       </tr><tr><td>
           <p><code><a href="qc_plasmid_histogram.html">qc_plasmid_histogram()</a></code> </p>
         </td>
@@ -162,6 +189,10 @@
           <p><code><a href="supported_cell_lines.html">supported_cell_lines()</a></code> </p>
         </td>
         <td><p>List the supported cell lines</p></td>
+      </tr><tr><td>
+          <p><code><a href="tpm_setup.html">tpm_setup()</a></code> </p>
+        </td>
+        <td><p>Download and set up DepMap TPM data</p></td>
       </tr></tbody></table></div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
