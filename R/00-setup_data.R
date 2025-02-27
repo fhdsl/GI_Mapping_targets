@@ -116,8 +116,6 @@ gimap_object <- function() {
     comparisons = NULL,
     annotation = NULL,
     normalized_log_fc = NULL,
-    single_crispr_score = NULL,
-    double_crispr_score = NULL,
     gi_scores = NULL,
     overall_results = NULL
   )

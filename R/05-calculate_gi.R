@@ -128,15 +128,19 @@ calc_gi <- function(.data = NULL,
       values_to = "control_gRNA_seq"
     ) %>%
     # If there's the same control sequence, and rep
-    dplyr::group_by(rep, control_gRNA_seq, norm_ctrl_flag) %>%
+    dplyr::group_by(rep, pgRNA_target, control_gRNA_seq, norm_ctrl_flag) %>%
     # Then take the mean for when controls have the same sequence
     dplyr::summarize(
       mean_double_control_crispr =
-        mean(crispr_score, na.rm = TRUE)
+        mean(crispr_score, na.rm = TRUE),
+      .groups = "drop"
     ) %>%
     dplyr::select(
       rep,
-      control_gRNA_seq, mean_double_control_crispr, norm_ctrl_flag
+      pgRNA_target,
+      control_gRNA_seq,
+      mean_double_control_crispr,
+      norm_ctrl_flag,
     )
   # This means we have a mean double control crispr for each rep and
   # control sequence
@@ -228,6 +232,7 @@ calc_gi <- function(.data = NULL,
     dplyr::select(pg_ids,
       rep,
       double_crispr = crispr_score,
+      norm_ctrl_flag,
       gRNA1_seq,
       gRNA2_seq,
       pgRNA_target,
@@ -410,11 +415,22 @@ calc_gi <- function(.data = NULL,
   # Store this
   gimap_dataset$overall_results <- single_lm_df
 
+  means_by_rep <- dplyr::bind_rows(
+    dplyr::select(single_crispr_df,
+                  rep, pgRNA_target, norm_ctrl_flag, mean_score = mean_single_crispr,
+                  seq = targeting_gRNA_seq),
+    dplyr::select(double_crispr_df,
+                  rep, pgRNA_target, norm_ctrl_flag, mean_score = double_crispr),
+    dplyr::select(control_target_df,
+                  rep, pgRNA_target, norm_ctrl_flag, mean_score = mean_double_control_crispr,
+                  seq = control_gRNA_seq))
+
   if (!use_lfc) {
     # Save at the target level but call them crispr scores
     gimap_dataset$crispr_score$single_crispr_score <- single_crispr_df
     gimap_dataset$crispr_score$double_crispr_score <- double_crispr_df
     gimap_dataset$crispr_score$neg_control_crispr <- control_target_df
+    gimap_dataset$crispr_score$means_by_rep <- means_by_rep
   } else {
     # Save at the target level but they aren't crispr scores
     colnames(single_crispr_df) <- gsub("crispr", "lfc", colnames(single_crispr_df))
@@ -431,17 +447,18 @@ calc_gi <- function(.data = NULL,
         mean_expected_lfc = mean_expected_cs,
         mean_observed_lfc = mean_observed_cs
       )
+    gimap_dataset$crispr_score$means_by_rep <- means_by_rep
   }
 
   return(gimap_dataset)
 }
 
 
-#' Do tests for each replicate --an internal function used by calc_gi() function
+#' Do tests --an internal function used by calc_gi() function
 #' @description Create results table that has t test p values
-#' @param replicate a name of a replicate to filter out from gi_calc_adj
 #' @param gi_calc_single a data.frame with adjusted single gi scores
 #' @param gi_calc_double a data.frame with adjusted double gi scores
+#' @param replicate a name of a replicate to filter out from gi_calc_adj Optional
 #' @importFrom stats p.adjust t.test wilcox.test
 gimap_stats <- function(gi_calc_double, gi_calc_single, replicate = NULL) {
   ## get a vector of GI scores for all single-targeting ("control") pgRNAs
@@ -460,9 +477,6 @@ gimap_stats <- function(gi_calc_double, gi_calc_single, replicate = NULL) {
 
   gi_scores <- gi_calc_double %>%
     group_by(pgRNA_target) %>%
-    # TODO make this so its all single targets not just the oens that are a
-    # part of this double construct
-    # 1000's of single constructs here
     mutate(p_val = t.test(
       x = gi_calc_single$single_gi_score,
       y = double_gi_score, # all 16 construct guides here

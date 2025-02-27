@@ -197,13 +197,13 @@ nrow(gimap_filtered$filtered_data$transformed_log2_cpm)
 ```
 
 ```{r eval = FALSE}
-str(gimap_dataset$filtered_data)
+str(gimap_filtered$filtered_data)
 ```
 
 Let's take a look at how many rows of data we have left:
 
 ```{r eval = FALSE}
-nrow(gimap_dataset$filtered_data$transformed_log2_cpm)
+nrow(gimap_filtered$filtered_data$transformed_log2_cpm)
 ```
 
 As you can see from the output above, there are fewer pgRNA constructs in the filtered dataset following completion of filtering.
@@ -267,7 +267,7 @@ We can pick out a specific pair to plot.
 
 ```{r eval = FALSE}
 # "MED12L_MED12" is top result so let's plot that
-plot_targets_bar(gimap_dataset, target1 = "MED12L", target2 = "MED12")
+plot_targets_bar(gimap_dataset, target1 = "AP2A1", target2 = "AP2A2")
 ```
 
 

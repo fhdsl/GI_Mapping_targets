@@ -162,6 +162,8 @@ plot_rank_scatter <- function(gimap_dataset, reps_to_drop = "") {
     )
   }
 
+  plot_data <- gimap_dataset$gi_scores
+
   if ("rep" %in% colnames(gimap_dataset$gi_scores)) {
     plot_data <- gimap_dataset$gi_scores %>%
       filter(!(rep %in% reps_to_drop))
@@ -226,9 +228,15 @@ plot_volcano <- function(gimap_dataset, facet_rep = FALSE, reps_to_drop = "") {
     )
   }
 
-  gplot <- gimap_dataset$gi_scores %>%
+  plot_data <- gimap_dataset$gi_scores
+
+  if ("rep" %in% colnames(gimap_dataset$gi_scores)) {
+    plot_data <- gimap_dataset$gi_scores %>%
+      filter(!(rep %in% reps_to_drop))
+  }
+
+  gplot <- plot_data %>%
     filter(target_type == "gene_gene") %>% # get only double targeting
-    filter(!(rep %in% reps_to_drop)) %>%
     mutate(
       logfdr = -log10(fdr),
       pointColor = case_when(logfdr < 1 ~ "darkgrey",
@@ -291,8 +299,8 @@ plot_volcano <- function(gimap_dataset, facet_rep = FALSE, reps_to_drop = "") {
 #' # To plot results, pick out two targets from the gi_score table
 #' head(dplyr::arrange(gimap_dataset$gi_score, fdr))
 #'
-#' # "NDEL1_NDE1" is top result so let's plot that
-#' plot_targets_bar(gimap_dataset, target1 = "NDEL1", target2 = "NDE1")
+#' # "TIAL1_TIA1" is top result so let's plot that
+#' plot_targets_bar(gimap_dataset, target1 = "TIAL1", target2 = "TIA1")
 #' }
 plot_targets_bar <- function(gimap_dataset, target1, target2, reps_to_drop = "") {
   if (!("gimap_dataset" %in% class(gimap_dataset))) {
@@ -313,17 +321,31 @@ plot_targets_bar <- function(gimap_dataset, target1, target2, reps_to_drop = "")
     "mean_expected_lfc",
     "mean_expected_cs"
   )
-  gplot <-
-    gimap_dataset$gi_scores %>%
-    filter(!(rep %in% reps_to_drop)) %>%
+
+  gplot_data <- gimap_dataset$gi_scores
+
+  if ("rep" %in% colnames(gimap_dataset$gi_scores)) {
+    gplot_data <- gimap_dataset$gi_scores %>%
+      filter(!(rep %in% reps_to_drop))
+  }
+
+  gplot_data <- gplot_data %>% dplyr::right_join(
+    gimap_dataset$crispr_score$means_by_rep %>%
+      dplyr::select(rep, pgRNA_target, mean_score, seq),
+    by = "pgRNA_target") %>%
     filter((grepl(target1, pgRNA_target)) | (grepl(target2, pgRNA_target))) %>%
+    dplyr::group_by(rep, pgRNA_target, target_type) %>%
+    dplyr::summarize(mean_score = mean(mean_score)) %>%
+    dplyr::distinct()
+
+  gplot <- gplot_data %>%
     ggplot(aes(
-      y = !!expected_col,
+      y = mean_score,
       x = target_type,
       fill = target_type
     )) +
-    geom_bar(stat = "summary", fun.y = "mean") +
-    geom_point(pch = 21, size = 3) +
+    geom_bar(position = "dodge", stat = "summary", fun = "mean") +
+    geom_point(aes(x = target_type, y = mean_score), pch = 21, size = 3) +
     theme_bw() +
     xlab("") +
     ggtitle(paste0(target1, "/", target2)) +
@@ -347,7 +369,7 @@ plot_targets_bar <- function(gimap_dataset, target1, target2, reps_to_drop = "")
       ylab("CRISPR score")
   } else if (expected_col == "mean_expected_lfc") {
     gplot <- gplot +
-      ylab("CRISPR score")
+      ylab("Adjusted Log Fold Change")
   }
 
   return(gplot)

@@ -183,10 +183,10 @@ gimap_normalize <- function(.data = NULL,
     # Rename and recode the timepoints variable
     gimap_dataset$metadata$sample_metadata <-
       gimap_dataset$metadata$sample_metadata %>%
-      dplyr::rename(timepoints = all_of(timepoints)) %>%
       # Note that timepoints are extablished as three categories:
       # control, early, or late.
-      dplyr::mutate(comparison = dplyr::case_when(
+      dplyr::mutate(timepoints = !!sym(timepoints),
+        comparison = dplyr::case_when(
         timepoints == min(timepoints) ~ "control",
         timepoints == max(timepoints) ~ "late",
         TRUE ~ "early"
