@@ -66,8 +66,10 @@ plot_exp_v_obs_scatter <- function(gimap_dataset, facet_rep = FALSE, reps_to_dro
     model <- lm(mean_observed_lfc ~ mean_expected_lfc, data = regression_data)
   }
 
+  gplot_data <- gimap_dataset$gi_scores
+
   if (reps_to_drop != "") {
-  gplot_data <- gimap_dataset$gi_scores %>%
+  gplot_data <- gplot_data %>%
     filter(!(rep %in% reps_to_drop))
   }
 
