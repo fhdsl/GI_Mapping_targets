@@ -65,7 +65,10 @@ genes should be used as controls.
 # normalize to.
 gimap_dataset <- get_example_data("gimap") \%>\%
   gimap_filter() \%>\%
-  gimap_annotate(cell_line = "HELA")
+  gimap_annotate(
+    cell_line = "HELA",
+    missing_ids_file =  tempfile()
+  )
 
 
 # You can also say cell_line_annotate = false if you don't want to use DepMap
@@ -78,7 +81,7 @@ gimap_dataset <- get_example_data("gimap") \%>\%
   gimap_normalize(
     timepoints = "day",
     normalize_by_unexpressed = FALSE,
-    missing_ids_file =  tempfile()
+    missing_ids_file = tempfile()
   )
 
 ### CUSTOM TPM example
@@ -89,9 +92,11 @@ gimap_dataset <- get_example_data("gimap") \%>\%
   gimap_filter() \%>\%
   gimap_annotate(
     cell_line = "HELA",
-    custom_tpm = custom_tpm) \%>\%
-  gimap_normalize(timepoints = "day",
-                  missing_ids_file =  tempfile()
-                  )
+    custom_tpm = custom_tpm
+  ) \%>\%
+  gimap_normalize(
+    timepoints = "day",
+    missing_ids_file = tempfile()
+  )
 }
 }

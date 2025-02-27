@@ -18,16 +18,16 @@
 #'   gimap_annotate(cell_line = "HELA") %>%
 #'   gimap_normalize(
 #'     timepoints = "day",
-#'      missing_ids_file =  tempfile()
+#'     missing_ids_file = tempfile()
 #'   ) %>%
 #'   calc_gi()
 #'
 #' # To plot results
-#' plot_exp_v_obs_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
-#' plot_rank_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
-#' plot_volcano(gimap_dataset, reps_to_drop = "Day05_RepA_early")
-#'}
-plot_exp_v_obs_scatter <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop = "") {
+#' plot_exp_v_obs_scatter(gimap_dataset)
+#' plot_rank_scatter(gimap_dataset)
+#' plot_volcano(gimap_dataset)
+#' }
+plot_exp_v_obs_scatter <- function(gimap_dataset, facet_rep = FALSE, reps_to_drop = "") {
   if (!("gimap_dataset" %in% class(gimap_dataset))) {
     stop(
       "This function only works",
@@ -42,23 +42,46 @@ plot_exp_v_obs_scatter <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop
     )
   }
 
+  expected_col <- ifelse(!"mean_expected_cs" %in% colnames(gimap_dataset$gi_scores),
+    "mean_expected_lfc",
+    "mean_expected_cs"
+  )
+
+  observed_col <- ifelse(!"mean_observed_cs" %in% colnames(gimap_dataset$gi_scores),
+    "mean_observed_lfc",
+    "mean_observed_cs"
+  )
 
   regression_data <- gimap_dataset$gi_scores %>%
-    filter(target_type != "gene_gene") %>% # get only single targeting
+    filter(target_type != "gene_gene")
+
+  if (reps_to_drop != "") {
+    regression_data <- regression_data %>% # get only single targeting
+     filter(!(rep %in% reps_to_drop))
+  }
+
+  if (expected_col == "mean_expected_cs") {
+    model <- lm(mean_observed_cs ~ mean_expected_cs, data = regression_data)
+  } else if (expected_col == "mean_expected_lfc") {
+    model <- lm(mean_observed_lfc ~ mean_expected_lfc, data = regression_data)
+  }
+
+  gplot_data <- gimap_dataset$gi_scores
+
+  if (reps_to_drop != "") {
+  gplot_data <- gplot_data %>%
     filter(!(rep %in% reps_to_drop))
+  }
 
-  model <- lm(mean_observed_cs ~ mean_expected_cs, data = regression_data)
-
-  gplot <- gimap_dataset$gi_scores %>%
-    filter(!(rep %in% reps_to_drop)) %>%
+  gplot <- gplot_data %>%
     mutate(broad_target_type = case_when(
       target_type == "gene_gene" ~ "DKO",
       target_type == "ctrl_gene" ~ "control",
       target_type == "gene_ctrl" ~ "control"
     )) %>%
     ggplot(aes(
-      x = mean_expected_cs,
-      y = mean_observed_cs,
+      x = !!sym(expected_col),
+      y = !!sym(observed_col),
       color = broad_target_type
     )) +
     geom_point(size = 1, alpha = 0.7) +
@@ -68,22 +91,30 @@ plot_exp_v_obs_scatter <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop
     )) +
     theme_classic() +
     theme(legend.title = element_blank()) +
-    xlab("Expected CRISPR score\n(paralog 1 KO + paralog 2 KO)") +
-    ylab("Observed CRISPR score\n(paralog 1 & 2 DKO)") +
     geom_abline(
-      slope = model$coefficients[["mean_expected_cs"]],
+      slope = model$coefficients[[expected_col]],
       intercept = model$coefficients[["(Intercept)"]]
     ) +
     geom_abline(
-      slope = model$coefficients[["mean_expected_cs"]],
+      slope = model$coefficients[[expected_col]],
       intercept = model$coefficients[["(Intercept)"]] + quantile(model$residuals)["75%"],
       linetype = 3
     ) +
     geom_abline(
-      slope = model$coefficients[["mean_expected_cs"]],
+      slope = model$coefficients[[expected_col]],
       intercept = model$coefficients[["(Intercept)"]] + quantile(model$residuals)["25%"],
       linetype = 3
     )
+
+  if (expected_col == "mean_expected_cs") {
+    gplot <- gplot +
+      xlab("Expected CRISPR score\n(paralog 1 KO + paralog 2 KO)") +
+      ylab("Observed CRISPR score\n(paralog 1 & 2 DKO)")
+  } else if (expected_col == "mean_expected_lfc") {
+    gplot <- gplot +
+      xlab("Expected LFC score\n(paralog 1 KO + paralog 2 KO)") +
+      ylab("Observed LFC score\n(paralog 1 & 2 DKO)")
+  }
 
   if (facet_rep) {
     return(gplot + facet_wrap(~rep))
@@ -112,9 +143,9 @@ plot_exp_v_obs_scatter <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop
 #'   calc_gi()
 #'
 #' # To plot results
-#' plot_exp_v_obs_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
-#' plot_rank_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
-#' plot_volcano(gimap_dataset, reps_to_drop = "Day05_RepA_early")
+#' plot_exp_v_obs_scatter(gimap_dataset)
+#' plot_rank_scatter(gimap_dataset)
+#' plot_volcano(gimap_dataset)
 #' }
 plot_rank_scatter <- function(gimap_dataset, reps_to_drop = "") {
   if (!("gimap_dataset" %in% class(gimap_dataset))) {
@@ -131,15 +162,19 @@ plot_rank_scatter <- function(gimap_dataset, reps_to_drop = "") {
     )
   }
 
-  return(
-    gimap_dataset$gi_scores %>%
-      filter(target_type == "gene_gene") %>% # get only double targeting
-      filter(!(rep %in% reps_to_drop)) %>%
+  plot_data <- gimap_dataset$gi_scores
+
+  if ("rep" %in% colnames(gimap_dataset$gi_scores)) {
+    plot_data <- gimap_dataset$gi_scores %>%
+      filter(!(rep %in% reps_to_drop))
+  }
+
+  gplot <- plot_data %>%
+      filter(target_type == "gene_gene") %>%
       mutate(Rank = dense_rank(mean_gi_score)) %>%
       ggplot(aes(
         x = Rank,
-        y = mean_gi_score,
-        color = rep
+        y = mean_gi_score
       )) +
       geom_point(size = 1, alpha = 0.7) +
       theme_classic() +
@@ -148,7 +183,8 @@ plot_rank_scatter <- function(gimap_dataset, reps_to_drop = "") {
       geom_hline(yintercept = 0) +
       geom_hline(yintercept = -0.5, linetype = "dashed") +
       geom_hline(yintercept = 0.25, linetype = "dashed")
-  )
+
+  return(gplot)
 }
 
 #' Volcano plot for GI scores
@@ -173,11 +209,11 @@ plot_rank_scatter <- function(gimap_dataset, reps_to_drop = "") {
 #'   calc_gi()
 #'
 #' # To plot results
-#' plot_exp_v_obs_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
-#' plot_rank_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
-#' plot_volcano(gimap_dataset, reps_to_drop = "Day05_RepA_early")
+#' plot_exp_v_obs_scatter(gimap_dataset)
+#' plot_rank_scatter(gimap_dataset)
+#' plot_volcano(gimap_dataset)
 #' }
-plot_volcano <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop = "") {
+plot_volcano <- function(gimap_dataset, facet_rep = FALSE, reps_to_drop = "") {
   if (!("gimap_dataset" %in% class(gimap_dataset))) {
     stop(
       "This function only works",
@@ -192,9 +228,15 @@ plot_volcano <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop = "") {
     )
   }
 
-  gplot <- gimap_dataset$gi_scores %>%
+  plot_data <- gimap_dataset$gi_scores
+
+  if ("rep" %in% colnames(gimap_dataset$gi_scores)) {
+    plot_data <- gimap_dataset$gi_scores %>%
+      filter(!(rep %in% reps_to_drop))
+  }
+
+  gplot <- plot_data %>%
     filter(target_type == "gene_gene") %>% # get only double targeting
-    filter(!(rep %in% reps_to_drop)) %>%
     mutate(
       logfdr = -log10(fdr),
       pointColor = case_when(logfdr < 1 ~ "darkgrey",
@@ -257,8 +299,8 @@ plot_volcano <- function(gimap_dataset, facet_rep = TRUE, reps_to_drop = "") {
 #' # To plot results, pick out two targets from the gi_score table
 #' head(dplyr::arrange(gimap_dataset$gi_score, fdr))
 #'
-#' # "NDEL1_NDE1" is top result so let's plot that
-#' plot_targets_bar(gimap_dataset, target1 = "NDEL1", target2 = "NDE1")
+#' # "TIAL1_TIA1" is top result so let's plot that
+#' plot_targets_bar(gimap_dataset, target1 = "TIAL1", target2 = "TIA1")
 #' }
 plot_targets_bar <- function(gimap_dataset, target1, target2, reps_to_drop = "") {
   if (!("gimap_dataset" %in% class(gimap_dataset))) {
@@ -275,34 +317,60 @@ plot_targets_bar <- function(gimap_dataset, target1, target2, reps_to_drop = "")
     )
   }
 
-  return(
-    gimap_dataset$gi_scores %>%
-      filter(!(rep %in% reps_to_drop)) %>%
-      filter((grepl(target1, pgRNA_target)) | (grepl(target2, pgRNA_target))) %>%
-      ggplot(aes(
-        y = mean_observed_cs, # This is not the right column
-        x = target_type,
-        fill = target_type
-      )) +
-      geom_bar(stat = "summary", fun.y = "mean") +
-      geom_point(pch = 21, size = 3) +
-      theme_bw() +
-      ylab("CRISPR score") +
-      xlab("") +
-      ggtitle(paste0(target1, "/", target2)) +
-      geom_hline(yintercept = 0) +
-      scale_x_discrete(labels = c(
-        "ctrl_gene" = paste0(target2, " KO"),
-        # this assumes that target2 is the ctrl_{target2} gene
-        "gene_ctrl" = paste0(target1, " KO"),
-        # this assumes that target1 is the {target1}_ctrl gene
-        "gene_gene" = "DKO"
-      )) +
-      theme(
-        legend.position = "none",
-        panel.background = element_blank(),
-        panel.grid = element_blank(),
-        axis.text.x = element_text(angle = 45, hjust = 1)
-      )
+  expected_col <- ifelse(is.null(gimap_dataset$gi_scores$mean_expected_cs),
+    "mean_expected_lfc",
+    "mean_expected_cs"
   )
+
+  gplot_data <- gimap_dataset$gi_scores
+
+  if ("rep" %in% colnames(gimap_dataset$gi_scores)) {
+    gplot_data <- gimap_dataset$gi_scores %>%
+      filter(!(rep %in% reps_to_drop))
+  }
+
+  gplot_data <- gplot_data %>% dplyr::right_join(
+    gimap_dataset$crispr_score$means_by_rep %>%
+      dplyr::select(rep, pgRNA_target, mean_score, seq),
+    by = "pgRNA_target") %>%
+    filter((grepl(target1, pgRNA_target)) | (grepl(target2, pgRNA_target))) %>%
+    dplyr::group_by(rep, pgRNA_target, target_type) %>%
+    dplyr::summarize(mean_score = mean(mean_score)) %>%
+    dplyr::distinct()
+
+  gplot <- gplot_data %>%
+    ggplot(aes(
+      y = mean_score,
+      x = target_type,
+      fill = target_type
+    )) +
+    geom_bar(position = "dodge", stat = "summary", fun = "mean") +
+    geom_point(aes(x = target_type, y = mean_score), pch = 21, size = 3) +
+    theme_bw() +
+    xlab("") +
+    ggtitle(paste0(target1, "/", target2)) +
+    geom_hline(yintercept = 0) +
+    scale_x_discrete(labels = c(
+      "ctrl_gene" = paste0(target2, " KO"),
+      # this assumes that target2 is the ctrl_{target2} gene
+      "gene_ctrl" = paste0(target1, " KO"),
+      # this assumes that target1 is the {target1}_ctrl gene
+      "gene_gene" = "DKO"
+    )) +
+    theme(
+      legend.position = "none",
+      panel.background = element_blank(),
+      panel.grid = element_blank(),
+      axis.text.x = element_text(angle = 45, hjust = 1)
+    )
+
+  if (expected_col == "mean_expected_cs") {
+    gplot <- gplot +
+      ylab("CRISPR score")
+  } else if (expected_col == "mean_expected_lfc") {
+    gplot <- gplot +
+      ylab("Adjusted Log Fold Change")
+  }
+
+  return(gplot)
 }

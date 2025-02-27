@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">gimap</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.2</span>
       </span>
     </div>
 
@@ -32,6 +32,9 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/example_qc_report.html">QC Report</a>
+    </li>
+    <li>
       <a href="../articles/quick-start.html">Quick Start</a>
     </li>
     <li>
@@ -71,12 +74,13 @@
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">run_qc</span><span class="op">(</span></span>
 <span>  <span class="va">gimap_dataset</span>,</span>
-<span>  output_file <span class="op">=</span> <span class="st">"./gimap_QC_Report.Rmd"</span>,</span>
-<span>  plots_dir <span class="op">=</span> <span class="st">"./qc_plots"</span>,</span>
+<span>  <span class="va">output_file</span>,</span>
+<span>  <span class="va">plots_dir</span>,</span>
 <span>  overwrite <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  filter_zerocount_target_col <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  filter_plasmid_target_col <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  filter_replicates_target_col <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  open_results <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -86,15 +90,17 @@
 
 
 <dl><dt id="arg-gimap-dataset">gimap_dataset<a class="anchor" aria-label="anchor" href="#arg-gimap-dataset"></a></dt>
-<dd><p>A special dataset structure that is setup using the `setup_data()` function.</p></dd>
+<dd><p>A special dataset structure that is setup using the
+`setup_data()` function.</p></dd>
 
 
 <dt id="arg-output-file">output_file<a class="anchor" aria-label="anchor" href="#arg-output-file"></a></dt>
-<dd><p>default is `QC_Report`; name of the output QC report file</p></dd>
+<dd><p>Needs to be a string that ends with ".Rmd" What the
+name of the output QC report file should be.</p></dd>
 
 
 <dt id="arg-plots-dir">plots_dir<a class="anchor" aria-label="anchor" href="#arg-plots-dir"></a></dt>
-<dd><p>default is `./qc_plots`; directory to save plots created with this function,
+<dd><p>directory to save plots created with this function,
 if it doesn't exist already it will be created</p></dd>
 
 
@@ -103,19 +109,29 @@ if it doesn't exist already it will be created</p></dd>
 
 
 <dt id="arg-filter-zerocount-target-col">filter_zerocount_target_col<a class="anchor" aria-label="anchor" href="#arg-filter-zerocount-target-col"></a></dt>
-<dd><p>default is NULL; Which sample column(s) should be
-used to check for counts of 0?  If NULL and not specified, downstream analysis will select all sample columns</p></dd>
+<dd><p>default is NULL; Which sample column(s)
+should be
+ used to check for counts of 0?  If NULL and not specified, downstream
+ analysis will select all sample columns</p></dd>
 
 
 <dt id="arg-filter-plasmid-target-col">filter_plasmid_target_col<a class="anchor" aria-label="anchor" href="#arg-filter-plasmid-target-col"></a></dt>
-<dd><p>default is NULL; Which sample columns(s) should be used to look at log2
-CPM expression for plasmid pgRNA constructs? If NULL and not specified, downstream analysis
+<dd><p>default is NULL; Which sample columns(s)
+should be used to look at log2
+CPM expression for plasmid pgRNA constructs? If NULL and not specified,
+downstream analysis
 will select the first sample column only</p></dd>
 
 
 <dt id="arg-filter-replicates-target-col">filter_replicates_target_col<a class="anchor" aria-label="anchor" href="#arg-filter-replicates-target-col"></a></dt>
-<dd><p>default is NULL; Which sample columns are replicates
-whose variation you'd like to analyze; If NULL, the last 3 sample columns are used</p></dd>
+<dd><p>default is NULL; Which sample columns
+are replicates whose variation you'd like to analyze; If NULL, the last
+3 sample columns are used</p></dd>
+
+
+<dt id="arg-open-results">open_results<a class="anchor" aria-label="anchor" href="#arg-open-results"></a></dt>
+<dd><p>default is TRUE but if you don't want the report
+automatically opened, choose FALSE.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -129,12 +145,47 @@ whose variation you'd like to analyze; If NULL, the last 3 sample columns are us
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">gimap_dataset</span> <span class="op">&lt;-</span> <span class="fu"><a href="get_example_data.html">get_example_data</a></span><span class="op">(</span><span class="st">"gimap"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu">run_qc</span><span class="op">(</span><span class="va">gimap_dataset</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-in"><span><span class="fu">run_qc</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="va">gimap_dataset</span>,</span></span>
+<span class="r-in"><span>  plots_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  output_file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"_QC_Report.Rmd"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> processing file: fileaa27480407ae_QC_Report.Rmd</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1/22                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2/22 [setup]           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3/22                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4/22 [unnamed-chunk-1] </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5/22                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6/22 [unnamed-chunk-2] </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7/22                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8/22 [unnamed-chunk-3] </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9/22                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10/22 [unnamed-chunk-4] </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11/22                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12/22 [unnamed-chunk-5] </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13/22                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14/22 [unnamed-chunk-6] </span>
+<span class="r-plt img"><img src="run_qc-1.png" alt="" width="700" height="433"></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15/22                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16/22 [unnamed-chunk-7] </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17/22                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18/22 [unnamed-chunk-8] </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19/22                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20/22 [unnamed-chunk-9] </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21/22                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22/22 [unnamed-chunk-10]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> output file: fileaa27480407ae_QC_Report.knit.md</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> /Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/x86_64/pandoc +RTS -K512m -RTS fileaa27480407ae_QC_Report.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output fileaa27480407ae_QC_Report.html --lua-filter /Library/Frameworks/R.framework/Versions/4.4-x86_64/Resources/library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /Library/Frameworks/R.framework/Versions/4.4-x86_64/Resources/library/rmarkdown/rmarkdown/lua/latex-div.lua --embed-resources --standalone --variable bs3=TRUE --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_smooth_scroll=1 --variable toc_print=1 --template /Library/Frameworks/R.framework/Versions/4.4-x86_64/Resources/library/rmarkdown/rmd/h/default.html --no-highlight --variable highlightjs=1 --variable theme=spacelab --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /var/folders/2d/d8927cd105550jjcy7qy99_w0000gn/T//RtmpIhnhWL/rmarkdown-straa2775912e82.html --variable code_folding=show --variable code_menu=1 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Output created: fileaa27480407ae_QC_Report.html</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Results in: /var/folders/2d/d8927cd105550jjcy7qy99_w0000gn/T//RtmpIhnhWL/fileaa27480407ae_QC_Report.html</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/var/folders/2d/d8927cd105550jjcy7qy99_w0000gn/T//RtmpIhnhWL/fileaa27480407ae_QC_Report.html"</span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>

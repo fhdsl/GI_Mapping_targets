@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">gimap</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.2</span>
       </span>
     </div>
 
@@ -32,6 +32,9 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/example_qc_report.html">QC Report</a>
+    </li>
+    <li>
       <a href="../articles/quick-start.html">Quick Start</a>
     </li>
     <li>
@@ -77,33 +80,47 @@
 
 
 <dl><dt id="arg--data">.data<a class="anchor" aria-label="anchor" href="#arg--data"></a></dt>
-<dd><p>Data can be piped in with tidyverse pipes from function to function. But the data must still be a gimap_dataset</p></dd>
+<dd><p>Data can be piped in with tidyverse pipes from function to
+function. But the data must still be a gimap_dataset</p></dd>
 
 
 <dt id="arg-gimap-dataset">gimap_dataset<a class="anchor" aria-label="anchor" href="#arg-gimap-dataset"></a></dt>
-<dd><p>A special dataset structure that is setup using the `setup_data()` function.</p></dd>
+<dd><p>A special dataset structure that is setup using the
+`setup_data()` function.</p></dd>
 
 
 <dt id="arg-output-file">output_file<a class="anchor" aria-label="anchor" href="#arg-output-file"></a></dt>
 <dd><p>A file for the output</p></dd>
 
 </dl></div>
+    <div id="value">
+    <h2>Value</h2>
+    <p>A ggplot2 boxplot of the CRISPR scores separated by the type of
+target. Can be used to determine the normalization has proceeded properly.</p>
+    </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">gimap_dataset</span> <span class="op">&lt;-</span> <span class="fu"><a href="get_example_data.html">get_example_data</a></span><span class="op">(</span><span class="st">"gimap"</span><span class="op">)</span> <span class="op">%&gt;%</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="gimap_filter.html">gimap_filter</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="gimap_annotate.html">gimap_annotate</a></span><span class="op">(</span>cell_line <span class="op">=</span> <span class="st">"HELA"</span><span class="op">)</span> <span class="op">%&gt;%</span></span></span>
+<span class="r-in"><span><span class="va">gimap_dataset</span> <span class="op">&lt;-</span> <span class="fu"><a href="get_example_data.html">get_example_data</a></span><span class="op">(</span><span class="st">"gimap"</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="gimap_filter.html">gimap_filter</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="gimap_annotate.html">gimap_annotate</a></span><span class="op">(</span>cell_line <span class="op">=</span> <span class="st">"HELA"</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="gimap_normalize.html">gimap_normalize</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    timepoints <span class="op">=</span> <span class="st">"day"</span></span></span>
+<span class="r-in"><span>    timepoints <span class="op">=</span> <span class="st">"day"</span>,</span></span>
+<span class="r-in"><span>    missing_ids_file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Annotating Data</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Downloading: 3.4 kB     Downloading: 3.4 kB     Downloading: 3.4 kB     Downloading: 3.4 kB     </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Downloading: Achilles_common_essentials.csv</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |                                                                      |   0%  |                                                                              |===============================================                       |  67%  |                                                                              |======================================================================| 100%</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Normalizing Log Fold Change</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Plot:</span></span></span>
-<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">plot_crispr</span><span class="op">(</span><span class="va">gimap_dataset</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-plt img"><img src="plot_crispr-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </div>

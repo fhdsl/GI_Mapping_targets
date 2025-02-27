@@ -23,5 +23,4 @@ plots sample specific histograms of the pgRNA cpm's
 gimap_dataset <- get_example_data("gimap")
 qc_sample_hist(gimap_dataset)
 
-
 }

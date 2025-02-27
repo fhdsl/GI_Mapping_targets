@@ -25,17 +25,16 @@
 #' pg_ids <- get_example_data("count") %>% dplyr::select("id")
 #'
 #' sample_metadata <- data.frame(
-#'  col_names = c("Day00_RepA", "Day05_RepA", "Day22_RepA", "Day22_RepB", "Day22_RepC"),
-#'  day = as.numeric(c("0", "5", "22", "22", "22")),
-#'  rep = as.factor(c("RepA", "RepA", "RepA", "RepB", "RepC"))
-#'  )
+#'   col_names = c("Day00_RepA", "Day05_RepA", "Day22_RepA", "Day22_RepB", "Day22_RepC"),
+#'   day = as.numeric(c("0", "5", "22", "22", "22")),
+#'   rep = as.factor(c("RepA", "RepA", "RepA", "RepB", "RepC"))
+#' )
 #'
 #' gimap_dataset <- setup_data(
 #'   counts = counts,
 #'   pg_ids = pg_ids,
 #'   sample_metadata = sample_metadata
 #' )
-#'
 #'
 setup_data <- function(counts = NULL,
                        pg_ids = NULL,
@@ -117,8 +116,6 @@ gimap_object <- function() {
     comparisons = NULL,
     annotation = NULL,
     normalized_log_fc = NULL,
-    single_crispr_score = NULL,
-    double_crispr_score = NULL,
     gi_scores = NULL,
     overall_results = NULL
   )

@@ -1,11 +1,12 @@
 #' Normalize Log fold changes
+#'
 #' @description This calculates the log fold change for a gimap dataset based on
 #' the annotation and metadata provided.
 #' gimap takes in a counts matrix that represents the number of cells that have
 #' each type of pgRNA this data needs some normalization before CRISPR scores
 #' and Genetic Interaction scores can be calculated.
 #'
-#' There are four steps of normalization.
+#' There are three steps of normalization.
 #' 1. `Calculate log2CPM` - First we account for different read depths across
 #' samples and transforms data to log2 counts per million reads.
 #' `log2((counts / total counts for sample)) * 1 million) + 1)`
@@ -46,6 +47,10 @@
 #' treatment or an untreated sample.
 #' For timepoints testing it will be assumed that the mininmum timepoint
 #' is the control.
+#' @param adj_method Must be one of three methods as stated by a character string
+#' "negative_control_adj" or "no_adjustment". Default is "negative_control_adj"
+#' "negative_control_adj" where CRISPR scores will be used for the GI scores
+#' "no_adjustment" is where LFC adjusted will be used for the GI scores
 #' @param num_ids_wo_annot default is 20; the number of pgRNA IDs to display to
 #' console if they don't have corresponding annotation data;
 #' ff there are more IDs without annotation data than this number, the output
@@ -66,21 +71,21 @@
 #' @export
 #' @examples \donttest{
 #'
-#' gimap_dataset <- get_example_data("gimap") %>%
+#' gimap_dataset_org <- get_example_data("gimap") %>%
 #'   gimap_filter() %>%
 #'   gimap_annotate(cell_line = "HELA") %>%
 #'   gimap_normalize(
 #'     timepoints = "day",
-#'     missing_ids_file =  tempfile()
+#'     missing_ids_file = tempfile()
 #'   )
-#'
-#'}
+#' }
 gimap_normalize <- function(.data = NULL,
                             gimap_dataset,
                             normalize_by_unexpressed = TRUE,
                             timepoints = NULL,
                             treatments = NULL,
                             control_name = NULL,
+                            adj_method = "negative_control_adj",
                             num_ids_wo_annot = 20,
                             rm_ids_wo_annot = TRUE,
                             missing_ids_file = "missing_ids_file.csv",
@@ -97,18 +102,18 @@ gimap_normalize <- function(.data = NULL,
       "can be made with the setup_data() function."
     )
   }
-
   # Based on log fold change calculations and other handling will go
   # based on the code in:
   # https://github.com/FredHutch/GI_mapping/blob/main/workflow/scripts/
   # 03-filter_and_calculate_LFC.Rmd
 
-
-  if (!is.null(gimap_dataset$normalized_log_fc) & !overwrite) {
-    stop(
-      "Normalization has already been preformed on this dataset.",
-      "set overwrite = TRUE if you'd like the existing data to be overwritten."
-    )
+  if (!adj_method %in% c("negative_control_adj", "no_negative_control", "no_adjustment")) {
+    if (!is.null(gimap_dataset$normalized_log_fc) & !overwrite) {
+      stop(
+        "Normalization has already been preformed on this dataset.",
+        "set overwrite = TRUE if you'd like the existing data to be overwritten."
+      )
+    }
   }
 
   if (overwrite) {
@@ -178,10 +183,10 @@ gimap_normalize <- function(.data = NULL,
     # Rename and recode the timepoints variable
     gimap_dataset$metadata$sample_metadata <-
       gimap_dataset$metadata$sample_metadata %>%
-      dplyr::rename(timepoints = all_of(timepoints)) %>%
       # Note that timepoints are extablished as three categories:
       # control, early, or late.
-      dplyr::mutate(comparison = dplyr::case_when(
+      dplyr::mutate(timepoints = !!sym(timepoints),
+        comparison = dplyr::case_when(
         timepoints == min(timepoints) ~ "control",
         timepoints == max(timepoints) ~ "late",
         TRUE ~ "early"
@@ -287,28 +292,32 @@ gimap_normalize <- function(.data = NULL,
         lfc = lfc - median(lfc[unexpressed_ctrl_flag == TRUE])
       )
   }
-  medians_df <- comparison_df %>%
-    dplyr::group_by(norm_ctrl_flag, rep) %>%
-    dplyr::summarize(median = median(lfc, na.rm = TRUE)) %>%
-    tidyr::pivot_wider(
-      values_from = median,
-      names_from = norm_ctrl_flag
-    ) %>%
-    dplyr::select(rep, negative_control, positive_control)
 
-  # logFC adjusted = (log2FC - log2FC_negctls) / |log2FC_posctls|
-  lfc_adj <- comparison_df %>%
-    dplyr::left_join(medians_df, by = "rep") %>%
-    dplyr::mutate(
-      crispr_score = (lfc - negative_control) /
-        (negative_control - positive_control)
-    )
+  if (adj_method == "negative_control_adj") {
+    medians_df <- comparison_df %>%
+      dplyr::group_by(norm_ctrl_flag, rep) %>%
+      dplyr::summarize(median = median(lfc, na.rm = TRUE)) %>%
+      tidyr::pivot_wider(
+        values_from = median,
+        names_from = norm_ctrl_flag
+      ) %>%
+      dplyr::select(rep, negative_control, positive_control)
 
-  # These should equal 0 and -1
-  lfc_adj %>%
-    dplyr::group_by(rep, norm_ctrl_flag) %>%
-    dplyr::summarize(median_crispr = median(crispr_score)) %>%
-    dplyr::filter(norm_ctrl_flag %in% c("negative_control", "positive_control"))
+    # logFC adjusted = (log2FC - log2FC_negctls) / |log2FC_posctls|
+    lfc_adj <- comparison_df %>%
+      dplyr::left_join(medians_df, by = "rep") %>%
+      dplyr::mutate(
+        crispr_score = (lfc - negative_control) /
+          (negative_control - positive_control)
+      )
+    # These should equal 0 and -1
+    lfc_adj %>%
+      dplyr::group_by(rep, norm_ctrl_flag) %>%
+      dplyr::summarize(median_crispr = median(crispr_score)) %>%
+      dplyr::filter(norm_ctrl_flag %in% c("negative_control", "positive_control"))
+  } else {
+    lfc_adj <- comparison_df
+  }
 
   # Save this at the construct level
   gimap_dataset$normalized_log_fc <- lfc_adj

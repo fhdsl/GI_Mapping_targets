@@ -26,18 +26,43 @@ test_that("Test Genetic Interaction score calculations", {
 
   testthat::expect_identical(
     round(gimap_dataset$gi_scores$mean_expected_cs[1], 3),
-    round(0.360, 3)
+    round(-0.2220, 3)
   )
   testthat::expect_identical(
     round(gimap_dataset$gi_scores$mean_observed_cs[1], 3),
-    round(-4.411, 3)
+    round(-1.515, 3)
   )
   testthat::expect_identical(
     round(gimap_dataset$gi_scores$mean_gi_score[1], 3),
-    round(-4.0740, 3)
+    round(-1.119, 3)
   )
   testthat::expect_identical(
     round(gimap_dataset$gi_scores$p_val[1], 3),
     round(0.001203125, 3)
   )
+})
+
+
+test_that("Test Genetic Interaction score calculations using LFC", {
+  testthat::skip_on_cran()
+  gimap_dataset <- get_example_data("gimap") %>%
+    gimap_filter() %>%
+    gimap_annotate(cell_line = "HELA") %>%
+    gimap_normalize(
+      timepoints = "day",
+      adj_method = "no_adjustment"
+    ) %>%
+    calc_gi(use_lfc = TRUE)
+})
+
+
+test_that("Test Genetic Interaction score calculations by rep", {
+  testthat::skip_on_cran()
+  gimap_dataset <- get_example_data("gimap") %>%
+    gimap_filter() %>%
+    gimap_annotate(cell_line = "HELA") %>%
+    gimap_normalize(
+      timepoints = "day",
+    ) %>%
+    calc_gi(stats_by_rep = TRUE)
 })

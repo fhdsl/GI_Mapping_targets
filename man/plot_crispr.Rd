@@ -30,7 +30,7 @@ gimap_dataset <- get_example_data("gimap") \%>\%
   gimap_annotate(cell_line = "HELA") \%>\%
   gimap_normalize(
     timepoints = "day",
-    missing_ids_file =  tempfile()
+    missing_ids_file = tempfile()
   )
 
 # Plot:

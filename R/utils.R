@@ -174,12 +174,12 @@ key_encrypt_creds_path <- function() {
 #'
 #' get_figshare(
 #'   return_list = TRUE
-#'  )
+#' )
 #'
 #' get_figshare(
 #'   file_name = "Achilles_common_essentials.csv",
-#'   output_dir =  tempdir()
-#'  )
+#'   output_dir = tempdir()
+#' )
 #'
 get_figshare <- function(file_name = NA,
                          item = "19700056",

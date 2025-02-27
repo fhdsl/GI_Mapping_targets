@@ -13,7 +13,6 @@
 #' gimap_dataset <- get_example_data("gimap")
 #' qc_cdf(gimap_dataset)
 #'
-#'
 qc_cdf <- function(gimap_dataset, wide_ar = 0.75) {
   long_form <-
     tidyr::pivot_longer(data.frame(gimap_dataset$transformed_data$log2_cpm),
@@ -49,7 +48,6 @@ qc_cdf <- function(gimap_dataset, wide_ar = 0.75) {
 #' @examples
 #' gimap_dataset <- get_example_data("gimap")
 #' qc_sample_hist(gimap_dataset)
-#'
 #'
 qc_sample_hist <- function(gimap_dataset, wide_ar = 0.75) {
   long_form <-
@@ -91,7 +89,6 @@ qc_sample_hist <- function(gimap_dataset, wide_ar = 0.75) {
 #' @examples
 #' gimap_dataset <- get_example_data("gimap")
 #' qc_variance_hist(gimap_dataset)
-#'
 #'
 qc_variance_hist <- function(gimap_dataset, filter_replicates_target_col = NULL, wide_ar = 0.75) {
   if (is.null(filter_replicates_target_col)) {
@@ -158,7 +155,6 @@ qc_variance_hist <- function(gimap_dataset, filter_replicates_target_col = NULL,
 #'   filter_replicates_target_col = 3:5
 #' )
 #'
-#'
 qc_constructs_countzero_bar <- function(gimap_dataset,
                                         filter_zerocount_target_col = NULL,
                                         filter_replicates_target_col = NULL,
@@ -215,7 +211,6 @@ qc_constructs_countzero_bar <- function(gimap_dataset,
 #' @examples
 #' gimap_dataset <- get_example_data("gimap")
 #' qc_cor_heatmap(gimap_dataset)
-#'
 #'
 qc_cor_heatmap <- function(gimap_dataset) {
   cpm_cor <- gimap_dataset$transformed_data$cpm %>%
@@ -305,7 +300,7 @@ qc_plasmid_histogram <- function(gimap_dataset,
 #' Standardized plot theme
 #' @description this is a ggplot2 standardized plot theme for this package
 #' @export
-#' @return A ggplot2 theme that can be used on the plots. 
+#' @return A ggplot2 theme that can be used on the plots.
 plot_theme <- function() {
   theme(
     axis.text = element_text(colour = "black"),

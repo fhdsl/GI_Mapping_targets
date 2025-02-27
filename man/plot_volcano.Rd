@@ -4,7 +4,7 @@
 \alias{plot_volcano}
 \title{Volcano plot for GI scores}
 \usage{
-plot_volcano(gimap_dataset, facet_rep = TRUE, reps_to_drop = "")
+plot_volcano(gimap_dataset, facet_rep = FALSE, reps_to_drop = "")
 }
 \arguments{
 \item{gimap_dataset}{A special dataset structure that is originally setup using `setup_data()` and has had gi scores calculated with `calc_gi()`.}
@@ -33,8 +33,8 @@ gimap_dataset <- get_example_data("gimap") \%>\%
   calc_gi()
 
 # To plot results
-plot_exp_v_obs_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
-plot_rank_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
-plot_volcano(gimap_dataset, reps_to_drop = "Day05_RepA_early")
+plot_exp_v_obs_scatter(gimap_dataset)
+plot_rank_scatter(gimap_dataset)
+plot_volcano(gimap_dataset)
 }
 }

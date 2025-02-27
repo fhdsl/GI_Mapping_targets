@@ -11,6 +11,7 @@ gimap_normalize(
   timepoints = NULL,
   treatments = NULL,
   control_name = NULL,
+  adj_method = "negative_control_adj",
   num_ids_wo_annot = 20,
   rm_ids_wo_annot = TRUE,
   missing_ids_file = "missing_ids_file.csv",
@@ -49,6 +50,11 @@ treatment or an untreated sample.
 For timepoints testing it will be assumed that the mininmum timepoint
 is the control.}
 
+\item{adj_method}{Must be one of three methods as stated by a character string
+"negative_control_adj" or "no_adjustment". Default is "negative_control_adj"
+"negative_control_adj" where CRISPR scores will be used for the GI scores
+"no_adjustment" is where LFC adjusted will be used for the GI scores}
+
 \item{num_ids_wo_annot}{default is 20; the number of pgRNA IDs to display to
 console if they don't have corresponding annotation data;
 ff there are more IDs without annotation data than this number, the output
@@ -78,7 +84,7 @@ gimap takes in a counts matrix that represents the number of cells that have
 each type of pgRNA this data needs some normalization before CRISPR scores
 and Genetic Interaction scores can be calculated.
 
-There are four steps of normalization.
+There are three steps of normalization.
 1. `Calculate log2CPM` - First we account for different read depths across
 samples and transforms data to log2 counts per million reads.
 `log2((counts / total counts for sample)) * 1 million) + 1)`
@@ -97,13 +103,12 @@ log2FC adjusted = log2FC /
 \examples{
 \donttest{
 
-gimap_dataset <- get_example_data("gimap") \%>\%
+gimap_dataset_org <- get_example_data("gimap") \%>\%
   gimap_filter() \%>\%
   gimap_annotate(cell_line = "HELA") \%>\%
   gimap_normalize(
     timepoints = "day",
-    missing_ids_file =  tempfile()
+    missing_ids_file = tempfile()
   )
-
 }
 }

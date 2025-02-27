@@ -20,5 +20,4 @@ This function uses the `cor` function to find correlations between the
 gimap_dataset <- get_example_data("gimap")
 qc_cor_heatmap(gimap_dataset)
 
-
 }

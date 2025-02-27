@@ -4,7 +4,7 @@
 \alias{plot_exp_v_obs_scatter}
 \title{Expected vs Observed CRISPR Scatterplot}
 \usage{
-plot_exp_v_obs_scatter(gimap_dataset, facet_rep = TRUE, reps_to_drop = "")
+plot_exp_v_obs_scatter(gimap_dataset, facet_rep = FALSE, reps_to_drop = "")
 }
 \arguments{
 \item{gimap_dataset}{A special dataset structure that is originally setup using `setup_data()` and has had gi scores calculated with `calc_gi()`.}
@@ -31,13 +31,13 @@ gimap_dataset <- get_example_data("gimap") \%>\%
   gimap_annotate(cell_line = "HELA") \%>\%
   gimap_normalize(
     timepoints = "day",
-     missing_ids_file =  tempfile()
+    missing_ids_file = tempfile()
   ) \%>\%
   calc_gi()
 
 # To plot results
-plot_exp_v_obs_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
-plot_rank_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
-plot_volcano(gimap_dataset, reps_to_drop = "Day05_RepA_early")
+plot_exp_v_obs_scatter(gimap_dataset)
+plot_rank_scatter(gimap_dataset)
+plot_volcano(gimap_dataset)
 }
 }

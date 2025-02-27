@@ -121,6 +121,18 @@ expected crispr single = single target crispr 1 + mean negative control for the 
 ```
 So for `TRPC5_nt1` single target we would take its CRISPR score + the mean of the `nt1` sequence across the constructs where it is included in a double non targeting construct.
 
+### t-tests
+
+Genetic Interaction scores are used to calculate p values using a t-test.
+
+For each gene pair...
+
+A t-test compares:
+1) The distribution of all single target GI scores
+2) The distribution of the data from the 16 double targeting constructs for the particular gene pair
+
+These t-tests can be performed with all samples combined or for each sample using the `stat_by_rep` argument in `calc_gi()`. False discovery rate is then applied after the p values are obtained to account for multiple testing correction.
+
 ### Normalization
 
 gimap takes in a counts matrix that represents the number of cells that have each type of pgRNA. This data needs some normalization before CRISPR scores and Genetic Interaction scores can be calculated.
@@ -162,7 +174,7 @@ Now you can [go to our quick start tutorial to get started!](https://fredhutch.g
 
 We also have tutorial examples that show how to run timepoint or treatment experimental set ups with gimap:
 
-- [Timepoint example](https://fredhutch.github.io/gimap/articles/timepoint-example.html
+- [Timepoint example](https://fredhutch.github.io/gimap/articles/timepoint-example.html)
 - [Treatment example](https://fredhutch.github.io/gimap/articles/treatment_example.html)
 
 Follow the steps there that will walk you through the example data. Then you can tailor that tutorial to use your own data.

@@ -180,6 +180,7 @@ There is a filter that flags pgRNA constructs that have low log2 CPM counts for 
 run_qc(gimap_dataset,
        output_file = "example_qc_report.Rmd",
        overwrite = TRUE,
+       plots_dir = "plots",
        quiet = TRUE)
 ```
 
@@ -248,15 +249,15 @@ head(dplyr::arrange(gimap_dataset$gi_score, fdr))
 You can remove any samples from these plots by altering the `reps_to_drop` argument.
 
 ```{r eval = FALSE}
-plot_exp_v_obs_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
+plot_exp_v_obs_scatter(gimap_dataset)
 ```
 
 ```{r eval = FALSE}
-plot_rank_scatter(gimap_dataset, reps_to_drop = "Day05_RepA_early")
+plot_rank_scatter(gimap_dataset)
 ```
 
 ```{r eval = FALSE}
-plot_volcano(gimap_dataset, reps_to_drop = "Day05_RepA_early")
+plot_volcano(gimap_dataset)
 ```
 
 ### Plot specific target pair
@@ -265,7 +266,8 @@ We can pick out a specific pair to plot.
 
 ```{r eval = FALSE}
 # "NDEL1_NDE1" is top result so let's plot that
-plot_targets_bar(gimap_dataset, target1 = "NDEL1", target2 = "NDE1")
+plot_targets_bar(gimap_dataset, target1 = "TIAL1", target2 = "TIA1",
+                 reps_to_drop = "Day05_RepA_early")
 ```
 
 ## Saving results to files

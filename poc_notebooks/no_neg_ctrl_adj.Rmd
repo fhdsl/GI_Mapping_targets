@@ -1,0 +1,127 @@
+---
+title: "Skip negative control adjustment"
+author: "Candace Savonen"
+date: "2025-02-19"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+devtools::load_all()
+```
+
+## Setting up data
+
+We're going to set up three datasets that we will provide to the `set_up()` function to create a `gimap` dataset object.
+
+- `counts` - the counts generated from pgPEN
+- `pg_ids` - the IDs that correspond to the rows of the counts and specify the construct
+- `sample_metadata` - metadata that describes the columns of the counts including their timepoints
+
+```{r}
+example_data <- get_example_data("count")
+
+counts <- example_data %>%
+  select(c("Day00_RepA", "Day05_RepA", "Day22_RepA", "Day22_RepB", "Day22_RepC")) %>%
+  as.matrix()
+
+pg_ids <- example_data %>%
+  dplyr::select("id")
+```
+
+Remove NTs for one of the datasets.
+
+```{r}
+pg_ids_nt <- grep("NTpg", pg_ids$id, invert = TRUE)
+
+counts_nt <- counts[pg_ids_nt, ]
+pg_ids_nt <- pg_ids[pg_ids_nt, ]
+```
+
+Sample metadata is the information that describes the samples and is sorted the same order as the columns in the count data.
+
+```{r }
+sample_metadata <- data.frame(
+  col_names = c("Day00_RepA", "Day05_RepA", "Day22_RepA", "Day22_RepB", "Day22_RepC"),
+  day = as.numeric(c("0", "5", "22", "22", "22")),
+  rep = as.factor(c("RepA", "RepA", "RepA", "RepB", "RepC"))
+)
+```
+
+
+```{r}
+gimap_dataset <- setup_data(
+  counts = counts,
+  pg_ids = pg_ids,
+  sample_metadata = sample_metadata
+)
+
+gimap_dataset_no_nts <- setup_data(
+  counts = counts_nt,
+  pg_ids = pg_ids_nt,
+  sample_metadata = sample_metadata
+)
+```
+
+## Set up comparison sets
+
+```{r}
+ gimap_dataset <- gimap_dataset %>%
+   gimap_filter() %>%
+   gimap_annotate(cell_line = "HELA") %>%
+   gimap_normalize(
+     timepoints = "day",
+     missing_ids_file =  tempfile()
+   ) %>%
+   calc_gi()
+
+ gimap_dataset_lfc <- gimap_dataset_no_nts %>%
+   gimap_filter() %>%
+   gimap_annotate(cell_line = "HELA") %>%
+   gimap_normalize(
+     timepoints = "day",
+     missing_ids_file =  tempfile(), 
+     adj_method = "no_adjustment"
+   ) %>%
+   calc_gi(use_lfc = TRUE)
+
+```
+ 
+ 
+```{r}
+ plot_exp_v_obs_scatter(gimap_dataset, 
+                        facet_rep = FALSE, 
+                        reps_to_drop = "Day05_RepA_early")
+
+ plot_exp_v_obs_scatter(gimap_dataset_lfc,
+                        facet_rep = FALSE,
+                        reps_to_drop = "Day05_RepA_early")
+```
+ 
+ 
+```{r}
+ plot_rank_scatter(gimap_dataset, 
+                   reps_to_drop = "Day05_RepA_early")
+ 
+ plot_rank_scatter(gimap_dataset_lfc, 
+                   reps_to_drop = "Day05_RepA_early")
+```
+ 
+```{r}
+ plot_volcano(gimap_dataset, reps_to_drop = "Day05_RepA_early")
+ plot_volcano(gimap_dataset_lfc, reps_to_drop = "Day05_RepA_early")
+```
+```{r}
+joined_df <- 
+  dplyr::inner_join(gimap_dataset$gi_scores, 
+                  gimap_dataset_lfc$gi_scores, 
+                  by =c("rep", "pgRNA_target"), 
+                  suffix = c("_crispr", "_lfc")) %>% 
+  dplyr::filter(rep != "Day05_RepA_early")
+
+
+ggplot(joined_df, aes(mean_gi_score_crispr, mean_gi_score_lfc)) + 
+  ggplot2::geom_point() + 
+  ggplot2::facet_wrap(~rep)
+```
