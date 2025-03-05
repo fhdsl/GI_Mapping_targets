@@ -53,6 +53,8 @@ test_that("Test Genetic Interaction score calculations using LFC", {
       adj_method = "no_adjustment"
     ) %>%
     calc_gi(use_lfc = TRUE)
+
+  testthat::expect_true(class(gimap_dataset)[1] == "list")
 })
 
 
@@ -65,4 +67,7 @@ test_that("Test Genetic Interaction score calculations by rep", {
       timepoints = "day",
     ) %>%
     calc_gi(stats_by_rep = TRUE)
+
+  testthat::expect_true(class(gimap_dataset)[1] == "list")
+
 })

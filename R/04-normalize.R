@@ -71,12 +71,14 @@
 #' @export
 #' @examples \donttest{
 #'
-#' gimap_dataset_org <- get_example_data("gimap") %>%
+#' gimap_dataset <- get_example_data("gimap",
+#'                                   data_dir = tempdir()) %>%
 #'   gimap_filter() %>%
 #'   gimap_annotate(cell_line = "HELA") %>%
 #'   gimap_normalize(
 #'     timepoints = "day",
-#'     missing_ids_file = tempfile()
+#'     missing_ids_file = tempfile(),
+#'     data_dir = tempdir()
 #'   )
 #' }
 gimap_normalize <- function(.data = NULL,

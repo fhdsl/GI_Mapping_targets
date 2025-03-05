@@ -32,7 +32,7 @@ utils::globalVariables(c(
 #' @returns the respective example data either as a data frame or a specialized
 #' gimap_dataset depending on what was requested.
 #'
-#' @examples \donttest{
+#' @examples \dontrun{
 #'
 #' counts_timepoint <- get_example_data("count")
 #' counts_treatment <- get_example_data("count_treatment")
@@ -41,8 +41,8 @@ utils::globalVariables(c(
 #' metadata <- get_example_data("meta")
 #' annotation <- get_example_data("annotation")
 #' }
-get_example_data <- function(which_data) {
-  data_dir <- system.file("extdata", package = "gimap")
+get_example_data <- function(which_data,
+                             data_dir = system.file("extdata", package = "gimap")) {
 
   file_name <- switch(which_data,
     "count" = "PP_pgPEN_HeLa_counts.txt",
@@ -170,20 +170,21 @@ key_encrypt_creds_path <- function() {
 #' in as data frames.
 #' @export
 #'
-#' @examples
+#' @examples \donttest{
 #'
 #' get_figshare(
-#'   return_list = TRUE
+#'   return_list = TRUE,
+#'   output_dir = tempdir()
 #' )
 #'
 #' get_figshare(
 #'   file_name = "Achilles_common_essentials.csv",
 #'   output_dir = tempdir()
 #' )
-#'
+#'}
 get_figshare <- function(file_name = NA,
                          item = "19700056",
-                         output_dir = NULL,
+                         output_dir = tempdir(),
                          return_list = FALSE) {
   if (is.null(output_dir)) output_dir <- system.file("extdata", package = "gimap")
 
@@ -241,7 +242,7 @@ get_figshare <- function(file_name = NA,
 
   writeLines(result_content, file.path(output_dir, file_name))
 
-  return(result_content)
+  return(file.path(output_dir, file_name))
 }
 
 #' Pipe operator
