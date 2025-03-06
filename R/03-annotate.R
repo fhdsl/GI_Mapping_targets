@@ -119,8 +119,9 @@ gimap_annotate <- function(.data = NULL,
     )
   }
 
+  # If data is to be refreshed delete old data
   if (refresh_annot) {
-    refresh_annotation()
+    delete_annotation()
   }
 
   # Get the annotation data based on the pg construct design
@@ -496,9 +497,15 @@ supported_cell_lines <- function() {
 #' @return options for tpm_file, cn_file, and ctrl_genes_file are set to NULL.
 #' @examples
 #'
-#' refresh_annotation()
+#' delete_annotation()
 #'
-refresh_annotation <- function() {
+delete_annotation <- function() {
+
+  message("Deleting original files")
+  unlink(options("tpm_file"))
+  unlink(options("cn_file"))
+  unlink(options("ctrl_genes_file"))
+
   options("tpm_file" = NULL)
   options("cn_file" = NULL)
   options("ctrl_genes_file" = NULL)
