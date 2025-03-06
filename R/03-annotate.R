@@ -337,7 +337,8 @@ tpm_setup <- function(overwrite = TRUE,
   options("tpm_file" = tpm_file)
   if (!file.exists(tpm_file) | overwrite) {
     if (!file.exists(file.path(data_dir, "CCLE_expression.csv.zip"))) {
-      get_figshare(file_name = "CCLE_expression.csv")
+      get_figshare(file_name = "CCLE_expression.csv",
+                   output_dir = data_dir)
     } else {
       unzip(file.path(data_dir, "CCLE_expression.csv.zip"),
         exdir = data_dir, overwrite = TRUE
@@ -392,7 +393,8 @@ cn_setup <- function(overwrite = TRUE,
 
   if (!file.exists(cn_file) | overwrite) {
     if (!file.exists(file.path(data_dir, "CCLE_gene_cn.csv.zip"))) {
-      get_figshare(file_name = "CCLE_gene_cn.csv")
+      get_figshare(file_name = "CCLE_gene_cn.csv",
+                   output_dir = data_dir)
     } else {
       unzip(file.path(data_dir, "CCLE_gene_cn.csv.zip"),
         exdir = data_dir, overwrite = TRUE
@@ -446,7 +448,8 @@ ctrl_genes <- function(overwrite = TRUE,
       data_dir,
       "Achilles_common_essentials.csv.zip"
     ))) {
-      get_figshare(file_name = "Achilles_common_essentials.csv")
+      get_figshare(file_name = "Achilles_common_essentials.csv",
+                   output_dir = data_dir)
     } else {
       unzip(file.path(data_dir, "Achilles_common_essentials.csv.zip"),
         exdir = data_dir,
