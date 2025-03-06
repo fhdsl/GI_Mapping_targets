@@ -28,6 +28,7 @@ utils::globalVariables(c(
 #' Which dataset is returned must be specified. Data will be downloaded from Figshare
 #' the first time it is used.
 #' @param which_data options are "count" or "meta"; specifies which example dataset should be returned
+#' @param data_dir Where should the data be saved if applicable?
 #' @export
 #' @returns the respective example data either as a data frame or a specialized
 #' gimap_dataset depending on what was requested.

@@ -12,7 +12,8 @@ gimap_annotate(
   cell_line_annotate = TRUE,
   custom_tpm = NULL,
   cell_line = NULL,
-  annot_dir = system.file("extdata", package = "gimap")
+  annot_dir = system.file("extdata", package = "gimap"),
+  refresh_annot = FALSE
 )
 }
 \arguments{
@@ -51,6 +52,9 @@ Required argument if cell_line_annotate is TRUE.}
 
 \item{annot_dir}{Where should the annotation files be saved? default is a
 temporary directory.}
+
+\item{refresh_annot}{Should the annotation file paths saved as options be reset
+and the files redownloaded? TRUE or FALSE.}
 }
 \value{
 A gimap_dataset with annotation data frame that can be retrieve by using

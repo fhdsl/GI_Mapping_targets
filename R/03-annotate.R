@@ -29,6 +29,8 @@
 #' DepMap like CN will be added.
 #' @param annot_dir Where should the annotation files be saved? default is a
 #' temporary directory.
+#' @param refresh_annot Should the annotation file paths saved as options be reset
+#' and the files redownloaded? TRUE or FALSE.
 #' @return A gimap_dataset with annotation data frame that can be retrieve by using
 #' gimap_dataset$annotation. This will contain information about your included
 #' genes in the set.

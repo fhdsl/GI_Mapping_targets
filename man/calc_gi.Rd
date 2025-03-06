@@ -68,11 +68,11 @@ Low FDR value for a double construct means high suspicion of paralogs.
 gimap_dataset <- get_example_data("gimap",
                                   data_dir = tempdir()) \%>\%
   gimap_filter() \%>\%
-  gimap_annotate(cell_line = "HELA") \%>\%
+  gimap_annotate(cell_line = "HELA",
+                 annot_dir = tempdir()) \%>\%
   gimap_normalize(
     timepoints = "day",
-    missing_ids_file = tempfile(),
-    annot_dir = tempdir()
+    missing_ids_file = tempfile()
   ) \%>\%
   calc_gi()
 

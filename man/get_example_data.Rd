@@ -11,6 +11,8 @@ get_example_data(
 }
 \arguments{
 \item{which_data}{options are "count" or "meta"; specifies which example dataset should be returned}
+
+\item{data_dir}{Where should the data be saved if applicable?}
 }
 \value{
 the respective example data either as a data frame or a specialized

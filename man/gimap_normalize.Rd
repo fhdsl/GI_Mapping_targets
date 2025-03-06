@@ -106,11 +106,11 @@ log2FC adjusted = log2FC /
 gimap_dataset <- get_example_data("gimap",
                                   data_dir = tempdir()) \%>\%
   gimap_filter() \%>\%
-  gimap_annotate(cell_line = "HELA") \%>\%
+  gimap_annotate(cell_line = "HELA",
+                 annot_dir = tempdir()) \%>\%
   gimap_normalize(
     timepoints = "day",
-    missing_ids_file = tempfile(),
-    data_dir = tempdir()
+    missing_ids_file = tempfile()
   )
 }
 }
