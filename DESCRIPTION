@@ -1,7 +1,7 @@
 Type: Package
 Package: gimap
 Title: Calculate Genetic Interactions for Paired CRISPR Targets
-Version: 1.0.2
+Version: 1.0.3
 Authors@R: c(
   person("Candace", "Savonen",
          email = c("cansav09@gmail.com","csavonen@fredhutch.org"), role = c("aut", "cre")),
