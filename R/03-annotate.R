@@ -91,7 +91,8 @@ gimap_annotate <- function(.data = NULL,
                            cell_line_annotate = TRUE,
                            custom_tpm = NULL,
                            cell_line = NULL,
-                           annot_dir = system.file("extdata", package = "gimap")) {
+                           annot_dir = system.file("extdata", package = "gimap"),
+                           refresh_annot = FALSE) {
   if (!is.null(.data)) gimap_dataset <- .data
 
   if (!("gimap_dataset" %in% class(gimap_dataset))) {
@@ -114,6 +115,10 @@ gimap_annotate <- function(.data = NULL,
       " unless you supply your own expression data using the `custom_tpm`",
       " argument"
     )
+  }
+
+  if (refresh_annot) {
+    refresh_annotation()
   }
 
   # Get the annotation data based on the pg construct design
@@ -477,4 +482,19 @@ supported_cell_lines <- function() {
   )
 
   return(sort(depmap_metadata$stripped_cell_line_name))
+}
+
+#' Refresh the annotation files by redownloading them
+#' @description This function will set annotation file options to NULL so files
+#' will be re-downloaded
+#' @export
+#' @return options for tpm_file, cn_file, and ctrl_genes_file are set to NULL.
+#' @examples
+#'
+#' refresh_annotation()
+#'
+refresh_annotation <- function() {
+  options("tpm_file" = NULL)
+  options("cn_file" = NULL)
+  options("ctrl_genes_file" = NULL)
 }
