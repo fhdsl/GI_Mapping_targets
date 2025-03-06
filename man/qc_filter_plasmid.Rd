@@ -39,7 +39,7 @@ cutoff
 }
 \examples{
 \donttest{
-gimap_dataset <- get_example_data("gimap")
+gimap_dataset <- get_example_data("gimap", data_dir = tempdir())
 
 qc_filter_plasmid(gimap_dataset)
 

@@ -7,7 +7,7 @@
 get_figshare(
   file_name = NA,
   item = "19700056",
-  output_dir = NULL,
+  output_dir = tempdir(),
   return_list = FALSE
 )
 }
@@ -28,14 +28,16 @@ in as data frames.
 Handler function for GET requests from Figshare
 }
 \examples{
+\donttest{
 
 get_figshare(
-  return_list = TRUE
+  return_list = TRUE,
+  output_dir = tempdir()
 )
 
 get_figshare(
   file_name = "Achilles_common_essentials.csv",
   output_dir = tempdir()
 )
-
+}
 }

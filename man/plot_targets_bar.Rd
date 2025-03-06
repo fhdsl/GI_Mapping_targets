@@ -40,7 +40,7 @@ gimap_dataset <- get_example_data("gimap") \%>\%
 # To plot results, pick out two targets from the gi_score table
 head(dplyr::arrange(gimap_dataset$gi_score, fdr))
 
-# "NDEL1_NDE1" is top result so let's plot that
-plot_targets_bar(gimap_dataset, target1 = "NDEL1", target2 = "NDE1")
+# "TIAL1_TIA1" is top result so let's plot that
+plot_targets_bar(gimap_dataset, target1 = "TIAL1", target2 = "TIA1")
 }
 }

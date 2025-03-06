@@ -2,7 +2,7 @@
 % Please edit documentation in R/05-calculate_gi.R
 \name{gimap_stats}
 \alias{gimap_stats}
-\title{Do tests for each replicate --an internal function used by calc_gi() function}
+\title{Do tests --an internal function used by calc_gi() function}
 \usage{
 gimap_stats(gi_calc_double, gi_calc_single, replicate = NULL)
 }
@@ -11,7 +11,7 @@ gimap_stats(gi_calc_double, gi_calc_single, replicate = NULL)
 
 \item{gi_calc_single}{a data.frame with adjusted single gi scores}
 
-\item{replicate}{a name of a replicate to filter out from gi_calc_adj}
+\item{replicate}{a name of a replicate to filter out from gi_calc_adj Optional}
 }
 \description{
 Create results table that has t test p values

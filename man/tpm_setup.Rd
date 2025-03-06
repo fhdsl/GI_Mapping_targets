@@ -4,10 +4,16 @@
 \alias{tpm_setup}
 \title{Download and set up DepMap TPM data}
 \usage{
-tpm_setup(overwrite = TRUE)
+tpm_setup(
+  overwrite = TRUE,
+  data_dir = system.file("extdata", package = "gimap")
+)
 }
 \arguments{
 \item{overwrite}{should the files be re downloaded}
+
+\item{data_dir}{What directory should this be saved to? Default is with package
+files}
 }
 \description{
 This function sets up the tpm data from DepMap is

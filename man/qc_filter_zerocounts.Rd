@@ -28,7 +28,7 @@ raw count of 0 for any sample/time point
 }
 \examples{
 \donttest{
-gimap_dataset <- get_example_data("gimap")
+gimap_dataset <- get_example_data("gimap", data_dir = tempdir())
 qc_filter_zerocounts(gimap_dataset)
 
 # or to specify a different column (or set of columns to select)

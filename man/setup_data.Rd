@@ -29,14 +29,15 @@ This function allows people to have their data ready to be
 }
 \examples{
 
-counts <- get_example_data("count") \%>\%
+counts <- get_example_data("count", data_dir = tempdir()) \%>\%
   dplyr::select(c(
     "Day00_RepA", "Day05_RepA", "Day22_RepA", "Day22_RepB",
     "Day22_RepC"
   )) \%>\%
   as.matrix()
 
-pg_ids <- get_example_data("count") \%>\% dplyr::select("id")
+pg_ids <- get_example_data("count", data_dir = tempdir()) \%>\%
+  dplyr::select("id")
 
 sample_metadata <- data.frame(
   col_names = c("Day00_RepA", "Day05_RepA", "Day22_RepA", "Day22_RepB", "Day22_RepC"),

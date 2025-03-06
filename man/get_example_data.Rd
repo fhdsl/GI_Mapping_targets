@@ -4,7 +4,10 @@
 \alias{get_example_data}
 \title{Returns example data for package}
 \usage{
-get_example_data(which_data)
+get_example_data(
+  which_data,
+  data_dir = system.file("extdata", package = "gimap")
+)
 }
 \arguments{
 \item{which_data}{options are "count" or "meta"; specifies which example dataset should be returned}
@@ -19,7 +22,7 @@ Which dataset is returned must be specified. Data will be downloaded from Figsha
 the first time it is used.
 }
 \examples{
-\donttest{
+\dontrun{
 
 counts_timepoint <- get_example_data("count")
 counts_treatment <- get_example_data("count_treatment")

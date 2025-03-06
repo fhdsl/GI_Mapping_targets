@@ -4,10 +4,16 @@
 \alias{cn_setup}
 \title{Download and set up DepMap CN}
 \usage{
-cn_setup(overwrite = TRUE)
+cn_setup(
+  overwrite = TRUE,
+  data_dir = system.file("extdata", package = "gimap")
+)
 }
 \arguments{
 \item{overwrite}{Should the files be redownloaded?}
+
+\item{data_dir}{What directory should this be saved to? Default is with package
+files}
 }
 \description{
 This function sets up the tpm data from DepMap is called
