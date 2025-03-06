@@ -1,0 +1,167 @@
+---
+title: "parrish pc9 reanalysis"
+author: "Marissa Fujimoto"
+date: "2025-02-4"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Calculating GI Scores Following Treatment Example
+
+```{r}
+library(gimap)
+library(dplyr)
+library(ggplot2)
+library(ggrepel)
+```
+
+```{r}
+output_dir <- "output_treatment"
+dir.create(output_dir, showWarnings = FALSE)
+```
+
+```{r}
+parrish_pc9_data <- readr::read_tsv("GSE178179_pgPEN_counts_renamed.txt",
+      show_col_types = FALSE)
+```
+
+```{r}
+colnames(parrish_pc9_data)
+```
+
+```{r}
+parrish_pc9_data <- parrish_pc9_data %>% 
+  mutate(PC9_plasmid_RepA = PC9_plasmid)
+parrish_pc9_data <- parrish_pc9_data %>% 
+  mutate(PC9_plasmid_RepB = PC9_plasmid)
+parrish_pc9_data <- parrish_pc9_data %>% 
+  mutate(PC9_plasmid_RepC = PC9_plasmid)
+```
+
+```{r}
+parrish_pc9_counts <- parrish_pc9_data %>%
+  select(c("PC9_plasmid_RepA","PC9_plasmid_RepB","PC9_plasmid_RepC","PC9_LTP_RepA", "PC9_LTP_RepB", "PC9_LTP_RepC")) %>%
+  as.matrix()
+```
+
+```{r}
+parrish_pc9_pg_ids <- parrish_pc9_data %>%
+  dplyr::select("id")
+```
+
+```{r}
+parrish_pc9_sample_metadata <- data.frame(
+  col_names = c("PC9_plasmid_RepA", "PC9_plasmid_RepB", "PC9_plasmid_RepC", "PC9_LTP_RepA", "PC9_LTP_RepB", "PC9_LTP_RepC"),
+  doubling = as.numeric(c("0", "0", "0", "12", "12", "12")),
+  rep = as.factor(c("RepA", "RepB", "RepC", "RepA", "RepB", "RepC"))
+)
+```
+
+```{r}
+parrish_pc9_gimap_dataset <- setup_data(
+  counts = parrish_pc9_counts,
+  pg_ids = parrish_pc9_pg_ids,
+  sample_metadata = parrish_pc9_sample_metadata
+)
+```
+
+```{r}
+str(parrish_pc9_gimap_dataset)
+```
+
+```{r}
+nrow(parrish_pc9_gimap_dataset$transformed_data$log2_cpm)
+```
+
+```{r}
+run_qc(parrish_pc9_gimap_dataset,
+       plots_dir = "plots",
+       output_file = "parrish_pc9_qc_report.Rmd",
+       overwrite = TRUE,
+       quiet = TRUE)
+```
+
+```{r}
+parrish_pc9_gimap_filtered <- parrish_pc9_gimap_dataset %>%
+  gimap_filter()
+```
+
+```{r}
+nrow(parrish_pc9_gimap_filtered$filtered_data$transformed_log2_cpm)
+```
+
+```{r}
+str(parrish_pc9_gimap_dataset$filtered_data)
+```
+
+```{r}
+nrow(parrish_pc9_gimap_dataset$filtered_data$transformed_log2_cpm)
+```
+
+```{r}
+parrish_pc9_gimap_dataset <- parrish_pc9_gimap_filtered %>%
+  gimap_annotate(cell_line = "PC9", cell_line_annotate = TRUE) %>%
+  # gimap_annotate(cell_line_annotate = FALSE) %>%
+  # Whatever is specified for "control_name" is what will be used to normalize other data points
+  gimap_normalize(
+    normalize_by_unexpressed = TRUE,
+    timepoints = "doubling",
+  ) %>%
+  calc_gi()
+```
+```{r}
+parrish_pc9_gimap_dataset_no_normalize_by_unexpressed <- parrish_pc9_gimap_filtered %>%
+  # gimap_annotate(cell_line = "PC9", cell_line_annotate = TRUE) %>%
+  gimap_annotate(cell_line_annotate = FALSE) %>%
+  # Whatever is specified for "control_name" is what will be used to normalize other data points
+  gimap_normalize(
+    normalize_by_unexpressed = FALSE,
+    timepoints = "doubling",
+  ) %>%
+  calc_gi()
+```
+
+```{r}
+head(parrish_pc9_gimap_dataset$gi_scores)
+```
+
+```{r}
+head(parrish_pc9_gimap_dataset_no_normalize_by_unexpressed$gi_scores)
+```
+
+```{r}
+head(dplyr::arrange(parrish_pc9_gimap_dataset$gi_score, fdr))
+```
+
+```{r}
+head(parrish_pc9_gimap_dataset$gi_scores)
+```
+
+```{r}
+plot_exp_v_obs_scatter(parrish_pc9_gimap_dataset)
+```
+
+```{r}
+plot_rank_scatter(parrish_pc9_gimap_dataset)
+```
+
+```{r, fig.width=16, fig.height=9}
+plot_volcano(parrish_pc9_gimap_dataset)
+```
+
+```{r, fig.width=16, fig.height=9}
+plot_volcano(parrish_pc9_gimap_dataset) +
+  geom_text_repel(aes(label=ifelse(logfdr > 1.0 & mean_gi_score < -.8, paste(pgRNA_target), "")), size=1.8, max.overlaps = 100)
+```
+
+```{r, fig.width=16, fig.height=9}
+plot_volcano(parrish_pc9_gimap_dataset, facet_rep = FALSE) +
+  geom_text_repel(aes(label=ifelse(logfdr > 1.0, paste(pgRNA_target), "")), size=1.8, max.overlaps = 100)
+```
+
+```{r}
+# readr::write_tsv(parrish_pc9_gimap_dataset$gi_scores, file.path(output_dir, "gi_scores_parrish_pc9_gimap_plasmid.tsv"))
+```
