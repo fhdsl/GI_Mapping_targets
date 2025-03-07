@@ -11,7 +11,9 @@ gimap_annotate(
   control_genes = NULL,
   cell_line_annotate = TRUE,
   custom_tpm = NULL,
-  cell_line = NULL
+  cell_line = NULL,
+  annot_dir = system.file("extdata", package = "gimap"),
+  refresh_annot = FALSE
 )
 }
 \arguments{
@@ -47,6 +49,12 @@ DepMap like CN will be added.}
 
 \item{cell_line}{which cell line are you using? (e.g., HELA, PC9, etc.).
 Required argument if cell_line_annotate is TRUE.}
+
+\item{annot_dir}{Where should the annotation files be saved? default is a
+temporary directory.}
+
+\item{refresh_annot}{Should the annotation file paths saved as options be reset
+and the files redownloaded? TRUE or FALSE.}
 }
 \value{
 A gimap_dataset with annotation data frame that can be retrieve by using
@@ -63,11 +71,13 @@ genes should be used as controls.
 # By default DepMap annotation will be used to determine genes which are
 # unexpressed. In the `gimap_normalize` this will by default be used to
 # normalize to.
-gimap_dataset <- get_example_data("gimap") \%>\%
+gimap_dataset <- get_example_data("gimap",
+                                  data_dir = tempdir()) \%>\%
   gimap_filter() \%>\%
   gimap_annotate(
     cell_line = "HELA",
-    missing_ids_file =  tempfile()
+    missing_ids_file =  tempfile(),
+    annot_dir = tempdir())
   )
 
 
@@ -75,9 +85,12 @@ gimap_dataset <- get_example_data("gimap") \%>\%
 # annotation BUT if you don't also specify that you say you are
 # `normalize_by_unexpressed = FALSE` in the normalize step you will get a
 # warning.
-gimap_dataset <- get_example_data("gimap") \%>\%
+gimap_dataset <- get_example_data("gimap",
+                                  data_dir = tempdir()) \%>\%
   gimap_filter() \%>\%
-  gimap_annotate(cell_line_annotate = FALSE) \%>\%
+  gimap_annotate(
+    cell_line_annotate = FALSE,
+    annot_dir = tempdir()) \%>\%
   gimap_normalize(
     timepoints = "day",
     normalize_by_unexpressed = FALSE,
@@ -88,11 +101,13 @@ gimap_dataset <- get_example_data("gimap") \%>\%
 # Lastly, this is also an option:
 # where custom data is provided to `custom_tpm` is a data frame with
 # `genes` and `log2_tpm` as the columns.
-gimap_dataset <- get_example_data("gimap") \%>\%
+gimap_dataset <- get_example_data("gimap",
+                                  data_dir = tempdir()) \%>\%
   gimap_filter() \%>\%
   gimap_annotate(
     cell_line = "HELA",
-    custom_tpm = custom_tpm
+    custom_tpm = custom_tpm,
+    annot_dir = tempdir()
   ) \%>\%
   gimap_normalize(
     timepoints = "day",

@@ -4,10 +4,19 @@
 \alias{get_example_data}
 \title{Returns example data for package}
 \usage{
-get_example_data(which_data)
+get_example_data(
+  which_data,
+  data_dir = system.file("extdata", package = "gimap"),
+  refresh_data = FALSE
+)
 }
 \arguments{
 \item{which_data}{options are "count" or "meta"; specifies which example dataset should be returned}
+
+\item{data_dir}{Where should the data be saved if applicable?}
+
+\item{refresh_data}{should the example data that's been downloaded be deleted
+and redownloaded?}
 }
 \value{
 the respective example data either as a data frame or a specialized
@@ -19,7 +28,7 @@ Which dataset is returned must be specified. Data will be downloaded from Figsha
 the first time it is used.
 }
 \examples{
-\donttest{
+\dontrun{
 
 counts_timepoint <- get_example_data("count")
 counts_treatment <- get_example_data("count_treatment")

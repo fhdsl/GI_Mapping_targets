@@ -47,7 +47,7 @@
 #' @import dplyr
 #' @examples \donttest{
 #'
-#' gimap_dataset <- get_example_data("gimap") %>%
+#' gimap_dataset <- get_example_data("gimap", data_dir = tempdir()) %>%
 #'   gimap_filter()
 #'
 #' # To see filtered data
@@ -220,7 +220,7 @@ gimap_filter <- function(.data = NULL,
 #' the number and percent of pgRNA which have a count zero for at least one
 #' sample/time point
 #' @examples \donttest{
-#' gimap_dataset <- get_example_data("gimap")
+#' gimap_dataset <- get_example_data("gimap", data_dir = tempdir())
 #' qc_filter_zerocounts(gimap_dataset)
 #'
 #' # or to specify a different column (or set of columns to select)
@@ -285,7 +285,7 @@ qc_filter_zerocounts <- function(gimap_dataset,
 #' report df `reportdf` for the number and percent of pgRNA which have a low
 #' plasmid log2 CPM
 #' @examples \donttest{
-#' gimap_dataset <- get_example_data("gimap")
+#' gimap_dataset <- get_example_data("gimap", data_dir = tempdir())
 #'
 #' qc_filter_plasmid(gimap_dataset)
 #'

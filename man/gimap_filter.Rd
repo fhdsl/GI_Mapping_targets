@@ -74,7 +74,7 @@ behavior of each filter
 \examples{
 \donttest{
 
-gimap_dataset <- get_example_data("gimap") \%>\%
+gimap_dataset <- get_example_data("gimap", data_dir = tempdir()) \%>\%
   gimap_filter()
 
 # To see filtered data

@@ -34,3 +34,28 @@ test_that("Test normalization", {
     round(c(-1, -1, -1))
   )
 })
+
+test_that("Test normalization without expression cutoff", {
+  testthat::skip_on_cran()
+
+  gimap_dataset_true <- get_example_data("gimap") %>%
+    gimap_filter() %>%
+    gimap_annotate(cell_line = "HELA") %>%
+    gimap_normalize(
+      timepoints = "day",
+      normalize_by_unexpressed = TRUE
+    )
+
+  gimap_dataset_false <- get_example_data("gimap") %>%
+    gimap_filter() %>%
+    gimap_annotate(cell_line = "HELA") %>%
+    gimap_normalize(
+      timepoints = "day",
+      normalize_by_unexpressed = FALSE
+    )
+
+  testthat::expect_true(
+    all(gimap_dataset_true$normalized_log_fc$lfc[1:6] !=
+          gimap_dataset_false$normalized_log_fc$lfc[1:6]))
+
+})

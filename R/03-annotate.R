@@ -27,6 +27,10 @@
 #' Note that you can use custom_tpm with cell_line_annotate but your custom_tpm
 #' will be used instead of the tpm data from DepMap. However other data from
 #' DepMap like CN will be added.
+#' @param annot_dir Where should the annotation files be saved? default is a
+#' temporary directory.
+#' @param refresh_annot Should the annotation file paths saved as options be reset
+#' and the files redownloaded? TRUE or FALSE.
 #' @return A gimap_dataset with annotation data frame that can be retrieve by using
 #' gimap_dataset$annotation. This will contain information about your included
 #' genes in the set.
@@ -39,11 +43,13 @@
 #' # By default DepMap annotation will be used to determine genes which are
 #' # unexpressed. In the `gimap_normalize` this will by default be used to
 #' # normalize to.
-#' gimap_dataset <- get_example_data("gimap") %>%
+#' gimap_dataset <- get_example_data("gimap",
+#'                                   data_dir = tempdir()) %>%
 #'   gimap_filter() %>%
 #'   gimap_annotate(
 #'     cell_line = "HELA",
-#'     missing_ids_file =  tempfile()
+#'     missing_ids_file =  tempfile(),
+#'     annot_dir = tempdir())
 #'   )
 #'
 #'
@@ -51,9 +57,12 @@
 #' # annotation BUT if you don't also specify that you say you are
 #' # `normalize_by_unexpressed = FALSE` in the normalize step you will get a
 #' # warning.
-#' gimap_dataset <- get_example_data("gimap") %>%
+#' gimap_dataset <- get_example_data("gimap",
+#'                                   data_dir = tempdir()) %>%
 #'   gimap_filter() %>%
-#'   gimap_annotate(cell_line_annotate = FALSE) %>%
+#'   gimap_annotate(
+#'     cell_line_annotate = FALSE,
+#'     annot_dir = tempdir()) %>%
 #'   gimap_normalize(
 #'     timepoints = "day",
 #'     normalize_by_unexpressed = FALSE,
@@ -64,11 +73,13 @@
 #' # Lastly, this is also an option:
 #' # where custom data is provided to `custom_tpm` is a data frame with
 #' # `genes` and `log2_tpm` as the columns.
-#' gimap_dataset <- get_example_data("gimap") %>%
+#' gimap_dataset <- get_example_data("gimap",
+#'                                   data_dir = tempdir()) %>%
 #'   gimap_filter() %>%
 #'   gimap_annotate(
 #'     cell_line = "HELA",
-#'     custom_tpm = custom_tpm
+#'     custom_tpm = custom_tpm,
+#'     annot_dir = tempdir()
 #'   ) %>%
 #'   gimap_normalize(
 #'     timepoints = "day",
@@ -81,7 +92,9 @@ gimap_annotate <- function(.data = NULL,
                            control_genes = NULL,
                            cell_line_annotate = TRUE,
                            custom_tpm = NULL,
-                           cell_line = NULL) {
+                           cell_line = NULL,
+                           annot_dir = system.file("extdata", package = "gimap"),
+                           refresh_annot = FALSE) {
   if (!is.null(.data)) gimap_dataset <- .data
 
   if (!("gimap_dataset" %in% class(gimap_dataset))) {
@@ -104,6 +117,11 @@ gimap_annotate <- function(.data = NULL,
       " unless you supply your own expression data using the `custom_tpm`",
       " argument"
     )
+  }
+
+  # If data is to be refreshed delete old data
+  if (refresh_annot) {
+    delete_annotation()
   }
 
   # Get the annotation data based on the pg construct design
@@ -136,7 +154,7 @@ gimap_annotate <- function(.data = NULL,
     # from DepMap Public 19Q3 All Files
     # Essential gene labeling is from
     # inst/extdata/Achilles_common_essentials.csv
-    control_genes <- crtl_genes()
+    control_genes <- ctrl_genes()
   }
 
   ############################ Get TPM data ####################################
@@ -160,13 +178,8 @@ gimap_annotate <- function(.data = NULL,
         "Run supported_cell_lines() to see the full list"
       )
     }
-
-    tpm_file <- file.path(
-      system.file("extdata", package = "gimap"),
-      "CCLE_expression.csv"
-    )
-
-    if (!file.exists(tpm_file)) tpm_setup()
+    tpm_file <- getOption("tpm_file")
+    if (is.null(tpm_file)) tpm_file <- tpm_setup(data_dir = annot_dir)
 
     op <- options("VROOM_CONNECTION_SIZE" = 500072)
     on.exit(options(op))
@@ -178,11 +191,9 @@ gimap_annotate <- function(.data = NULL,
       dplyr::rename(log2_tpm = dplyr::all_of(!!my_depmap_id))
 
     ############################ COPY NUMBER ANNOTATION #######################
-    cn_file <- file.path(
-      system.file("extdata", package = "gimap"),
-      "CCLE_gene_cn.csv"
-    )
-    if (!file.exists(cn_file)) cn_setup()
+    cn_file <- getOption("cn_file")
+
+    if (is.null(cn_file)) cn_file <- cn_setup(data_dir = annot_dir)
 
     # Read in the CN data
     depmap_cn <- readr::read_csv(cn_file,
@@ -316,15 +327,19 @@ gimap_annotate <- function(.data = NULL,
 #' @description  This function sets up the tpm data from DepMap is
 #' called by the `gimap_annotate()` function
 #' @param overwrite should the files be re downloaded
+#' @param data_dir What directory should this be saved to? Default is with package
+#' files
 #' @importFrom utils download.file unzip
-tpm_setup <- function(overwrite = TRUE) {
-  data_dir <- system.file("extdata", package = "gimap")
+tpm_setup <- function(overwrite = TRUE,
+                      data_dir = system.file("extdata", package = "gimap")) {
 
   tpm_file <- file.path(data_dir, "CCLE_expression.csv")
 
+  options("tpm_file" = tpm_file)
   if (!file.exists(tpm_file) | overwrite) {
     if (!file.exists(file.path(data_dir, "CCLE_expression.csv.zip"))) {
-      get_figshare(file_name = "CCLE_expression.csv")
+      get_figshare(file_name = "CCLE_expression.csv",
+                   output_dir = data_dir)
     } else {
       unzip(file.path(data_dir, "CCLE_expression.csv.zip"),
         exdir = data_dir, overwrite = TRUE
@@ -363,20 +378,24 @@ tpm_setup <- function(overwrite = TRUE) {
 #' @description This function sets up the tpm data from DepMap is called
 #' by the `gimap_annotate()` function if the cn_annotate = TRUE
 #' @param overwrite Should the files be redownloaded?
+#' @param data_dir What directory should this be saved to? Default is with package
+#' files
 #' @importFrom utils download.file unzip
-cn_setup <- function(overwrite = TRUE) {
+cn_setup <- function(overwrite = TRUE,
+                     data_dir = system.file("extdata", package = "gimap")) {
   options(timeout = 1000)
-
-  data_dir <- system.file("extdata", package = "gimap")
 
   cn_file <- file.path(
     data_dir,
     "CCLE_gene_cn.csv"
   )
 
+  options("cn_file" = cn_file)
+
   if (!file.exists(cn_file) | overwrite) {
     if (!file.exists(file.path(data_dir, "CCLE_gene_cn.csv.zip"))) {
-      get_figshare(file_name = "CCLE_gene_cn.csv")
+      get_figshare(file_name = "CCLE_gene_cn.csv",
+                   output_dir = data_dir)
     } else {
       unzip(file.path(data_dir, "CCLE_gene_cn.csv.zip"),
         exdir = data_dir, overwrite = TRUE
@@ -414,19 +433,24 @@ cn_setup <- function(overwrite = TRUE) {
 #' @description This function sets up the control genes file from DepMap is
 #' called by the `gimap_annotate()`
 #' @param overwrite Should the file be redownloaded and reset up?
+#' @param data_dir What directory should this be saved to? Default is with package
+#' files
 #' @importFrom utils download.file unzip
-crtl_genes <- function(overwrite = TRUE) {
-  data_dir <- system.file("extdata", package = "gimap")
+ctrl_genes <- function(overwrite = TRUE,
+                       data_dir = system.file("extdata", package = "gimap")) {
 
-  crtl_genes_file <- file.path(data_dir, "Achilles_common_essentials.csv")
+  ctrl_genes_file <- file.path(data_dir, "Achilles_common_essentials.csv")
 
-  if (!file.exists(crtl_genes_file) | overwrite) {
+  options("ctrl_genes_file" = ctrl_genes_file)
+
+  if (!file.exists(ctrl_genes_file) | overwrite) {
     # Can also be downloaded like this:
     if (!file.exists(file.path(
       data_dir,
       "Achilles_common_essentials.csv.zip"
     ))) {
-      get_figshare(file_name = "Achilles_common_essentials.csv")
+      get_figshare(file_name = "Achilles_common_essentials.csv",
+                   output_dir = data_dir)
     } else {
       unzip(file.path(data_dir, "Achilles_common_essentials.csv.zip"),
         exdir = data_dir,
@@ -437,13 +461,13 @@ crtl_genes <- function(overwrite = TRUE) {
       }
     }
   }
-  crtl_genes <- readr::read_csv(crtl_genes_file, show_col_types = FALSE) %>%
+  ctrl_genes <- readr::read_csv(ctrl_genes_file, show_col_types = FALSE) %>%
     tidyr::separate(
       col = gene, into = c("gene_symbol", "entrez_id"),
       remove = FALSE, extra = "drop"
     )
 
-  return(crtl_genes$gene_symbol)
+  return(ctrl_genes$gene_symbol)
 }
 
 
@@ -464,4 +488,25 @@ supported_cell_lines <- function() {
   )
 
   return(sort(depmap_metadata$stripped_cell_line_name))
+}
+
+#' Refresh the annotation files by redownloading them
+#' @description This function will set annotation file options to NULL so files
+#' will be re-downloaded
+#' @export
+#' @return options for tpm_file, cn_file, and ctrl_genes_file are set to NULL.
+#' @examples
+#'
+#' delete_annotation()
+#'
+delete_annotation <- function() {
+
+  message("Deleting original files")
+  unlink(options("tpm_file"))
+  unlink(options("cn_file"))
+  unlink(options("ctrl_genes_file"))
+
+  options("tpm_file" = NULL)
+  options("cn_file" = NULL)
+  options("ctrl_genes_file" = NULL)
 }

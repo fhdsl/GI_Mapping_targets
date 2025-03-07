@@ -2,6 +2,8 @@
 
 export("%>%")
 export(calc_gi)
+export(delete_annotation)
+export(delete_example_data)
 export(example_data_folder)
 export(get_example_data)
 export(get_figshare)

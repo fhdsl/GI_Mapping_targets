@@ -19,7 +19,7 @@ utils::globalVariables(c(
   "mean_single_crispr_1", "expected_single_crispr", "double_crispr", "double_gi_score",
   "fdr", "lfc", "mean_expected_cs", "mean_gi_score", "mean_single_crispr",
   "expected_double_crispr", "p_val", "single_gi_score", "Rank", "broad_target_type",
-  "logfdr", "pointColor", "both"
+  "logfdr", "pointColor", "both", "mean_score"
 ))
 
 
@@ -28,11 +28,14 @@ utils::globalVariables(c(
 #' Which dataset is returned must be specified. Data will be downloaded from Figshare
 #' the first time it is used.
 #' @param which_data options are "count" or "meta"; specifies which example dataset should be returned
+#' @param data_dir Where should the data be saved if applicable?
+#' @param refresh_data should the example data that's been downloaded be deleted
+#' and redownloaded?
 #' @export
 #' @returns the respective example data either as a data frame or a specialized
 #' gimap_dataset depending on what was requested.
 #'
-#' @examples \donttest{
+#' @examples \dontrun{
 #'
 #' counts_timepoint <- get_example_data("count")
 #' counts_treatment <- get_example_data("count_treatment")
@@ -41,8 +44,9 @@ utils::globalVariables(c(
 #' metadata <- get_example_data("meta")
 #' annotation <- get_example_data("annotation")
 #' }
-get_example_data <- function(which_data) {
-  data_dir <- system.file("extdata", package = "gimap")
+get_example_data <- function(which_data,
+                             data_dir = system.file("extdata", package = "gimap"),
+                             refresh_data = FALSE) {
 
   file_name <- switch(which_data,
     "count" = "PP_pgPEN_HeLa_counts.txt",
@@ -53,9 +57,19 @@ get_example_data <- function(which_data) {
     "annotation" = "pgPEN_annotations.txt"
   )
 
-  file_path <- file.path(data_dir, file_name)
+  # If data is to be refreshed delete old data
+  if (refresh_data) {
+    delete_example_data()
+  }
 
   if (!grepl("RDS$", file_name)) {
+    file_path <- file.path(data_dir, file_name)
+
+    # Save file path in the options
+    file_path_list <- list(file_path)
+    names(file_path_list) <- which_data
+    options(file_path_list)
+
     if (!file.exists(file_path)) {
       get_figshare(
         file_name = file_name,
@@ -63,6 +77,8 @@ get_example_data <- function(which_data) {
         output_dir = data_dir
       )
     }
+  } else {
+    file_path <- file.path(system.file("extdata", package = "gimap"), file_name)
   }
   dataset <- switch(which_data,
     "count" = readr::read_tsv(file_path,
@@ -170,20 +186,21 @@ key_encrypt_creds_path <- function() {
 #' in as data frames.
 #' @export
 #'
-#' @examples
+#' @examples \donttest{
 #'
 #' get_figshare(
-#'   return_list = TRUE
+#'   return_list = TRUE,
+#'   output_dir = tempdir()
 #' )
 #'
 #' get_figshare(
 #'   file_name = "Achilles_common_essentials.csv",
 #'   output_dir = tempdir()
 #' )
-#'
+#'}
 get_figshare <- function(file_name = NA,
                          item = "19700056",
-                         output_dir = NULL,
+                         output_dir = tempdir(),
                          return_list = FALSE) {
   if (is.null(output_dir)) output_dir <- system.file("extdata", package = "gimap")
 
@@ -241,7 +258,7 @@ get_figshare <- function(file_name = NA,
 
   writeLines(result_content, file.path(output_dir, file_name))
 
-  return(result_content)
+  return(file.path(output_dir, file_name))
 }
 
 #' Pipe operator
@@ -258,3 +275,29 @@ get_figshare <- function(file_name = NA,
 #' @param rhs A function call using the magrittr semantics.
 #' @return The result of calling `rhs(lhs)`.
 NULL
+
+
+#' Refresh the example data files by redownloading them
+#' @description This function will set example data file options to NULL so files
+#' will be re-downloaded
+#' @export
+#' @return options for example data are are set to NULL.
+#' @examples
+#'
+#' delete_example_data()
+#'
+delete_example_data <- function() {
+
+  data_list <- list("count" = NULL,
+                    "count_treatment" = NULL,
+                    "meta" = NULL,
+                    "gimap" = NULL,
+                    "gimap_treatment" = NULL,
+                    "annotation" = NULL)
+
+  message("Deleting the example data files listed in options")
+  unlink(options(names(data_list)))
+
+  # Set options as NULL
+  options(data_list)
+}
