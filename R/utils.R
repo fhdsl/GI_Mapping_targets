@@ -62,14 +62,14 @@ get_example_data <- function(which_data,
     delete_example_data()
   }
 
-  file_path <- file.path(data_dir, file_name)
-
-  # Save file path in the options
-  file_path_list <- list(file_path)
-  names(file_path_list) <- which_data
-  options(file_path_list)
-
   if (!grepl("RDS$", file_name)) {
+    file_path <- file.path(data_dir, file_name)
+
+    # Save file path in the options
+    file_path_list <- list(file_path)
+    names(file_path_list) <- which_data
+    options(file_path_list)
+
     if (!file.exists(file_path)) {
       get_figshare(
         file_name = file_name,
@@ -77,6 +77,8 @@ get_example_data <- function(which_data,
         output_dir = data_dir
       )
     }
+  } else {
+    file_path <- file.path(system.file("extdata", package = "gimap"), file_name)
   }
   dataset <- switch(which_data,
     "count" = readr::read_tsv(file_path,
